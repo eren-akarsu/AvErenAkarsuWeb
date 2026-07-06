@@ -1,0 +1,2360 @@
+# PROJECT.md
+
+# Av. Eren Akarsu Premium LegalTech Platform
+
+Version: 1.0
+
+---
+
+# 1. Projenin Amacı
+
+Bu proje, yalnızca bir avukatlık ofisi web sitesi geliştirmek amacıyla oluşturulmamaktadır.
+
+Amaç; hukuk hizmetlerini modern teknoloji ile birleştiren, kullanıcı deneyimini ön planda tutan, güven veren, uzun yıllar boyunca geliştirilebilecek profesyonel bir LegalTech platformu oluşturmaktır.
+
+Platform hem kişisel marka yönetimi hem de günlük avukatlık faaliyetlerini destekleyen güçlü bir yönetim sistemi olacaktır.
+
+Bu sistem;
+
+• Müvekkiller
+• Potansiyel müvekkiller
+• Akademisyenler
+• Öğrenciler
+• Hukukçular
+
+tarafından kullanılabilecek modern bir bilgi ve hizmet platformu olacaktır.
+
+---
+
+# 2. Proje Vizyonu
+
+Platformun temel vizyonu;
+
+"Hukuk hizmetlerini teknoloji ile birleştirerek erişilebilir, güvenilir ve kullanıcı dostu hale getirmek."
+
+şeklindedir.
+
+Bu nedenle tasarım dili;
+
+• Minimal
+
+• Modern
+
+• Premium
+
+• Teknolojik
+
+• Güven veren
+
+olmalıdır.
+
+Kesinlikle klasik avukat web sitesi görünümü kullanılmayacaktır.
+
+---
+
+# 3. Marka Kimliği
+
+Marka
+
+Av. Eren Akarsu
+
+Slogan
+
+(Yönetici tarafından değiştirilebilir.)
+
+Monogram
+
+EA
+
+Kurumsal Renkler
+
+Cream
+#F0DAC5
+
+Dark Navy
+#1C2340
+
+Burgundy
+#50223C
+
+---
+
+# 4. Hedef Kullanıcılar
+
+Platform aşağıdaki kullanıcı tiplerini hedeflemektedir.
+
+## Ziyaretçiler
+
+Siteyi inceleyen kullanıcılar.
+
+Yetkileri
+
+• Yazıları okuyabilir.
+
+• Makaleleri görüntüleyebilir.
+
+• İletişim kurabilir.
+
+• Randevu oluşturabilir.
+
+• Ödeme yapabilir.
+
+• Chatbot kullanabilir.
+
+---
+
+## Müvekkiller
+
+İlerleyen fazlarda oluşturulacak kullanıcı paneline giriş yapabilirler.
+
+Yetkileri
+
+• Dosyalarını görüntüleme
+
+• Evrak yükleme
+
+• Randevu takibi
+
+• Ödeme geçmişi
+
+• Görüşme bağlantıları
+
+---
+
+## Yönetici
+
+Yalnızca Av. Eren Akarsu.
+
+Tüm sisteme erişim yetkisine sahiptir.
+
+---
+
+# 5. Tasarım İlkeleri
+
+Tüm sayfalarda aşağıdaki prensiplere uyulacaktır.
+
+• Büyük boşluk kullanımı
+
+• İnce çizgiler
+
+• Glassmorphism
+
+• Modern kart yapıları
+
+• Hafif gölgeler
+
+• Yuvarlatılmış köşeler
+
+• Premium animasyonlar
+
+• Responsive tasarım
+
+• Accessibility
+
+• SEO uyumluluğu
+
+---
+
+# 6. Arayüz Dili
+
+Varsayılan dil
+
+Türkçe
+
+İkinci dil
+
+İngilizce
+
+Header içerisinde TR | EN dil değiştirme butonu bulunacaktır.
+
+Dil değiştirme işlemi sayfa yenilenmeden gerçekleştirilecektir.
+
+Tüm içerikler i18n altyapısına uygun hazırlanacaktır.
+
+URL yapısı örnekleri
+
+/tr
+
+/en
+
+---
+
+# 7. Tema Sistemi
+
+Header içerisinde tema değiştirme butonu bulunacaktır.
+
+Desteklenen temalar
+
+• Light Mode
+
+• Dark Mode
+
+Tema değişikliği animasyonlu olacaktır.
+
+Kullanıcının tercihi Local Storage içerisinde saklanacaktır.
+
+İstenirse sistem temasını otomatik algılayabilecektir.
+
+---
+
+# 8. Header
+
+Header tüm sayfalarda sabit olacaktır.
+
+İçeriği
+
+EA Monogram
+
+Anasayfa
+
+Hakkımda
+
+Hukuki İçerikler
+
+İletişim
+
+TR / EN
+
+Dark Mode
+
+Mobil Menü
+
+Header aşağı kaydırıldığında küçülmeli ancak tamamen kaybolmamalıdır.
+
+Arka planı scroll sırasında hafif blur efektine sahip olmalıdır.
+
+---
+
+# 9. Mega Menü
+
+"Hukuki İçerikler"
+
+üzerine gelindiğinde modern Mega Menu açılacaktır.
+
+Kategori yapısı
+
+Dilekçe ve Doküman Örnekleri
+
+Makaleler
+
+Hukuki Değerlendirmeler
+
+• Yargı Kararları
+
+• Kanun ve İçtihat Analizleri
+
+Meslekten Notlar
+
+Her kategoride son eklenen dört içerik dinamik olarak listelenecektir.
+
+Bu liste Admin Panelinden yönetilecektir.
+
+---
+
+# 10. Floating Action Buttons
+
+Sayfanın sağ alt köşesinde iki adet sabit yuvarlak buton bulunacaktır.
+
+1.
+
+WhatsApp
+
+Canlı yeşil
+
+Hover Glow
+
+Telefon simgesi
+
+Tek tıkla iletişim
+
+2.
+
+AI Chatbot
+
+Kurumsal renkler
+
+Glass Effect
+
+AI ikonu
+
+Hover animasyonu
+
+Kullanıcı sayfayı aşağı kaydırdıkça butonlar sabit kalacaktır.
+
+Mobil uyumlu olacaktır.
+
+---
+
+# 11. AI Chatbot
+
+Platform içerisinde yapay zekâ destekli sohbet sistemi bulunacaktır.
+
+Bu sistem Hugging Face API kullanılarak geliştirilecektir.
+
+Şimdilik yalnızca arayüz tasarlanacaktır.
+
+Özellikleri
+
+• Karşılama mesajı
+
+• Hızlı soru kartları
+
+• Hukuki yönlendirme
+
+• Makale önerileri
+
+• Randevu oluşturma yönlendirmesi
+
+• İletişim yönlendirmesi
+
+• KVKK bilgilendirmesi
+
+• "Bu bilgiler hukuki danışmanlık niteliğinde değildir." uyarısı
+
+Admin panelinden yönetilebilecek alanlar
+
+• Karşılama mesajı
+
+• Hızlı sorular
+
+• Sistem Promptu
+
+• Aktif/Pasif
+
+• Kullanılacak AI modeli
+
+• Yasaklı kelimeler
+
+• Maksimum cevap uzunluğu
+
+
+# 12. ANASAYFA
+
+Anasayfa, platformun en önemli sayfasıdır.
+
+Kullanıcı siteye ilk girdiği anda;
+
+• güven
+• profesyonellik
+• teknoloji
+• sadelik
+• premium kalite
+
+hissini vermelidir.
+
+Amaç klasik bir avukat sitesi oluşturmak değildir.
+
+Amaç;
+
+Apple,
+Notion,
+Linear,
+Stripe,
+Vercel
+
+gibi modern ürünlerin hissiyatını hukuk sektörüyle birleştirmektir.
+
+Sayfa aşağıdaki sıraya göre oluşturulacaktır.
+
+------------------------------------------------------------
+
+1. HERO
+
+Bu bölüm sitenin en dikkat çekici kısmıdır.
+
+Kullanıcı ilk 3 saniye içerisinde;
+
+"Bu sıradan bir avukat sitesi değil."
+
+hissini yaşamalıdır.
+
+Hero;
+
+fazla kalabalık,
+
+fazla yazılı,
+
+fazla klasik
+
+olmamalıdır.
+
+Minimal olmalıdır.
+
+Hero içerisinde;
+
+• büyük başlık
+
+• kısa açıklama
+
+• iki adet CTA
+
+• sağ tarafta büyük hero görseli
+
+bulunacaktır.
+
+Hero görseli daha sonra yönetici tarafından değiştirilecektir.
+
+Bu nedenle placeholder kullanılmalıdır.
+
+CTA Butonları
+
+• Randevu Oluştur
+
+• Hukuki İçerikler
+
+İsteğe bağlı üçüncü buton
+
+• İletişime Geç
+
+Hero arka planında;
+
+çok hafif blur,
+
+geometrik şekiller,
+
+ışık efektleri,
+
+gradient geçişler
+
+kullanılabilir.
+
+Ancak dikkat dağıtıcı olmamalıdır.
+
+------------------------------------------------------------
+
+2. HAKKIMDA
+
+Hero'nun hemen altında yer alacaktır.
+
+Kullanıcı aşağı indiğinde;
+
+Avukat Eren Akarsu'nu tanımaya başlayacaktır.
+
+Bu bölüm klasik CV görünümünde olmayacaktır.
+
+Kartlar,
+
+timeline,
+
+istatistikler,
+
+bilgi blokları
+
+kullanılacaktır.
+
+İçerikler CONTENT.md dosyasından alınacaktır.
+
+------------------------------------------------------------
+
+3. EĞİTİM ZAMAN ÇİZELGESİ
+
+Modern dikey timeline kullanılacaktır.
+
+Bilgiler
+
+İstanbul Okan Üniversitesi
+
+↓
+
+Hukuk Fakültesi
+
+↓
+
+2024 Fakülte İkincisi
+
+↓
+
+Yazılım Mühendisliği
+
+↓
+
+Çift Anadal
+
+↓
+
+%100 İngilizce
+
+↓
+
+Tam Burslu
+
+↓
+
+İstanbul Barosu
+
+↓
+
+Özel Hukuk Yüksek Lisansı
+
+Timeline sayfanın en dikkat çekici bölümlerinden biri olmalıdır.
+
+------------------------------------------------------------
+
+4. BAŞARI KARTLARI
+
+Timeline altında istatistik kartları yer alacaktır.
+
+Kartlar animasyonlu olacaktır.
+
+Örnek
+
+2
+
+Lisans Diploması
+
+------------
+
+1
+
+Yüksek Lisans
+
+------------
+
+Aktif
+
+CMK Görevleri
+
+------------
+
+LegalTech
+
+Projeleri
+
+------------
+
+Çok Sayıda
+
+Hukuki İçerik
+
+------------
+
+Sürekli
+
+Mesleki Gelişim
+
+------------------------------------------------------------
+
+5. FAALİYET ALANLARI
+
+Bu bölüm modern kartlardan oluşacaktır.
+
+Kartlar hover durumunda yükselmelidir.
+
+Alanlar
+
+• Ceza Hukuku
+
+• Aile Hukuku
+
+• Miras Hukuku
+
+• İcra ve İflas Hukuku
+
+• Ticaret Hukuku
+
+• İş Hukuku
+
+• Bilişim Hukuku
+
+• Sözleşmeler Hukuku
+
+Her kartta
+
+ikon,
+
+kısa açıklama,
+
+ince border,
+
+glass effect
+
+bulunacaktır.
+
+------------------------------------------------------------
+
+6. GÜNCEL YAZILAR
+
+Bu bölüm tamamen dinamik olacaktır.
+
+Admin panelinde yayınlanan son yazılar otomatik gelecektir.
+
+Kart içerisinde
+
+• kategori
+
+• başlık
+
+• özet
+
+• okunma süresi
+
+• görüntülenme
+
+• beğeni
+
+• yorum
+
+• paylaş
+
+• devamını oku
+
+yer alacaktır.
+
+Kartlar premium görünmelidir.
+
+------------------------------------------------------------
+
+7. DİKKAT ÇEKİCİ YARGI KARARLARI
+
+Bu bölüm yalnızca önemli kararları gösterecektir.
+
+Kartlarda
+
+mahkeme
+
+esas
+
+karar
+
+özet
+
+etiket
+
+kararı incele
+
+bulunacaktır.
+
+Hover animasyonu olacaktır.
+
+------------------------------------------------------------
+
+8. HUKUKİ HESAPLAMA ARAÇLARI
+
+Bu bölüm platforma değer katacaktır.
+
+Kartlar halinde sunulacaktır.
+
+İlerleyen sürümlerde geliştirilecektir.
+
+Örnek araçlar
+
+• Kıdem Tazminatı Hesaplama
+
+• İhbar Tazminatı
+
+• Kira Artış Hesabı
+
+• Faiz Hesabı
+
+• Harç Hesabı
+
+• Vekalet Ücreti
+
+• Miras Payı
+
+Her araç kendi sayfasına yönlendirecektir.
+
+------------------------------------------------------------
+
+9. ÖDEME SİSTEMİ
+
+Modern güven veren tasarım.
+
+Alanlar
+
+Ad Soyad
+
+Telefon
+
+Ödeme Tutarı
+
+Açıklama
+
+Ödeme Yap
+
+KVKK
+
+SSL Güvenliği
+
+iyzico entegrasyonuna hazır olacaktır.
+
+------------------------------------------------------------
+
+10. İLETİŞİM
+
+Modern iki sütunlu yapı.
+
+Sol tarafta
+
+iletişim bilgileri
+
+harita
+
+çalışma saatleri
+
+sağ tarafta
+
+iletişim formu
+
+Form
+
+Ad
+
+Telefon
+
+Mail
+
+Konu
+
+Mesaj
+
+KVKK
+
+Gönder
+
+------------------------------------------------------------
+
+11. ONLINE RANDEVU
+
+İletişim bölümünün altında bulunacaktır.
+
+Alanlar
+
+Takvim
+
+Saat
+
+Görüşme Türü
+
+Telefon
+
+Mail
+
+Not
+
+Ödeme
+
+Randevu Talebi
+
+İleride Google Calendar ile entegre edilecektir.
+
+------------------------------------------------------------
+
+12. FOOTER
+
+Footer minimal olacaktır.
+
+İçerik
+
+EA Monogram
+
+Kısa tanıtım
+
+Hızlı Linkler
+
+İletişim
+
+Sosyal Medya
+
+KVKK
+
+Aydınlatma Metni
+
+Çerez Politikası
+
+Telif Bilgisi
+
+Footer modern, temiz ve premium görünmelidir.
+
+------------------------------------------------------------
+
+GENEL KURALLAR
+
+• Hiçbir bölüm birbirine benzememelidir.
+
+• Her bölüm farklı bir kompozisyona sahip olmalıdır.
+
+• Sayfa aşağı indikçe monotonlaşmamalıdır.
+
+• Fazla animasyon kullanılmamalıdır.
+
+• Kullanıcı yorulmamalıdır.
+
+• Büyük boşluklar kullanılmalıdır.
+
+• Tasarım nefes almalıdır.
+
+• Tüm sayfa premium hissi vermelidir.
+
+• Kullanıcı sayfanın sonuna kadar inmeye teşvik edilmelidir.
+
+# 13. HUKUKİ İÇERİKLER SAYFASI
+
+Bu sayfa platformun bilgi merkezi olacaktır.
+
+Amaç yalnızca blog yazılarının listelendiği klasik bir sayfa oluşturmak değildir.
+
+Kullanıcı;
+
+• hukuki makalelere ulaşabilmeli,
+
+• dilekçe örneklerini indirebilmeli,
+
+• önemli yargı kararlarını inceleyebilmeli,
+
+• kanun analizlerini okuyabilmeli,
+
+• mesleki değerlendirmelere erişebilmelidir.
+
+Bu sayfa sürekli büyüyen dinamik bir kütüphane mantığında geliştirilecektir.
+
+------------------------------------------------------------
+
+1. SAYFA HERO
+
+Sayfanın üst kısmında sade bir Hero alanı bulunacaktır.
+
+İçerik:
+
+Başlık
+
+"Hukuki İçerikler"
+
+Alt Başlık
+
+"Makaleler, dilekçe örnekleri, yargı kararları ve hukuki değerlendirmeler."
+
+Sağ tarafta modern LegalTech illüstrasyonu kullanılacaktır.
+
+------------------------------------------------------------
+
+2. ARAMA
+
+Sayfanın en üstünde büyük bir arama kutusu bulunacaktır.
+
+Placeholder
+
+"Hangi hukuki içeriği arıyorsunuz?"
+
+Arama anlık çalışacaktır.
+
+Başlık
+
+İçerik
+
+Etiket
+
+Kategori
+
+Anahtar kelime
+
+üzerinde arama yapacaktır.
+
+------------------------------------------------------------
+
+3. KATEGORİLER
+
+Modern kartlar şeklinde oluşturulacaktır.
+
+Kategori kartları
+
+• Dilekçe ve Doküman Örnekleri
+
+• Makaleler
+
+• Hukuki Değerlendirmeler
+
+• Yargı Kararları
+
+• Kanun ve İçtihat Analizleri
+
+• Meslekten Notlar
+
+Kartlar hover animasyonuna sahip olacaktır.
+
+------------------------------------------------------------
+
+4. FİLTRELEME
+
+Kullanıcı içerikleri filtreleyebilmelidir.
+
+Filtreler
+
+Kategori
+
+Tarih
+
+En Çok Okunan
+
+En Yeni
+
+En Eski
+
+En Çok Beğenilen
+
+Okuma Süresi
+
+Etiket
+
+------------------------------------------------------------
+
+5. İÇERİK KARTLARI
+
+Her içerik kartında;
+
+Kapak görseli
+
+Kategori
+
+Başlık
+
+Özet
+
+Yayın Tarihi
+
+Okuma Süresi
+
+Görüntülenme
+
+Beğeni Sayısı
+
+Yorum Sayısı
+
+Paylaş
+
+Kaydet
+
+Devamını Oku
+
+bulunacaktır.
+
+Kartlar modern glassmorphism yapısında olacaktır.
+
+------------------------------------------------------------
+
+6. İÇERİK DETAY SAYFASI
+
+Her içerik kendi sayfasına sahip olacaktır.
+
+Üst bölüm
+
+Kategori
+
+Başlık
+
+Yazar
+
+Tarih
+
+Okuma Süresi
+
+Paylaş
+
+Kaydet
+
+Yazdır
+
+PDF İndir
+
+------------------------------------------------------------
+
+7. YAZI İÇERİĞİ
+
+Modern okunabilir yapı.
+
+Geniş satır aralıkları.
+
+İçindekiler tablosu.
+
+Başlıklara otomatik geçiş.
+
+Kod blokları desteklenebilir.
+
+Alıntılar modern kutular içerisinde gösterilecektir.
+
+------------------------------------------------------------
+
+8. DOSYA İNDİRME
+
+Eğer içerik;
+
+dilekçe,
+
+başvuru formu,
+
+örnek belge
+
+içeriyorsa;
+
+İndir butonu gösterilecektir.
+
+Dosya türü
+
+PDF
+
+DOCX
+
+ZIP
+
+desteklenmelidir.
+
+------------------------------------------------------------
+
+9. YARGI KARARLARI
+
+Yargı kararlarında ayrıca;
+
+Mahkeme
+
+Esas
+
+Karar
+
+Karar Tarihi
+
+Anahtar Kelimeler
+
+Özet
+
+Tam Metin
+
+İndir
+
+bulunacaktır.
+
+------------------------------------------------------------
+
+10. KANUN ANALİZLERİ
+
+Bu bölümde;
+
+Kanun Maddesi
+
+Madde Metni
+
+Değerlendirme
+
+Uygulama Örneği
+
+İlgili Kararlar
+
+bulunacaktır.
+
+------------------------------------------------------------
+
+11. ETİKETLER
+
+Her içerik;
+
+birden fazla etikete sahip olabilir.
+
+Örnek
+
+Boşanma
+
+İcra
+
+KVKK
+
+TCK
+
+HMK
+
+CMK
+
+Yargıtay
+
+Anayasa Mahkemesi
+
+Bilişim Hukuku
+
+------------------------------------------------------------
+
+12. BENZER İÇERİKLER
+
+Her yazının sonunda
+
+"Benzer İçerikler"
+
+başlığı bulunacaktır.
+
+Kategori ve etiketlere göre öneriler sunulacaktır.
+
+------------------------------------------------------------
+
+13. YORUMLAR
+
+Kullanıcılar yorum yapabilecektir.
+
+Yorumlar admin onayından sonra yayınlanacaktır.
+
+Her yorumda
+
+Ad
+
+Tarih
+
+Yorum
+
+Beğen
+
+Şikayet Et
+
+bulunacaktır.
+
+------------------------------------------------------------
+
+14. PAYLAŞIM
+
+İçerikler aşağıdaki platformlarda paylaşılabilecektir.
+
+LinkedIn
+
+X
+
+Facebook
+
+WhatsApp
+
+E-posta
+
+Bağlantıyı Kopyala
+
+------------------------------------------------------------
+
+15. OKUMA DENEYİMİ
+
+Yazı okunurken;
+
+Sayfa üstünde
+
+Okuma ilerleme çubuğu
+
+bulunacaktır.
+
+Kullanıcı;
+
+Yazı puntosunu büyütebilir.
+
+Dark Mode kullanabilir.
+
+Yazıyı PDF olarak indirebilir.
+
+------------------------------------------------------------
+
+16. SEO
+
+Her içerik için;
+
+SEO Başlığı
+
+SEO Açıklaması
+
+Slug
+
+Canonical URL
+
+Open Graph
+
+Twitter Card
+
+otomatik oluşturulacaktır.
+
+------------------------------------------------------------
+
+17. ADMİN YÖNETİMİ
+
+Yönetici;
+
+Yeni içerik ekleyebilir.
+
+Düzenleyebilir.
+
+Taslak oluşturabilir.
+
+Yayın tarihini planlayabilir.
+
+Kapak görseli değiştirebilir.
+
+SEO bilgilerini düzenleyebilir.
+
+PDF yükleyebilir.
+
+Etiket ekleyebilir.
+
+Kategori oluşturabilir.
+
+------------------------------------------------------------
+
+18. GELECEK FAZLAR
+
+İlerleyen sürümlerde;
+
+AI özetleme
+
+Sesli makale
+
+Podcast
+
+Video anlatım
+
+AI destekli içerik önerileri
+
+kişisel okuma listesi
+
+eklenebilecektir.
+
+------------------------------------------------------------
+
+GENEL KURALLAR
+
+• Sayfa blog gibi görünmemelidir.
+
+• Premium dijital hukuk kütüphanesi hissi vermelidir.
+
+• Büyük boşluklar kullanılmalıdır.
+
+• Her kart modern görünmelidir.
+
+• Glassmorphism tasarım dili korunmalıdır.
+
+• Responsive yapı zorunludur.
+
+• Tüm içerikler admin panelinden yönetilecektir.
+
+• Sayfa sürekli büyüyebilecek ölçeklenebilir yapıda tasarlanmalıdır.
+
+# 14. ADMİN PANELİ
+
+## Genel Amaç
+
+Admin Paneli, platformun yönetim merkezidir.
+
+Bu panel yalnızca Av. Eren Akarsu tarafından kullanılacaktır.
+
+Amaç;
+
+• web sitesini yönetmek,
+
+• içerik üretmek,
+
+• müvekkil süreçlerini takip etmek,
+
+• dava dosyalarını yönetmek,
+
+• duruşmaları planlamak,
+
+• ödemeleri kontrol etmek,
+
+• AI Chatbot'u yönetmek,
+
+• site istatistiklerini görüntülemek
+
+için tek merkez oluşturmaktır.
+
+Panel modern Dashboard mantığında hazırlanacaktır.
+
+------------------------------------------------------------
+
+# Giriş Sayfası
+
+Admin paneline yalnızca yönetici giriş yapabilecektir.
+
+Sayfa;
+
+Minimal,
+
+Premium,
+
+Glassmorphism
+
+tasarımına sahip olacaktır.
+
+Alanlar
+
+• Email
+
+• Şifre
+
+• Beni Hatırla
+
+• Şifremi Unuttum
+
+• Güvenli Giriş
+
+İlerleyen sürümlerde
+
+2FA (İki Faktörlü Doğrulama)
+
+desteklenecektir.
+
+------------------------------------------------------------
+
+# Dashboard
+
+Giriş yapıldıktan sonra kullanıcı Dashboard ekranına yönlendirilir.
+
+Dashboard;
+
+kart tabanlı,
+
+özet bilgilerden oluşan
+
+modern bir yönetim ekranıdır.
+
+Gösterilecek Kartlar
+
+Bugünkü Duruşmalar
+
+Yaklaşan Duruşmalar
+
+Toplam Müvekkil
+
+Aktif Dosya Sayısı
+
+Son Eklenen Blog
+
+Bekleyen Randevular
+
+Son Ödemeler
+
+Yeni Mesajlar
+
+Chatbot Kullanım Sayısı
+
+Site Ziyaretçi Sayısı
+
+En Çok Okunan Makale
+
+------------------------------------------------------------
+
+# Sol Menü
+
+Dashboard
+
+Blog Yönetimi
+
+Hukuki İçerikler
+
+Müvekkiller
+
+Dava Dosyaları
+
+Takvim
+
+Duruşmalar
+
+Randevular
+
+Ödemeler
+
+Chatbot
+
+Dosya Yönetimi
+
+Site Ayarları
+
+İstatistikler
+
+Çıkış Yap
+
+------------------------------------------------------------
+
+# BLOG YÖNETİMİ
+
+Bu bölüm gelişmiş bir CMS gibi çalışacaktır.
+
+Yönetici;
+
+Yeni içerik oluşturabilir.
+
+Taslak oluşturabilir.
+
+Yayınlayabilir.
+
+Yayından kaldırabilir.
+
+Kategori oluşturabilir.
+
+Etiket ekleyebilir.
+
+Kapak görseli yükleyebilir.
+
+PDF ekleyebilir.
+
+SEO düzenleyebilir.
+
+İçindekiler oluşturabilir.
+
+İçeriği önizleyebilir.
+
+Yayın tarihini planlayabilir.
+
+------------------------------------------------------------
+
+# HUKUKİ İÇERİKLER
+
+Alt Kategoriler
+
+Makaleler
+
+Dilekçe Örnekleri
+
+Dokümanlar
+
+Yargı Kararları
+
+Kanun Analizleri
+
+Meslekten Notlar
+
+Hukuki Araçlar
+
+Tüm içerikler buradan yönetilecektir.
+
+------------------------------------------------------------
+
+# MÜVEKKİL YÖNETİMİ
+
+Her müvekkil için kart oluşturulacaktır.
+
+Kart içerisinde
+
+Ad Soyad
+
+TC Kimlik
+
+Telefon
+
+Mail
+
+Adres
+
+Meslek
+
+Notlar
+
+İlgili Dosyalar
+
+Ödeme Geçmişi
+
+Belgeler
+
+Son Görüşme
+
+Son İşlem
+
+bulunacaktır.
+
+Dosyalar müvekkille ilişkilendirilecektir.
+
+------------------------------------------------------------
+
+# DAVA DOSYALARI
+
+Dosyalar kategori bazlı tutulacaktır.
+
+Kategori
+
+Hukuk
+
+↓
+
+İcra
+
+Aile
+
+Miras
+
+İş
+
+Ticaret
+
+Tüketici
+
+Gayrimenkul
+
+Kategori
+
+Ceza
+
+Kategori
+
+CMK
+
+Her dosyada
+
+Dosya No
+
+Mahkeme
+
+Esas
+
+Karar
+
+Müvekkil
+
+Karşı Taraf
+
+Avukat
+
+Aşama
+
+Duruşmalar
+
+Belgeler
+
+Notlar
+
+Görevler
+
+bulunacaktır.
+
+------------------------------------------------------------
+
+# TAKVİM
+
+Tam ekran takvim.
+
+Ay
+
+Hafta
+
+Gün
+
+görünümü.
+
+Google Calendar entegrasyonuna hazır.
+
+------------------------------------------------------------
+
+# DURUŞMALAR
+
+Bugünkü
+
+Yarınki
+
+Yaklaşan
+
+Tamamlanan
+
+Duruşmalar
+
+Her duruşmada
+
+Mahkeme
+
+Saat
+
+Salon
+
+Dosya
+
+Not
+
+Hatırlatma
+
+bulunacaktır.
+
+------------------------------------------------------------
+
+# RANDEVULAR
+
+Online
+
+Yüz Yüze
+
+Bekleyen
+
+Onaylanan
+
+İptal
+
+Tamamlanan
+
+Randevular
+
+Tek tıkla
+
+Google Meet bağlantısı oluşturulabilecektir.
+
+------------------------------------------------------------
+
+# ÖDEMELER
+
+Ödeme listesi
+
+Bekleyen
+
+Tamamlanan
+
+İade
+
+Dekont
+
+Fatura
+
+iyzico entegrasyonuna hazır olacaktır.
+
+------------------------------------------------------------
+
+# AI CHATBOT
+
+Admin panelinden yönetilebilecektir.
+
+Yönetilebilir Alanlar
+
+Karşılama Mesajı
+
+Sistem Promptu
+
+Hızlı Sorular
+
+Model Seçimi
+
+Hugging Face Ayarları
+
+KVKK Uyarısı
+
+Aktif / Pasif
+
+Yanıt Uzunluğu
+
+Yasaklı Kelimeler
+
+Loglar
+
+------------------------------------------------------------
+
+# DOSYA YÖNETİMİ
+
+Belgeler
+
+PDF
+
+DOCX
+
+Görseller
+
+Videolar
+
+ZIP
+
+Kategori bazlı tutulacaktır.
+
+Cloudinary entegrasyonuna hazır olacaktır.
+
+------------------------------------------------------------
+
+# İSTATİSTİKLER
+
+Ziyaretçi Sayısı
+
+En Çok Okunan Makaleler
+
+En Çok İndirilen Belgeler
+
+En Çok Aranan Kelimeler
+
+Chatbot Kullanımı
+
+WhatsApp Tıklamaları
+
+Randevu Dönüşüm Oranı
+
+Ödeme İstatistikleri
+
+------------------------------------------------------------
+
+# SİTE AYARLARI
+
+Logo
+
+Favicon
+
+Renkler
+
+Sosyal Medya
+
+SEO
+
+KVKK
+
+Footer
+
+Header
+
+Hero
+
+İletişim Bilgileri
+
+WhatsApp Numarası
+
+Chatbot Ayarları
+
+Google Analytics
+
+Google Search Console
+
+------------------------------------------------------------
+
+# BİLDİRİM MERKEZİ
+
+Yeni Randevu
+
+Yeni Mesaj
+
+Yeni Yorum
+
+Yeni Ödeme
+
+Yeni İletişim Formu
+
+Chatbot Hatası
+
+Sistem Güncellemesi
+
+------------------------------------------------------------
+
+# GÜVENLİK
+
+JWT
+
+HTTPS
+
+Rate Limiting
+
+CSRF
+
+XSS Koruması
+
+SQL Injection Koruması
+
+Rol Bazlı Yetkilendirme
+
+Audit Log
+
+------------------------------------------------------------
+
+# TASARIM
+
+Panel
+
+Dark Mode ağırlıklı olacaktır.
+
+İstenirse Light Mode kullanılabilecektir.
+
+Glassmorphism
+
+Premium Kartlar
+
+Yuvarlatılmış Köşeler
+
+Modern Grafikler
+
+Minimal Tasarım
+
+kullanılacaktır.
+
+Panel Notion,
+
+Linear,
+
+Vercel,
+
+Raycast
+
+arayüzlerinden ilham almalıdır.
+
+------------------------------------------------------------
+
+# GELECEK FAZLAR
+
+• UYAP entegrasyonu
+
+• E-imza desteği
+
+• Müvekkil Portalı
+
+• Mobil Uygulama
+
+• Yapay Zekâ Dosya Analizi
+
+• OCR ile Evrak Okuma
+
+• Sesli Notlar
+
+• Duruşma Hatırlatma SMS
+
+• AI Dilekçe Taslağı
+
+• AI İçtihat Önerisi
+
+• AI Dosya Özetleme
+
+• AI Takvim Asistanı
+
+# 15. VERİTABANI TASARIMI
+
+Bu bölüm backend geliştirme sürecinde temel referans olacaktır.
+
+Veritabanı yapısı ölçeklenebilir, güvenli ve ilişkilendirilebilir şekilde tasarlanmalıdır.
+
+Temel amaç;
+
+• içerik yönetimi  
+• müvekkil yönetimi  
+• dava dosyaları  
+• randevular  
+• ödemeler  
+• chatbot kayıtları  
+• takvim  
+• görev yönetimi  
+
+modüllerini tek sistemde tutarlı şekilde yönetmektir.
+
+------------------------------------------------------------
+
+# TEMEL TABLOLAR
+
+## User
+
+Sisteme giriş yapan kullanıcıları temsil eder.
+
+Alanlar:
+
+id  
+name  
+email  
+passwordHash  
+role  
+avatar  
+isActive  
+createdAt  
+updatedAt  
+
+Roller:
+
+ADMIN  
+CLIENT  
+EDITOR  
+
+İlk fazda yalnızca ADMIN aktif olacaktır.
+
+------------------------------------------------------------
+
+## Client
+
+Müvekkil kayıtlarını temsil eder.
+
+Alanlar:
+
+id  
+fullName  
+tcIdentityNumber  
+phone  
+email  
+address  
+occupation  
+notes  
+createdAt  
+updatedAt  
+
+İlişkiler:
+
+Client → CaseFile  
+Client → Appointment  
+Client → Payment  
+Client → Document  
+
+------------------------------------------------------------
+
+## CaseFile
+
+Dava dosyalarını temsil eder.
+
+Alanlar:
+
+id  
+clientId  
+title  
+caseNumber  
+courtName  
+courtCity  
+opposingParty  
+caseType  
+caseCategory  
+stage  
+status  
+description  
+notes  
+createdAt  
+updatedAt  
+
+Kategori örnekleri:
+
+HUKUK  
+CEZA  
+CMK  
+
+Alt kategoriler:
+
+İcra  
+Aile  
+Miras  
+İş  
+Ticaret  
+Tüketici  
+Gayrimenkul  
+Boşanma  
+
+------------------------------------------------------------
+
+## Hearing
+
+Duruşma kayıtlarını temsil eder.
+
+Alanlar:
+
+id  
+caseFileId  
+clientId  
+courtName  
+hearingDate  
+hearingTime  
+courtroom  
+description  
+result  
+reminderEnabled  
+status  
+createdAt  
+updatedAt  
+
+Durumlar:
+
+Yaklaşan  
+Tamamlandı  
+Ertelendi  
+İptal  
+
+------------------------------------------------------------
+
+## Appointment
+
+Randevu taleplerini temsil eder.
+
+Alanlar:
+
+id  
+clientName  
+phone  
+email  
+appointmentDate  
+appointmentTime  
+consultationType  
+meetingType  
+paymentStatus  
+status  
+notes  
+meetingLink  
+createdAt  
+updatedAt  
+
+Görüşme türleri:
+
+Online  
+Yüz Yüze  
+Telefon  
+
+Durumlar:
+
+Bekliyor  
+Onaylandı  
+Reddedildi  
+Tamamlandı  
+İptal Edildi  
+
+------------------------------------------------------------
+
+## Payment
+
+Ödeme kayıtlarını temsil eder.
+
+Alanlar:
+
+id  
+clientId  
+appointmentId  
+amount  
+currency  
+paymentProvider  
+paymentStatus  
+paymentDescription  
+transactionId  
+receiptUrl  
+createdAt  
+updatedAt  
+
+Provider:
+
+iyzico  
+Stripe  
+Manuel  
+
+Durumlar:
+
+Bekliyor  
+Tamamlandı  
+Başarısız  
+İade Edildi  
+
+------------------------------------------------------------
+
+## BlogPost
+
+Blog ve hukuki içerikleri temsil eder.
+
+Alanlar:
+
+id  
+title  
+slug  
+excerpt  
+content  
+coverImage  
+categoryId  
+subcategoryId  
+authorId  
+status  
+isFeatured  
+readingTime  
+viewCount  
+likeCount  
+commentCount  
+seoTitle  
+seoDescription  
+publishedAt  
+createdAt  
+updatedAt  
+
+Durumlar:
+
+Taslak  
+Yayında  
+Planlandı  
+Arşivlendi  
+
+------------------------------------------------------------
+
+## Category
+
+İçerik kategorilerini temsil eder.
+
+Alanlar:
+
+id  
+name  
+slug  
+description  
+parentId  
+createdAt  
+updatedAt  
+
+Ana kategoriler:
+
+Dilekçe ve Doküman Örnekleri  
+Makaleler  
+Hukuki Değerlendirmeler  
+Yargı Kararları  
+Kanun ve İçtihat Analizleri  
+Meslekten Notlar  
+
+------------------------------------------------------------
+
+## Tag
+
+Etiketleri temsil eder.
+
+Alanlar:
+
+id  
+name  
+slug  
+createdAt  
+updatedAt  
+
+Örnek etiketler:
+
+Ceza Hukuku  
+Aile Hukuku  
+İcra Hukuku  
+Miras Hukuku  
+KVKK  
+Bilişim Hukuku  
+CMK  
+HMK  
+TCK  
+Yargıtay  
+
+------------------------------------------------------------
+
+## BlogPostTag
+
+Blog yazıları ile etiketler arasındaki ilişki tablosudur.
+
+Alanlar:
+
+id  
+blogPostId  
+tagId  
+
+------------------------------------------------------------
+
+## Comment
+
+Yorumları temsil eder.
+
+Alanlar:
+
+id  
+blogPostId  
+name  
+email  
+content  
+status  
+likeCount  
+createdAt  
+updatedAt  
+
+Durumlar:
+
+Bekliyor  
+Onaylandı  
+Reddedildi  
+
+------------------------------------------------------------
+
+## Document
+
+Yüklenen belgeleri temsil eder.
+
+Alanlar:
+
+id  
+title  
+fileUrl  
+fileType  
+fileSize  
+relatedType  
+relatedId  
+uploadedBy  
+createdAt  
+updatedAt  
+
+Dosya türleri:
+
+PDF  
+DOCX  
+PNG  
+JPG  
+ZIP  
+
+Kullanım alanları:
+
+Blog  
+Dava Dosyası  
+Müvekkil  
+Randevu  
+Admin  
+
+------------------------------------------------------------
+
+## Task
+
+Görev yönetimi için kullanılır.
+
+Alanlar:
+
+id  
+caseFileId  
+clientId  
+title  
+description  
+priority  
+status  
+dueDate  
+reminderDate  
+createdAt  
+updatedAt  
+
+Öncelik:
+
+Düşük  
+Orta  
+Yüksek  
+Acil  
+
+Durum:
+
+Yapılacak  
+Devam Ediyor  
+Tamamlandı  
+Ertelendi  
+
+------------------------------------------------------------
+
+## ChatbotLog
+
+AI chatbot konuşma kayıtlarını temsil eder.
+
+Alanlar:
+
+id  
+sessionId  
+userMessage  
+aiResponse  
+modelName  
+ipAddress  
+createdAt  
+
+Bu kayıtlar yalnızca teknik analiz ve iyileştirme için tutulmalıdır.
+
+KVKK uyumlu saklama politikası uygulanmalıdır.
+
+------------------------------------------------------------
+
+## ChatbotSettings
+
+Admin panelinden yönetilecek chatbot ayarlarıdır.
+
+Alanlar:
+
+id  
+welcomeMessage  
+disclaimerText  
+systemPrompt  
+modelName  
+isActive  
+maxResponseLength  
+createdAt  
+updatedAt  
+
+------------------------------------------------------------
+
+## ContactMessage
+
+İletişim formu mesajlarını temsil eder.
+
+Alanlar:
+
+id  
+fullName  
+phone  
+email  
+subject  
+message  
+status  
+createdAt  
+updatedAt  
+
+Durumlar:
+
+Yeni  
+Okundu  
+Cevaplandı  
+Arşivlendi  
+
+------------------------------------------------------------
+
+## SiteSettings
+
+Genel site ayarlarıdır.
+
+Alanlar:
+
+id  
+logoUrl  
+faviconUrl  
+siteTitle  
+siteDescription  
+phone  
+email  
+address  
+whatsappNumber  
+linkedinUrl  
+githubUrl  
+instagramUrl  
+defaultLanguage  
+defaultTheme  
+createdAt  
+updatedAt  
+
+------------------------------------------------------------
+
+# VERİTABANI İLİŞKİLERİ
+
+Client birden fazla CaseFile sahibi olabilir.
+
+CaseFile birden fazla Hearing içerebilir.
+
+CaseFile birden fazla Document içerebilir.
+
+Client birden fazla Payment kaydına sahip olabilir.
+
+Appointment bir Payment ile ilişkilendirilebilir.
+
+BlogPost bir Category ile ilişkilidir.
+
+BlogPost birden fazla Tag içerebilir.
+
+BlogPost birden fazla Comment içerebilir.
+
+Admin tüm kayıtları yönetebilir.
+
+------------------------------------------------------------
+
+# GÜVENLİK NOTLARI
+
+TC kimlik numarası, telefon, adres ve dava dosyası bilgileri hassas kişisel veriler içerir.
+
+Bu nedenle;
+
+• veriler HTTPS üzerinden taşınmalı  
+• şifreler hashlenmeli  
+• hassas alanlara yetkisiz erişim engellenmeli  
+• admin paneli JWT ile korunmalı  
+• mümkünse iki faktörlü doğrulama eklenmeli  
+• audit log tutulmalı  
+• dosya yüklemelerinde virüs ve format kontrolü yapılmalı  
+• KVKK uyumlu saklama ve silme politikası uygulanmalı  
+
+------------------------------------------------------------
+
+# GELECEK FAZ VERİ MODELLERİ
+
+İlerleyen sürümlerde aşağıdaki tablolar eklenebilir:
+
+ClientPortalAccess  
+VideoMeeting  
+Invoice  
+Notification  
+AuditLog  
+LegalCalculator  
+NewsletterSubscriber  
+AIAnalysis  
+UYAPIntegrationLog  
+DocumentVersion  
+ContractTemplate  
+
+------------------------------------------------------------
+
+# VERİTABANI TASARIM PRENSİPLERİ
+
+• İlişkiler açık olmalı  
+• Gereksiz tekrar yapılmamalı  
+• Silme işlemlerinde soft delete düşünülebilir  
+• Her tabloda createdAt ve updatedAt bulunmalı  
+• Hassas veri içeren alanlar korunmalı  
+• Backend tarafında validasyon zorunlu olmalı  
+• Admin panelinde filtreleme ve arama desteklenmeli  
+• Tüm sistem ileride büyümeye uygun tasarlanmalı  

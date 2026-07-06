@@ -1,0 +1,505 @@
+import React, { useState, useEffect } from 'react';
+import { useApp } from '../../context/AppContext';
+import { Sun, Moon, Menu, X, ChevronDown, BookOpen, Clock, Eye, Scale } from 'lucide-react';
+
+export const Header: React.FC = () => {
+  const { theme, toggleTheme, language, toggleLanguage, currentRoute, navigateTo, blogPosts, t } = useApp();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+
+  const [activeSection, setActiveSection] = useState('home');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+
+      // Scrollspy active section mapping
+      if (currentRoute === 'home') {
+        const sections = [
+          { id: 'hero', name: 'home' },
+          { id: 'about', name: 'about' },
+          { id: 'education', name: 'about' },
+          { id: 'stats', name: 'about' },
+          { id: 'practice', name: 'practice' },
+          { id: 'recent-posts', name: 'blog' },
+          { id: 'legal-decisions', name: 'blog' },
+          { id: 'payment', name: 'contact' },
+          { id: 'contact', name: 'contact' },
+          { id: 'appointment', name: 'appointment' }
+        ];
+
+        const viewportMiddle = window.innerHeight / 2;
+        let currentActive = 'home';
+
+        for (const section of sections) {
+          const el = document.getElementById(section.id);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= viewportMiddle && rect.bottom >= viewportMiddle) {
+              currentActive = section.name;
+              break;
+            }
+          }
+        }
+
+        if (window.scrollY < 100) {
+          currentActive = 'home';
+        }
+
+        setActiveSection(currentActive);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentRoute]);
+
+  const handleNavClick = (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari') => {
+    navigateTo(route);
+    setIsMobileMenuOpen(false);
+    setIsMegaMenuOpen(false);
+  };
+
+  const recentPosts = blogPosts.slice(0, 4);
+
+  return (
+    <header
+      style={{
+        position: 'fixed',
+        zIndex: 1000,
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        
+        // Dynamic scroll states centered symmetrically without translateX
+        top: isScrolled ? '20px' : '0',
+        left: '0',
+        right: '0',
+        margin: '0 auto',
+        width: isScrolled ? '95%' : '100%',
+        maxWidth: isScrolled ? '1440px' : '100%',
+        transform: 'none',
+        borderRadius: isScrolled ? '50px' : '0',
+        height: isScrolled ? '64px' : '90px',
+        padding: isScrolled ? '0 32px' : '0 40px',
+        border: isScrolled ? '1px solid var(--border-color)' : '1px solid transparent',
+        borderBottom: isScrolled ? '1px solid var(--border-color)' : '1px solid transparent',
+        background: isScrolled 
+          ? (theme === 'dark' ? 'rgba(28, 35, 64, 0.7)' : 'rgba(250, 246, 240, 0.7)')
+          : 'transparent',
+        boxShadow: isScrolled ? '0 10px 30px rgba(0, 0, 0, 0.25)' : 'none',
+        backdropFilter: isScrolled ? 'blur(16px)' : 'none',
+        WebkitBackdropFilter: isScrolled ? 'blur(16px)' : 'none',
+      }}
+    >
+      {/* Brand Logo */}
+      <div 
+        onClick={() => handleNavClick('home')} 
+        style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+      >
+        <img
+          src="/ea-monogram.png"
+          alt="EA Monogram"
+          style={{
+            height: isScrolled ? '32px' : '42px',
+            width: 'auto',
+            objectFit: 'contain',
+            transition: 'height 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
+        />
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'Outfit', color: 'var(--text-primary)' }}>
+            {t('brand.title')}
+          </span>
+        </div>
+      </div>
+
+      {/* Desktop Navigation Links */}
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '30px' }} className="desktop-only">
+        <span
+          onClick={() => handleNavClick('home')}
+          className={`nav-link ${currentRoute === 'home' && activeSection === 'home' ? 'active' : ''}`}
+        >
+          {t('nav.home')}
+        </span>
+        <a
+          href="#about"
+          onClick={() => handleNavClick('home')}
+          className={`nav-link ${currentRoute === 'home' && activeSection === 'about' ? 'active' : ''}`}
+        >
+          {t('nav.about')}
+        </a>
+        <a
+          href="#practice"
+          onClick={() => handleNavClick('home')}
+          className={`nav-link ${currentRoute === 'home' && activeSection === 'practice' ? 'active' : ''}`}
+        >
+          {t('nav.practice')}
+        </a>
+
+        {/* Mega Menu Trigger */}
+        <div
+          onMouseEnter={() => setIsMegaMenuOpen(true)}
+          onMouseLeave={() => setIsMegaMenuOpen(false)}
+          style={{ 
+            position: 'relative', 
+            height: '100%', 
+            display: 'flex', 
+            alignItems: 'center',
+            padding: '0 10px'
+          }}
+        >
+          <span
+            onClick={() => handleNavClick('knowledge-hub')}
+            className={`nav-link ${currentRoute === 'knowledge-hub' || (currentRoute === 'home' && activeSection === 'blog') ? 'active' : ''}`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            {t('nav.blog')} <ChevronDown size={14} style={{ transform: isMegaMenuOpen ? 'rotate(180deg)' : 'none', transition: 'var(--transition-fast)' }} />
+          </span>
+
+          {/* Mega Menu Panel */}
+          {isMegaMenuOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '900px',
+                paddingTop: '15px',
+                zIndex: 999,
+                cursor: 'default'
+              }}
+            >
+              <div
+                className="glass-panel"
+                style={{
+                  borderRadius: '16px',
+                  padding: '30px',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1.5fr',
+                  gap: '30px',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.35)',
+                  animation: 'fadeIn 0.2s ease',
+                  border: '1px solid var(--border-color)',
+                  background: theme === 'dark' ? 'rgba(10, 13, 24, 0.98)' : 'rgba(250, 246, 240, 0.98)',
+                  backdropFilter: 'blur(24px)'
+                }}
+              >
+                {/* Left Column: Categories list */}
+                <div style={{ borderRight: '1px solid var(--border-color)', paddingRight: '24px' }}>
+                  <h4 style={{ fontSize: '14px', color: 'var(--color-burgundy)', marginBottom: '16px', fontFamily: 'Outfit' }}>
+                    {language === 'en' ? 'Categories' : 'Kategoriler'}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {[
+                      { 
+                        title: language === 'en' ? 'Petition and Document Templates' : 'Dilekçe ve Doküman Örnekleri',
+                        categoryKey: 'Dilekçe Örnekleri'
+                      },
+                      { 
+                        title: language === 'en' ? 'Articles' : 'Makaleler',
+                        categoryKey: 'Makaleler'
+                      },
+                      { 
+                        title: language === 'en' ? 'Legal Evaluations' : 'Hukuki Değerlendirmeler',
+                        categoryKey: 'Değerlendirmeler',
+                        subCategories: [
+                          { 
+                            title: language === 'en' ? 'Court Decisions' : 'Yargı Kararları',
+                            categoryKey: 'Yargı Kararları'
+                          },
+                          { 
+                            title: language === 'en' ? 'Law and Precedent Analyses' : 'Kanun ve İçtihat Analizleri',
+                            categoryKey: 'Kanun Analizleri'
+                          }
+                        ]
+                      },
+                      { 
+                        title: language === 'en' ? 'Practice Notes' : 'Meslekten Notlar',
+                        categoryKey: 'Meslekten Notlar'
+                      },
+                      { 
+                        title: language === 'en' ? 'Legal Calculation Tools' : 'Hukuki Hesaplama Araçları',
+                        route: 'hukuki-hesaplama-araclari'
+                      }
+                    ].map((item: any, idx) => (
+                      <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <span
+                          onClick={() => item.route ? handleNavClick(item.route) : handleNavClick('knowledge-hub')}
+                          style={{ 
+                            fontSize: '13px', 
+                            color: 'var(--text-primary)', 
+                            cursor: 'pointer', 
+                            transition: 'var(--transition-fast)',
+                            fontWeight: item.subCategories ? 600 : 400
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-burgundy)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                        >
+                          {item.title}
+                        </span>
+                        {item.subCategories && item.subCategories.map((sub: any, subIdx: number) => (
+                          <span
+                            key={subIdx}
+                            onClick={() => handleNavClick('knowledge-hub')}
+                            style={{ 
+                              fontSize: '12px', 
+                              color: 'var(--text-secondary)', 
+                              cursor: 'pointer', 
+                              paddingLeft: '16px',
+                              display: 'block', 
+                              transition: 'var(--transition-fast)' 
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-burgundy)')}
+                            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
+                          >
+                            ↳ {sub.title}
+                          </span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right Column: Dynamic latest articles from context */}
+                <div>
+                  <h4 style={{ fontSize: '14px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: 600, fontFamily: 'Outfit' }}>
+                    {language === 'en' ? 'Recent Legal Content' : 'Son Eklenen İçerikler'}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {recentPosts.map((post) => (
+                      <div
+                        key={post.id}
+                        onClick={() => {
+                          navigateTo('knowledge-hub');
+                          setIsMegaMenuOpen(false);
+                        }}
+                        style={{ display: 'flex', gap: '12px', cursor: 'pointer', transition: 'var(--transition-fast)' }}
+                      >
+                        <img
+                          src={post.coverImage}
+                          alt={post.title}
+                          style={{ width: '60px', height: '45px', borderRadius: '4px', objectFit: 'cover' }}
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', lineHeight: '1.2' }}>
+                            {post.title}
+                          </span>
+                          <div style={{ display: 'flex', gap: '8px', fontSize: '10px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                            <span>{post.category}</span>
+                            <span>•</span>
+                            <span>{post.readingTime} {language === 'en' ? 'Read' : 'Okuma'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <a
+          href="#contact"
+          onClick={() => handleNavClick('home')}
+          className={`nav-link ${currentRoute === 'home' && activeSection === 'contact' ? 'active' : ''}`}
+        >
+          {t('nav.contact')}
+        </a>
+        <a
+          href="#appointment"
+          onClick={() => handleNavClick('home')}
+          className={`nav-link ${currentRoute === 'home' && activeSection === 'appointment' ? 'active' : ''}`}
+        >
+          {t('nav.appointment')}
+        </a>
+
+        {/* Secure Admin Gate Link */}
+        <span
+          onClick={() => handleNavClick('admin')}
+          style={{
+            cursor: 'pointer',
+            fontSize: '13px',
+            background: 'rgba(80, 34, 60, 0.1)',
+            padding: '6px 12px',
+            borderRadius: '20px',
+            color: 'var(--color-burgundy)',
+            border: '1px solid var(--border-color)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontWeight: 500
+          }}
+        >
+          <Lock size={12} /> {t('nav.admin')}
+        </span>
+      </nav>
+
+      {/* Right Controls: TR/EN and Dark/Light Mode toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }} className="desktop-only">
+        {/* Language selector pill */}
+        <div
+          onClick={toggleLanguage}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            border: '1px solid var(--border-color)',
+            borderRadius: '20px',
+            padding: '4px 12px',
+            fontSize: '12px',
+            fontWeight: 600,
+            background: 'var(--input-bg)',
+            userSelect: 'none',
+            gap: '6px'
+          }}
+        >
+          <span style={{ color: language === 'tr' ? 'var(--color-burgundy)' : 'var(--text-secondary)' }}>TR</span>
+          <span style={{ color: 'var(--border-color)' }}>|</span>
+          <span style={{ color: language === 'en' ? 'var(--color-burgundy)' : 'var(--text-secondary)' }}>EN</span>
+        </div>
+
+        {/* Theme mode toggle */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            background: 'var(--input-bg)',
+            border: '1px solid var(--border-color)',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+            transition: 'var(--transition-fast)'
+          }}
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      </div>
+
+      {/* Mobile Burger Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        style={{
+          display: 'none',
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--text-primary)',
+          cursor: 'pointer',
+          zIndex: 1001
+        }}
+        className="mobile-burger"
+      >
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Mobile Slide-in Drawer */}
+      {isMobileMenuOpen && (
+        <div
+          className="glass-panel"
+          style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: '280px',
+            padding: '100px 30px 40px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            boxShadow: '-10px 0 30px rgba(0,0,0,0.2)',
+            zIndex: 1000,
+            animation: 'slideIn 0.3s ease'
+          }}
+        >
+          <span onClick={() => handleNavClick('home')} style={{ fontSize: '18px', fontWeight: 600 }}>
+            {t('nav.home')}
+          </span>
+          <a href="#about" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '18px' }}>
+            {t('nav.about')}
+          </a>
+          <a href="#practice" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '18px' }}>
+            {t('nav.practice')}
+          </a>
+          <span onClick={() => handleNavClick('knowledge-hub')} style={{ fontSize: '18px' }}>
+            {t('nav.blog')}
+          </span>
+          <a href="#contact" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '18px' }}>
+            {t('nav.contact')}
+          </a>
+          <a href="#appointment" onClick={() => setIsMobileMenuOpen(false)} style={{ fontSize: '18px' }}>
+            {t('nav.appointment')}
+          </a>
+          
+          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px', marginTop: '20px' }}>
+            <span 
+              onClick={() => handleNavClick('admin')} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-burgundy)', fontWeight: 600, cursor: 'pointer' }}
+            >
+              <Lock size={16} /> {t('nav.admin')}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px', marginTop: 'auto' }}>
+            <button onClick={toggleTheme} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', cursor: 'pointer' }}>
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </button>
+            <button onClick={toggleLanguage} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', cursor: 'pointer' }}>
+              {language === 'tr' ? 'EN' : 'TR'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Styled JSX for Responsive Header Styles & keyframes */}
+      <style>{`
+        @media (max-width: 1023px) {
+          .desktop-only { display: none !important; }
+          .mobile-burger { display: flex !important; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
+    </header>
+  );
+};
+
+// Extra icon lock
+const Lock: React.FC<{ size: number }> = ({ size }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);

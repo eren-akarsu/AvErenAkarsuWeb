@@ -1,0 +1,390 @@
+# Av. Eren Akarsu | Premium LegalTech Platform
+
+> Modern, kullanıcı odaklı ve teknoloji destekli avukatlık web sitesi ve yönetim platformu.
+
+---
+
+# Proje Hakkında
+
+Bu proje, Avukat **Eren Akarsu** için geliştirilen modern bir kişisel marka ve LegalTech platformudur.
+
+Amaç yalnızca klasik bir avukatlık ofisi web sitesi oluşturmak değildir.
+
+Bu platform;
+
+- profesyonel bir kişisel marka,
+- dinamik içerik yönetim sistemi,
+- hukuk bilgi merkezi,
+- çevrim içi danışmanlık altyapısı,
+- ödeme sistemi,
+- randevu yönetimi,
+- yapay zekâ destekli yardımcı sistemler
+- ve gelişmiş yönetim panelini
+
+tek bir çatı altında birleştiren uzun ömürlü bir yazılım olarak tasarlanacaktır.
+
+---
+
+# Projenin Vizyonu
+
+Modern hukuk hizmetleri yalnızca dava takibiyle sınırlı değildir.
+
+Teknoloji, iletişim ve kullanıcı deneyimi günümüz hukuk hizmetlerinin ayrılmaz bir parçasıdır.
+
+Bu proje;
+
+- güven veren,
+- erişilebilir,
+- modern,
+- hızlı,
+- kullanıcı dostu
+
+bir dijital hukuk platformu oluşturmayı hedeflemektedir.
+
+Platform, müvekkiller ile avukat arasındaki iletişimi kolaylaştırırken aynı zamanda hukuki bilgi paylaşımını da destekleyecektir.
+
+---
+
+# Projenin Temel Amacı
+
+Bu platform aşağıdaki hedefleri gerçekleştirmek amacıyla geliştirilmektedir.
+
+• Profesyonel kişisel marka oluşturmak
+
+• Hukuki içerikleri düzenli olarak paylaşmak
+
+• Müvekkillerin kolayca iletişim kurabilmesini sağlamak
+
+• Online randevu oluşturabilmek
+
+• Güvenli ödeme alabilmek
+
+• AI destekli ön bilgilendirme sunmak
+
+• Müvekkil yönetimini kolaylaştırmak
+
+• Dava süreçlerini tek panelden yönetebilmek
+
+• Modern LegalTech çözümleri geliştirmek
+
+---
+
+# Hedef Kitle
+
+Platform aşağıdaki kullanıcı gruplarına hitap etmektedir.
+
+- Müvekkiller
+
+- Potansiyel müvekkiller
+
+- Şirketler
+
+- Öğrenciler
+
+- Akademisyenler
+
+- Avukatlar
+
+- Stajyer avukatlar
+
+- Hukuki araştırma yapan kullanıcılar
+
+---
+
+# Kişisel Marka
+
+Bu platformun merkezinde Avukat **Eren Akarsu** bulunmaktadır.
+
+Klasik kurumsal avukatlık sitesi yerine;
+
+hukuk ile teknolojiyi bir araya getiren,
+
+modern,
+
+yenilikçi,
+
+güven veren
+
+bir kişisel marka oluşturulacaktır.
+
+---
+
+# Eğitim Geçmişi
+
+Platformda aşağıdaki akademik bilgiler kullanılacaktır.
+
+## İstanbul Okan Üniversitesi
+
+Hukuk Fakültesi
+
+2024
+
+Fakülte İkincisi
+
+---
+
+## İstanbul Okan Üniversitesi
+
+Yazılım Mühendisliği
+
+Çift Anadal
+
+%100 İngilizce
+
+Tam Burslu
+
+---
+
+## İstanbul Okan Üniversitesi
+
+Özel Hukuk
+
+Yüksek Lisans
+
+Devam Ediyor
+
+---
+
+# Mesleki Deneyim
+
+Platform aşağıdaki profesyonel deneyimleri yansıtacaktır.
+
+- İstanbul Barosu Avukatı
+
+- AHİM Hukuk Bürosu
+
+- Müvekkil görüşmeleri
+
+- Dava dosyalarının yönetimi
+
+- Dilekçe hazırlanması
+
+- Hukuki mütalaa hazırlanması
+
+- Adliye süreçlerinin takibi
+
+- CMK görevlendirmeleri
+
+- Hukuki danışmanlık
+
+---
+
+# Yazılım Deneyimi
+
+Platform aşağıdaki teknik geçmişi de yansıtacaktır.
+
+- Yazılım Mühendisliği
+
+- Software Persona
+
+- SoftITO Front-End Developer Programı
+
+- React
+
+- Next.js
+
+- TypeScript
+
+- Tailwind CSS
+
+- UI/UX
+
+- LegalTech
+
+- Yapay Zekâ
+
+---
+
+# Teknoloji Yığını
+
+## Frontend
+
+- React
+
+- Next.js
+
+- TypeScript
+
+- Tailwind CSS
+
+- Framer Motion
+
+- Shadcn UI
+
+---
+
+## Backend
+
+- Node.js
+
+- Express
+
+- Prisma
+
+- PostgreSQL
+
+- JWT Authentication
+
+---
+
+## Servisler
+
+- Hugging Face
+
+- WhatsApp
+
+- iyzico
+
+- Stripe (opsiyonel)
+
+- Cloudinary
+
+- Google Calendar
+
+- SMTP Mail
+
+---
+
+# Tasarım Felsefesi
+
+Bu proje;
+
+Apple,
+
+Linear,
+
+Vercel,
+
+Notion
+
+gibi sade ve premium arayüzlerden ilham almaktadır.
+
+Kesinlikle klasik avukatlık sitesi görünümünde olmayacaktır.
+
+---
+
+# Tasarım Dili
+
+Modern
+
+Minimal
+
+Premium
+
+LegalTech
+
+Glassmorphism
+
+Soft Shadows
+
+Micro Interactions
+
+Large White Space
+
+Rounded Components
+
+Responsive
+
+---
+
+# Arayüz Dili
+
+Tüm kullanıcı arayüzü tamamen Türkçe olacaktır.
+
+Lorem Ipsum kullanılmayacaktır.
+
+Gerçekçi örnek içerikler üretilecektir.
+
+---
+
+# Proje Prensipleri
+
+- Kullanıcı odaklı tasarım
+
+- Performans
+
+- Güvenlik
+
+- SEO
+
+- Accessibility
+
+- Responsive
+
+- Component Based Architecture
+
+- Ölçeklenebilirlik
+
+- Temiz Kod
+
+---
+
+# Geliştirme Yaklaşımı
+
+Bu proje;
+
+Google Antigravity ile UI geliştirme,
+
+React + Next.js ile frontend,
+
+Node.js ile backend,
+
+PostgreSQL ile veri yönetimi
+
+mantığıyla geliştirilecektir.
+
+---
+
+# Yol Haritası
+
+Faz 1
+
+- UI Tasarımı
+
+- Sayfa Yapıları
+
+- Component Sistemi
+
+---
+
+Faz 2
+
+- Backend
+
+- API
+
+- Authentication
+
+---
+
+Faz 3
+
+- Blog
+
+- Admin
+
+- Ödeme
+
+- Randevu
+
+---
+
+Faz 4
+
+- AI Chatbot
+
+- Müvekkil Paneli
+
+- Görüntülü Görüşme
+
+- LegalTech Servisleri
+
+---
+
+# Son Not
+
+Bu proje yalnızca bir web sitesi değildir.
+
+Amaç; Avukat Eren Akarsu'nun uzun yıllar boyunca aktif olarak kullanacağı, sürekli geliştirilecek modern bir LegalTech platformu oluşturmaktır.
+
+Tüm tasarım ve geliştirme kararları bu vizyona uygun şekilde alınmalıdır.
