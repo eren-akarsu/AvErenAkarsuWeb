@@ -66,7 +66,7 @@ export const ContactForm: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
             
             {/* Info Cards Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="form-grid-2" style={{ gap: '20px' }}>
               
               {/* Card 1: Phone */}
               <div className="glass-card" style={{ padding: '24px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)' }}>
@@ -161,7 +161,7 @@ export const ContactForm: React.FC = () => {
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-grid-2">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>{t('contact.form.name')} *</label>
                     <input
@@ -186,7 +186,7 @@ export const ContactForm: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-grid-2">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>{t('contact.form.email')} *</label>
                     <input

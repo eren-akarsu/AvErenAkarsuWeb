@@ -289,7 +289,7 @@ export const LegalDecisions: React.FC = () => {
           onClick={() => setActiveDecisionId(null)}
         >
           <div
-            className="glass-panel"
+            className="glass-panel decision-modal"
             style={{
               width: '100%',
               maxWidth: '650px',

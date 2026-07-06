@@ -20,10 +20,8 @@ export const About: React.FC = () => {
           
           {/* Left Column: Visual details (Cards displaying specialized skill points) */}
           <div
+            className="about-grid"
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '20px',
               position: 'relative'
             }}
           >
@@ -79,12 +77,11 @@ export const About: React.FC = () => {
 
             {/* Block 2: Yazılımcı Persona */}
             <div
-              className="glass-card"
+              className="glass-card about-card-offset"
               style={{
                 padding: '24px',
                 border: '1px solid var(--glass-border)',
-                background: 'var(--bg-card)',
-                marginTop: '30px'
+                background: 'var(--bg-card)'
               }}
             >
               <div
@@ -114,12 +111,11 @@ export const About: React.FC = () => {
 
             {/* Block 3: LegalTech entegrasyonu */}
             <div
-              className="glass-card"
+              className="glass-card about-card-offset-negative"
               style={{
                 padding: '24px',
                 border: '1px solid var(--glass-border)',
-                background: 'var(--bg-card)',
-                transform: 'translateY(-30px)'
+                background: 'var(--bg-card)'
               }}
             >
               <div

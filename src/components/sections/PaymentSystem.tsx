@@ -99,14 +99,14 @@ export const PaymentSystem: React.FC = () => {
         {/* Outer Checkout Layout Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '40px',
           maxWidth: '900px',
           margin: '0 auto'
         }}>
           
           {/* Form container */}
-          <div className="glass-panel" style={{ padding: '30px', borderRadius: '20px', background: 'var(--bg-card)' }}>
+          <div className="glass-panel appointment-card" style={{ borderRadius: '20px', background: 'var(--bg-card)' }}>
             
             {paymentStatus === 'processing' ? (
               <div style={{ textAlign: 'center', padding: '60px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
@@ -133,18 +133,22 @@ export const PaymentSystem: React.FC = () => {
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-grid-2">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Your Name Surname *' : 'Adınız Soyadınız *'}</label>
                     <input
                       type="text"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      onChange={(e) => setFullName(e.target.value.slice(0, 25))}
                       className="glass-input"
                       placeholder={isEn ? "Client Name" : "Müvekkil Adı"}
                       style={{ width: '100%' }}
+                      maxLength={25}
                       required
                     />
+                    <div style={{ fontSize: '10px', color: fullName.length >= 25 ? 'var(--color-burgundy)' : 'var(--text-secondary)', alignSelf: 'flex-end', marginTop: '2px' }}>
+                      {fullName.length} / 25
+                    </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Phone Number *' : 'Telefon Numarası *'}</label>
@@ -160,7 +164,7 @@ export const PaymentSystem: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-grid-2">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Payment Amount (TL) *' : 'Ödeme Tutarı (TL) *'}</label>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -265,7 +269,7 @@ export const PaymentSystem: React.FC = () => {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div className="form-grid-2">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Expiry Date *' : 'Son Kullanma *'}</label>
                       <input
@@ -430,16 +434,27 @@ export const PaymentSystem: React.FC = () => {
                     {cardNumber || '•••• •••• •••• ••••'}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px', width: '100%', minWidth: 0 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, flex: 1 }}>
                       <span style={{ fontSize: '8px', textTransform: 'uppercase', opacity: '0.6' }}>{isEn ? 'Cardholder' : 'Kart Sahibi'}</span>
-                      <span style={{ fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <span 
+                        style={{ 
+                          fontSize: '13px', 
+                          fontWeight: 600, 
+                          textTransform: 'uppercase', 
+                          letterSpacing: '0.05em',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: 'block'
+                        }}
+                      >
                         {fullName || (isEn ? 'NAME SURNAME' : 'AD SOYAD')}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'right', flexShrink: 0 }}>
                       <span style={{ fontSize: '8px', textTransform: 'uppercase', opacity: '0.6' }}>{isEn ? 'Expiry' : 'Son Kul.'}</span>
-                      <span style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'monospace' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
                         {cardExpiry || 'AA/YY'}
                       </span>
                     </div>

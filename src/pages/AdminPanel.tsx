@@ -5,7 +5,7 @@ import {
   Lock, User, Mail, Calendar, Clock, BookOpen, Users, Folder, Scale, 
   CreditCard, Sparkles, Settings, BarChart2, CheckSquare, LogOut, Plus, 
   Trash2, Check, X, ShieldAlert, Award, FileText, ChevronRight, Info,
-  File, HelpCircle, Eye, ArrowLeft
+  File, HelpCircle, Eye, ArrowLeft, Menu
 } from 'lucide-react';
 import { ContentTypeCard } from '../components/admin/ContentTypeCard';
 import { ContentEditorLayout } from '../components/admin/ContentEditorLayout';
@@ -38,6 +38,7 @@ export const AdminPanel: React.FC = () => {
   const [email, setEmail] = useState('admin@akarsu.av.tr');
   const [password, setPassword] = useState('admin123');
   const [rememberMe, setRememberMe] = useState(true);
+  const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
 
   // Sidebar navigation state
   const [activeTab, setActiveTab] = useState<
@@ -658,10 +659,24 @@ export const AdminPanel: React.FC = () => {
 
   // Dashboard structure
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', minHeight: '100vh', background: '#080A12', color: '#E2E8F0', fontFamily: 'Inter, sans-serif' }}>
+    <div className={`admin-layout ${isAdminSidebarOpen ? 'sidebar-open' : ''}`}>
       
+      {/* Sidebar Backdrop Overlay on Mobile */}
+      {isAdminSidebarOpen && (
+        <div 
+          onClick={() => setIsAdminSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.6)',
+            zIndex: 1000,
+            backdropFilter: 'blur(3px)'
+          }}
+        />
+      )}
+
       {/* Sidebar Panel */}
-      <aside style={{ background: '#0C101E', borderRight: '1px solid rgba(240, 218, 197, 0.1)', padding: '30px 20px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+      <aside className="admin-sidebar">
         
         {/* Monogram title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -698,7 +713,10 @@ export const AdminPanel: React.FC = () => {
             return (
               <div
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => {
+                  setActiveTab(tab.id as any);
+                  setIsAdminSidebarOpen(false);
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -721,7 +739,10 @@ export const AdminPanel: React.FC = () => {
 
         {/* Exit link */}
         <div
-          onClick={() => setIsLoggedIn(false)}
+          onClick={() => {
+            setIsLoggedIn(false);
+            setIsAdminSidebarOpen(false);
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -743,8 +764,47 @@ export const AdminPanel: React.FC = () => {
       </aside>
 
       {/* Main Workspace content */}
-      <main style={{ padding: '40px', overflowY: 'auto', maxHeight: '100vh', background: '#0A0D18' }}>
+      <main className="admin-workspace" style={{ flex: 1 }}>
         
+        {/* Mobile Header Bar for Admin */}
+        <div 
+          style={{ 
+            display: 'none', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            borderBottom: '1px solid rgba(240, 218, 197, 0.1)', 
+            paddingBottom: '15px',
+            marginBottom: '10px'
+          }}
+          className="admin-mobile-header"
+        >
+          <button
+            onClick={() => setIsAdminSidebarOpen(!isAdminSidebarOpen)}
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              color: '#F0DAC5', 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Menu size={20} />
+            <span style={{ fontSize: '14px', fontWeight: 600 }}>{isEn ? 'Admin Menu' : 'Yönetici Menüsü'}</span>
+          </button>
+
+          <span style={{ fontSize: '13px', color: '#A0AEC0', border: '1px solid rgba(240, 218, 197, 0.2)', padding: '4px 10px', borderRadius: '20px' }}>
+            {activeTab === 'dashboard' && (isEn ? 'Dashboard' : 'Genel Durum')}
+            {activeTab === 'blog' && (isEn ? 'Content Management' : 'İçerik Yönetimi')}
+            {activeTab === 'clients' && (isEn ? 'Clients' : 'Müvekkiller')}
+            {activeTab === 'cases' && (isEn ? 'Case Files' : 'Dava Takibi')}
+            {activeTab === 'appointments' && (isEn ? 'Appointments' : 'Randevular')}
+            {activeTab === 'kanban' && (isEn ? 'Kanban Tasks' : 'Kanban Takip')}
+            {activeTab === 'chatbot' && (isEn ? 'Chatbot' : 'Yapay Zekâ')}
+          </span>
+        </div>
+
         {/* Active Route display */}
         {activeTab === 'dashboard' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
@@ -784,36 +844,38 @@ export const AdminPanel: React.FC = () => {
               <h4 style={{ fontSize: '16px', fontWeight: 600, color: '#F0DAC5', marginBottom: '16px' }}>
                 {isEn ? "Today's / Upcoming Hearings" : 'Bugünkü / Yaklaşan Duruşmalar'}
               </h4>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(240, 218, 197, 0.1)', color: '#A0AEC0', textAlign: 'left' }}>
-                    <th style={{ padding: '12px' }}>{isEn ? 'Case / Client' : 'Dosya / Müvekkil'}</th>
-                    <th style={{ padding: '12px' }}>{isEn ? 'Court / Room' : 'Mahkeme / Salon'}</th>
-                    <th style={{ padding: '12px' }}>{isEn ? 'Date / Time' : 'Tarih / Saat'}</th>
-                    <th style={{ padding: '12px' }}>{isEn ? 'Status' : 'Durum'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hearings.map((h) => (
-                    <tr key={h.id} style={{ borderBottom: '1px solid rgba(240, 218, 197, 0.05)' }}>
-                      <td style={{ padding: '12px' }}>
-                        <div><strong>{h.caseTitle}</strong></div>
-                        <div style={{ fontSize: '11px', color: '#718096' }}>{isEn ? 'Client:' : 'Müvekkil:'} {h.clientName}</div>
-                      </td>
-                      <td style={{ padding: '12px' }}>
-                        <div>{h.courtName}</div>
-                        <div style={{ fontSize: '11px', color: '#718096' }}>{h.courtroom}</div>
-                      </td>
-                      <td style={{ padding: '12px' }}>{h.hearingDate} {h.hearingTime}</td>
-                      <td style={{ padding: '12px' }}>
-                        <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '2px 6px', borderRadius: '4px', fontSize: '10px' }}>
-                          {h.status === 'Yaklaşan' && isEn ? 'Upcoming' : h.status}
-                        </span>
-                      </td>
+              <div className="table-responsive-wrapper">
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(240, 218, 197, 0.1)', color: '#A0AEC0', textAlign: 'left' }}>
+                      <th style={{ padding: '12px' }}>{isEn ? 'Case / Client' : 'Dosya / Müvekkil'}</th>
+                      <th style={{ padding: '12px' }}>{isEn ? 'Court / Room' : 'Mahkeme / Salon'}</th>
+                      <th style={{ padding: '12px' }}>{isEn ? 'Date / Time' : 'Tarih / Saat'}</th>
+                      <th style={{ padding: '12px' }}>{isEn ? 'Status' : 'Durum'}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {hearings.map((h) => (
+                      <tr key={h.id} style={{ borderBottom: '1px solid rgba(240, 218, 197, 0.05)' }}>
+                        <td style={{ padding: '12px' }}>
+                          <div><strong>{h.caseTitle}</strong></div>
+                          <div style={{ fontSize: '11px', color: '#718096' }}>{isEn ? 'Client:' : 'Müvekkil:'} {h.clientName}</div>
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <div>{h.courtName}</div>
+                          <div style={{ fontSize: '11px', color: '#718096' }}>{h.courtroom}</div>
+                        </td>
+                        <td style={{ padding: '12px' }}>{h.hearingDate} {h.hearingTime}</td>
+                        <td style={{ padding: '12px' }}>
+                          <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '2px 6px', borderRadius: '4px', fontSize: '10px' }}>
+                            {h.status === 'Yaklaşan' && isEn ? 'Upcoming' : h.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -1538,6 +1600,7 @@ export const AdminPanel: React.FC = () => {
 
             {/* List */}
             <div style={{ background: '#0C101E', borderRadius: '12px', padding: '24px', border: '1px solid rgba(240, 218, 197, 0.08)' }}>
+            <div className="table-responsive-wrapper">
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(240, 218, 197, 0.1)', color: '#A0AEC0', textAlign: 'left' }}>
@@ -1565,11 +1628,12 @@ export const AdminPanel: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            </div>
 
             {/* Client modal */}
             {showClientModal && (
               <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-                <div style={{ background: '#0C101E', borderRadius: '16px', padding: '30px', width: '500px', border: '1px solid rgba(240, 218, 197, 0.15)' }}>
+                <div style={{ background: '#0C101E', borderRadius: '16px', padding: '30px', width: '90%', maxWidth: '500px', margin: '20px', border: '1px solid rgba(240, 218, 197, 0.15)' }}>
                   <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '20px', color: '#F0DAC5' }}>
                     {isEn ? 'Add New Client' : 'Yeni Müvekkil Ekle'}
                   </h3>
@@ -1610,6 +1674,7 @@ export const AdminPanel: React.FC = () => {
 
             {/* List */}
             <div style={{ background: '#0C101E', borderRadius: '12px', padding: '24px', border: '1px solid rgba(240, 218, 197, 0.08)' }}>
+            <div className="table-responsive-wrapper">
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(240, 218, 197, 0.1)', color: '#A0AEC0', textAlign: 'left' }}>
@@ -1654,11 +1719,12 @@ export const AdminPanel: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            </div>
 
             {/* Case modal */}
             {showCaseModal && (
               <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-                <div style={{ background: '#0C101E', borderRadius: '16px', padding: '30px', width: '500px', border: '1px solid rgba(240, 218, 197, 0.15)' }}>
+                <div style={{ background: '#0C101E', borderRadius: '16px', padding: '30px', width: '90%', maxWidth: '500px', margin: '20px', border: '1px solid rgba(240, 218, 197, 0.15)' }}>
                   <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '20px', color: '#F0DAC5' }}>
                     {isEn ? 'Add New Case' : 'Yeni Dava Ekle'}
                   </h3>
@@ -1679,7 +1745,7 @@ export const AdminPanel: React.FC = () => {
                     <input type="text" placeholder={isEn ? "Court (e.g. Istanbul 2nd Labor Court)" : "Mahkeme (Örn: İstanbul 2. İş Mahkemesi)"} value={newCaseCourt} onChange={(e) => setNewCaseCourt(e.target.value)} className="glass-input" style={{ background: '#121727' }} />
                     <input type="text" placeholder={isEn ? "Opposing Party" : "Karşı Taraf"} value={newCaseOpposing} onChange={(e) => setNewCaseOpposing(e.target.value)} className="glass-input" style={{ background: '#121727' }} />
                     
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div className="form-grid-2" style={{ gap: '10px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <label style={{ fontSize: '11px', color: '#A0AEC0', marginBottom: '4px' }}>{isEn ? 'Case Type' : 'Dava Tipi'}</label>
                         <CustomSelect
@@ -1724,6 +1790,7 @@ export const AdminPanel: React.FC = () => {
 
             {/* List */}
             <div style={{ background: '#0C101E', borderRadius: '12px', padding: '24px', border: '1px solid rgba(240, 218, 197, 0.08)' }}>
+            <div className="table-responsive-wrapper">
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(240, 218, 197, 0.1)', color: '#A0AEC0', textAlign: 'left' }}>
@@ -1780,6 +1847,7 @@ export const AdminPanel: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
             </div>
           </div>
         )}

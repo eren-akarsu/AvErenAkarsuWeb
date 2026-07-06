@@ -4,11 +4,19 @@ import type { BlogPost } from '../context/AppContext';
 import { Search, Scale, FileText, ArrowRight, Eye, ThumbsUp, Printer, MessageSquare, Download, Share2, ZoomIn, ZoomOut, ChevronDown } from 'lucide-react';
 
 export const KnowledgeHub: React.FC = () => {
-  const { blogPosts, precedentDecisions, t, language, theme, navigateTo, showToast } = useApp();
+  const { blogPosts, precedentDecisions, t, language, theme, navigateTo, showToast, selectedCategory, setSelectedCategory } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('Hepsi');
   const [sortBy, setSortBy] = useState<'newest' | 'views' | 'likes'>('newest');
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+
+  // Sync selectedCategory from context if set by other components
+  React.useEffect(() => {
+    if (selectedCategory) {
+      setActiveCategory(selectedCategory);
+      setSelectedCategory(null);
+    }
+  }, [selectedCategory, setSelectedCategory]);
   
   const isEn = language === 'en';
 

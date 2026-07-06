@@ -104,7 +104,7 @@ export const AppointmentSystem: React.FC = () => {
         </div>
 
         {/* Outer Panel Grid */}
-        <div className="glass-card" style={{ maxWidth: '850px', margin: '0 auto', padding: '40px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)' }}>
+        <div className="glass-card appointment-card" style={{ maxWidth: '850px', margin: '0 auto', border: '1px solid var(--glass-border)', background: 'var(--bg-card)' }}>
           
           {isBooked ? (
             <div style={{ textAlign: 'center', padding: '40px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
@@ -132,7 +132,7 @@ export const AppointmentSystem: React.FC = () => {
                   </div>
 
                   {/* Days grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
+                  <div className="appointment-days-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
                     {getUpcomingDays().map((day) => {
                       const isSelected = selectedDate === day.fullDate;
                       return (
@@ -213,7 +213,7 @@ export const AppointmentSystem: React.FC = () => {
                   </div>
 
                   {/* Phone & Mail */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-grid-2" style={{ gap: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Phone *' : 'Telefon *'}</label>
                       <input
@@ -243,7 +243,7 @@ export const AppointmentSystem: React.FC = () => {
                   {/* Meeting Type Selector */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>{t('appointment.type')}</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                    <div className="appointment-types-grid">
                       {[
                         { type: 'Online', nameTr: 'Online', nameEn: 'Online', icon: <Video size={14} />, price: '2500 TL' },
                         { type: 'Yüz Yüze', nameTr: 'Yüz Yüze', nameEn: 'Face to Face', icon: <Users size={14} />, price: '3000 TL' },

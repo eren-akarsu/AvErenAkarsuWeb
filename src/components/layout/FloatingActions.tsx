@@ -129,7 +129,7 @@ export const FloatingActions: React.FC = () => {
       {/* Chat Window Panel */}
       {isOpen && (
         <div
-          className="glass-panel"
+          className="glass-panel chatbot-panel"
           style={{
             position: 'fixed',
             right: '24px',

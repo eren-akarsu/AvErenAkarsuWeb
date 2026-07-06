@@ -176,6 +176,9 @@ interface AppContextType {
   // Dynamic Page states
   selectedPost: BlogPost | null;
   setSelectedPost: (post: BlogPost | null) => void;
+  selectedCategory: string | null;
+  setSelectedCategory: (category: string | null) => void;
+
   
   // Translation function
   t: (key: string) => string;
@@ -780,6 +783,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     { sender: 'bot', text: 'Merhaba! Ben Av. Eren Akarsu Yapay Zekâ Asistanıyım. Size hukuki konularda veya randevu işlemlerinde nasıl yardımcı olabilirim?', timestamp: new Date() }
   ]);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   
   const [chatbotSettings, setChatbotSettings] = useState({
     welcomeMessage: 'Merhaba! Ben Av. Eren Akarsu Yapay Zekâ Asistanıyım. Size hukuki konularda veya randevu işlemlerinde nasıl yardımcı olabilirim?',
@@ -1067,6 +1072,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateChatbotSettings,
       selectedPost,
       setSelectedPost,
+      selectedCategory,
+      setSelectedCategory,
       t
     }}>
       {children}
