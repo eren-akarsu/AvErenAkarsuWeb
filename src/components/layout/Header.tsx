@@ -80,6 +80,7 @@ export const Header: React.FC = () => {
   const recentPosts = blogPosts.slice(0, 4);
 
   return (
+    <>
     <header
       style={{
         position: 'fixed',
@@ -431,197 +432,256 @@ export const Header: React.FC = () => {
       </button>
 
       {/* Mobile Slide-in Drawer */}
-      {isMobileMenuOpen && (
-        <div
-          className="glass-panel"
-          style={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: '290px',
-            padding: '80px 24px 30px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            boxShadow: '-10px 0 30px rgba(0,0,0,0.3)',
-            zIndex: 1000,
-            animation: 'slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            background: theme === 'dark' ? 'rgba(10, 13, 24, 0.99)' : 'rgba(245, 238, 230, 0.99)',
-            borderLeft: '1px solid var(--border-color)',
-            overflowY: 'auto'
-          }}
-        >
-          {/* Menu Title / Header inside drawer */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
-            <img src="/ea-monogram.png" alt="EA Logo" style={{ height: '30px', width: 'auto' }} />
-            <span style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'Outfit', color: 'var(--text-primary)' }}>
-              {t('brand.title')}
-            </span>
-          </div>
+    </header>
 
-          {/* Links navigation list */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {[
-              { id: 'home', label: t('nav.home'), onClick: () => { handleNavClick('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
-              { id: 'about', label: t('nav.about'), href: '#about' },
-              { id: 'practice', label: t('nav.practice'), href: '#practice' },
-            ].map((link, idx) => {
-              const isLinkActive = currentRoute === 'home' && activeSection === link.id;
-              return link.href ? (
-                <a
-                  key={idx}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+      {/* Mobile Slide-in Drawer */}
+      {isMobileMenuOpen && (
+        <>
+          {/* Backdrop Overlay */}
+          <div
+            onClick={() => setIsMobileMenuOpen(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 99998,
+              animation: 'fadeIn 0.2s ease'
+            }}
+          />
+          <div
+            className="glass-panel"
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              height: '100dvh',
+              width: '290px',
+              padding: '80px 24px 30px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
+              zIndex: 99999,
+              animation: 'slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              background: theme === 'dark' ? 'rgba(10, 13, 24, 0.98)' : 'rgba(245, 238, 230, 0.98)',
+              borderLeft: '1px solid var(--border-color)',
+              overflowY: 'auto'
+            }}
+          >
+            {/* Menu Title / Header inside drawer */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
+              <img src="/ea-monogram.png" alt="EA Logo" style={{ height: '30px', width: 'auto' }} />
+              <span style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'Outfit', color: 'var(--text-primary)' }}>
+                {t('brand.title')}
+              </span>
+            </div>
+
+            {/* Links navigation list */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[
+                { id: 'home', label: t('nav.home'), onClick: () => { handleNavClick('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+                { id: 'about', label: t('nav.about'), href: '#about' },
+                { id: 'practice', label: t('nav.practice'), href: '#practice' },
+              ].map((link, idx) => {
+                const isLinkActive = currentRoute === 'home' && activeSection === link.id;
+                return link.href ? (
+                  <a
+                    key={idx}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: isLinkActive ? 700 : 500,
+                      color: isLinkActive ? 'var(--color-burgundy)' : 'var(--text-primary)',
+                      padding: '8px 0',
+                      borderLeft: isLinkActive ? '3px solid var(--color-burgundy)' : 'none',
+                      paddingLeft: isLinkActive ? '10px' : '0',
+                      display: 'block'
+                    }}
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <span
+                    key={idx}
+                    onClick={link.onClick}
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: isLinkActive ? 700 : 500,
+                      color: isLinkActive ? 'var(--color-burgundy)' : 'var(--text-primary)',
+                      padding: '8px 0',
+                      borderLeft: isLinkActive ? '3px solid var(--color-burgundy)' : 'none',
+                      paddingLeft: isLinkActive ? '10px' : '0',
+                      display: 'block',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {link.label}
+                  </span>
+                );
+              })}
+
+              {/* Accordion Menu Trigger for Hukuki İçerikler */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div
+                  onClick={() => setIsMobileAccordionOpen(!isMobileAccordionOpen)}
                   style={{
                     fontSize: '16px',
-                    fontWeight: isLinkActive ? 700 : 500,
-                    color: isLinkActive ? 'var(--color-burgundy)' : 'var(--text-primary)',
+                    fontWeight: currentRoute === 'knowledge-hub' ? 700 : 500,
+                    color: currentRoute === 'knowledge-hub' ? 'var(--color-burgundy)' : 'var(--text-primary)',
                     padding: '8px 0',
-                    borderLeft: isLinkActive ? '3px solid var(--color-burgundy)' : 'none',
-                    paddingLeft: isLinkActive ? '10px' : '0',
-                    display: 'block'
-                  }}
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <span
-                  key={idx}
-                  onClick={link.onClick}
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: isLinkActive ? 700 : 500,
-                    color: isLinkActive ? 'var(--color-burgundy)' : 'var(--text-primary)',
-                    padding: '8px 0',
-                    borderLeft: isLinkActive ? '3px solid var(--color-burgundy)' : 'none',
-                    paddingLeft: isLinkActive ? '10px' : '0',
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                     cursor: 'pointer'
                   }}
                 >
-                  {link.label}
-                </span>
-              );
-            })}
+                  <span>{t('nav.blog')}</span>
+                  <ChevronDown 
+                    size={16} 
+                    style={{ 
+                      transform: isMobileAccordionOpen ? 'rotate(180deg)' : 'none', 
+                      transition: 'transform 0.2s ease',
+                      color: 'var(--text-secondary)'
+                    }} 
+                  />
+                </div>
 
-            {/* Accordion Menu Trigger for Hukuki İçerikler */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div
-                onClick={() => setIsMobileAccordionOpen(!isMobileAccordionOpen)}
-                style={{
-                  fontSize: '16px',
-                  fontWeight: currentRoute === 'knowledge-hub' ? 700 : 500,
-                  color: currentRoute === 'knowledge-hub' ? 'var(--color-burgundy)' : 'var(--text-primary)',
-                  padding: '8px 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer'
-                }}
-              >
-                <span>{t('nav.blog')}</span>
-                <ChevronDown 
-                  size={16} 
-                  style={{ 
-                    transform: isMobileAccordionOpen ? 'rotate(180deg)' : 'none', 
-                    transition: 'transform 0.2s ease',
-                    color: 'var(--text-secondary)'
-                  }} 
-                />
+                {/* Accordion content list */}
+                {isMobileAccordionOpen && (
+                  <div 
+                    style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      gap: '10px', 
+                      paddingLeft: '14px', 
+                      borderLeft: '1.5px solid var(--border-color)', 
+                      marginTop: '4px',
+                      animation: 'fadeIn 0.2s ease'
+                    }}
+                  >
+                    {[
+                      { title: language === 'en' ? 'Petition Templates' : 'Dilekçe ve Doküman Örnekleri', categoryKey: 'Dilekçeler' },
+                      { title: language === 'en' ? 'Articles' : 'Makaleler', categoryKey: 'Makaleler' },
+                      { title: language === 'en' ? 'Court Decisions' : 'Yargı Kararları', categoryKey: 'Kararlar' },
+                      { title: language === 'en' ? 'Law & Precedent Analyses' : 'Kanun ve İçtihat Analizleri', categoryKey: 'Analizler' },
+                      { title: language === 'en' ? 'Practice Notes' : 'Meslekten Notlar', categoryKey: 'Notlar' },
+                      { title: language === 'en' ? 'Calculation Tools' : 'Hukuki Hesaplama Araçları', route: 'hukuki-hesaplama-araclari' }
+                    ].map((sub, sIdx) => (
+                      <span
+                        key={sIdx}
+                        onClick={() => {
+                          if (sub.categoryKey) {
+                            setSelectedCategory(sub.categoryKey);
+                          }
+                          sub.route ? handleNavClick(sub.route as any) : handleNavClick('knowledge-hub');
+                        }}
+                        style={{
+                          fontSize: '13px',
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          padding: '4px 0',
+                          display: 'block'
+                        }}
+                      >
+                        ↳ {sub.title}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Accordion content list */}
-              {isMobileAccordionOpen && (
-                <div 
-                  style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: '10px', 
-                    paddingLeft: '14px', 
-                    borderLeft: '1.5px solid var(--border-color)', 
-                    marginTop: '4px',
-                    animation: 'fadeIn 0.2s ease'
-                  }}
-                >
-                  {[
-                    { title: language === 'en' ? 'Petition Templates' : 'Dilekçe ve Doküman Örnekleri', categoryKey: 'Dilekçeler' },
-                    { title: language === 'en' ? 'Articles' : 'Makaleler', categoryKey: 'Makaleler' },
-                    { title: language === 'en' ? 'Court Decisions' : 'Yargı Kararları', categoryKey: 'Kararlar' },
-                    { title: language === 'en' ? 'Law & Precedent Analyses' : 'Kanun ve İçtihat Analizleri', categoryKey: 'Analizler' },
-                    { title: language === 'en' ? 'Practice Notes' : 'Meslekten Notlar', categoryKey: 'Notlar' },
-                    { title: language === 'en' ? 'Calculation Tools' : 'Hukuki Hesaplama Araçları', route: 'hukuki-hesaplama-araclari' }
-                  ].map((sub, sIdx) => (
-                    <span
-                      key={sIdx}
-                      onClick={() => {
-                        if (sub.categoryKey) {
-                          setSelectedCategory(sub.categoryKey);
-                        }
-                        sub.route ? handleNavClick(sub.route as any) : handleNavClick('knowledge-hub');
-                      }}
-                      style={{
-                        fontSize: '13px',
-                        color: 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        padding: '4px 0',
-                        display: 'block'
-                      }}
-                    >
-                      ↳ {sub.title}
-                    </span>
-                  ))}
-                </div>
-              )}
+              {/* Rest of standard links */}
+              {[
+                { id: 'contact', label: t('nav.contact'), href: '#contact' },
+                { id: 'appointment', label: t('nav.appointment'), href: '#appointment' }
+              ].map((link, idx) => {
+                const isLinkActive = currentRoute === 'home' && activeSection === link.id;
+                return (
+                  <a
+                    key={idx}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: isLinkActive ? 700 : 500,
+                      color: isLinkActive ? 'var(--color-burgundy)' : 'var(--text-primary)',
+                      padding: '8px 0',
+                      borderLeft: isLinkActive ? '3px solid var(--color-burgundy)' : 'none',
+                      paddingLeft: isLinkActive ? '10px' : '0',
+                      display: 'block'
+                    }}
+                  >
+                    {link.label}
+                  </a>
+                );
+              })}
+            </div>
+            
+            {/* Admin panel redirect gate */}
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '15px', marginTop: '10px' }}>
+              <span 
+                onClick={() => handleNavClick('admin')} 
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-burgundy)', fontWeight: 600, cursor: 'pointer', fontSize: '15px' }}
+              >
+                <Lock size={15} /> {t('nav.admin')}
+              </span>
             </div>
 
-            {/* Rest of standard links */}
-            {[
-              { id: 'contact', label: t('nav.contact'), href: '#contact' },
-              { id: 'appointment', label: t('nav.appointment'), href: '#appointment' }
-            ].map((link, idx) => {
-              const isLinkActive = currentRoute === 'home' && activeSection === link.id;
-              return (
-                <a
-                  key={idx}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: isLinkActive ? 700 : 500,
-                    color: isLinkActive ? 'var(--color-burgundy)' : 'var(--text-primary)',
-                    padding: '8px 0',
-                    borderLeft: isLinkActive ? '3px solid var(--color-burgundy)' : 'none',
-                    paddingLeft: isLinkActive ? '10px' : '0',
-                    display: 'block'
-                  }}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
-          </div>
-          
-          {/* Admin panel redirect gate */}
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '15px', marginTop: '10px' }}>
-            <span 
-              onClick={() => handleNavClick('admin')} 
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-burgundy)', fontWeight: 600, cursor: 'pointer', fontSize: '15px' }}
-            >
-              <Lock size={15} /> {t('nav.admin')}
-            </span>
-          </div>
+            {/* Theme & Language controls matching desktop design */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
+              {/* Language Switcher Pill */}
+              <div
+                onClick={toggleLanguage}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '20px',
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  background: 'var(--input-bg)',
+                  userSelect: 'none',
+                  gap: '8px',
+                  flex: 1
+                }}
+              >
+                <span style={{ color: language === 'tr' ? 'var(--color-burgundy)' : 'var(--text-secondary)' }}>TR</span>
+                <span style={{ color: 'var(--border-color)' }}>|</span>
+                <span style={{ color: language === 'en' ? 'var(--color-burgundy)' : 'var(--text-secondary)' }}>EN</span>
+              </div>
 
-          {/* Theme & Language pills stacked */}
-          <div style={{ display: 'flex', gap: '12px', marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border-color)' }}>
-            <button onClick={toggleTheme} style={{ flex: 1, padding: '10px 0', fontSize: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-              {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />} {theme === 'dark' ? 'Light' : 'Dark'}
-            </button>
-            <button onClick={toggleLanguage} style={{ flex: 1, padding: '10px 0', fontSize: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-primary)', cursor: 'pointer' }}>
-              {language === 'tr' ? 'English (EN)' : 'Türkçe (TR)'}
-            </button>
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                style={{
+                  background: 'var(--input-bg)',
+                  border: '1px solid var(--border-color)',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  transition: 'var(--transition-fast)',
+                  flexShrink: 0
+                }}
+              >
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Styled JSX for Responsive Header Styles & keyframes */}
@@ -639,7 +699,7 @@ export const Header: React.FC = () => {
           to { transform: translateX(0); }
         }
       `}</style>
-    </header>
+    </>
   );
 };
 

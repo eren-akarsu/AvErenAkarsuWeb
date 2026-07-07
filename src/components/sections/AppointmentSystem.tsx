@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Calendar as CalendarIcon, Clock, Video, Users, PhoneCall, Check } from 'lucide-react';
 import { CustomCheckbox } from '../ui/CustomCheckbox';
@@ -18,6 +18,13 @@ export const AppointmentSystem: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [isBooked, setIsBooked] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const daysContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDays = (direction: 'left' | 'right') => {
+    if (daysContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -80 : 80;
+      daysContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Generates 6 upcoming calendar day selectors
   const getUpcomingDays = () => {
@@ -131,34 +138,105 @@ export const AppointmentSystem: React.FC = () => {
                     <CalendarIcon size={18} /> {t('appointment.date')}
                   </div>
 
-                  {/* Days grid */}
-                  <div className="appointment-days-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
-                    {getUpcomingDays().map((day) => {
-                      const isSelected = selectedDate === day.fullDate;
-                      return (
-                        <div
-                          key={day.fullDate}
-                          onClick={() => setSelectedDate(day.fullDate)}
-                          style={{
-                            padding: '12px 6px',
-                            borderRadius: '10px',
-                            border: isSelected ? '1px solid var(--color-burgundy)' : '1px solid var(--border-color)',
-                            background: isSelected ? 'var(--color-burgundy)' : 'var(--input-bg)',
-                            color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
-                            cursor: 'pointer',
-                            textAlign: 'center',
-                            transition: 'var(--transition-fast)'
-                          }}
-                        >
-                          <div style={{ fontSize: '10px', opacity: isSelected ? '0.8' : '0.6', textTransform: 'uppercase' }}>
-                            {day.dayName}
+                  {/* Days grid with scroll buttons on mobile */}
+                  <style>{`
+                    .days-scroll-btn {
+                      display: none;
+                      align-items: center;
+                      justify-content: center;
+                      background: rgba(12, 16, 30, 0.85);
+                      border: 1px solid var(--border-color);
+                      color: var(--text-primary);
+                      border-radius: 50%;
+                      width: 28px;
+                      height: 28px;
+                      cursor: pointer;
+                      z-index: 10;
+                      transition: all 0.2s ease;
+                      user-select: none;
+                    }
+                    .days-scroll-btn:hover {
+                      border-color: var(--color-burgundy);
+                      color: var(--color-burgundy);
+                    }
+                    @media (max-width: 768px) {
+                      .appointment-days-row {
+                        display: flex !important;
+                        overflow-x: auto !important;
+                        scroll-behavior: smooth;
+                        scrollbar-width: none; /* Firefox */
+                        padding: 0 4px;
+                        gap: 8px !important;
+                      }
+                      .appointment-days-row::-webkit-scrollbar {
+                        display: none; /* Safari/Chrome */
+                      }
+                      .appointment-days-row > div {
+                        flex: 0 0 68px !important; /* Equal width mobile items */
+                      }
+                      .days-scroll-btn {
+                        display: flex;
+                      }
+                    }
+                  `}</style>
+                  
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className="days-scroll-btn"
+                      onClick={() => scrollDays('left')}
+                      style={{ flexShrink: 0 }}
+                    >
+                      ‹
+                    </button>
+                    
+                    <div
+                      ref={daysContainerRef}
+                      className="appointment-days-row"
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(6, 1fr)',
+                        gap: '10px',
+                        width: '100%',
+                        overflowX: 'visible'
+                      }}
+                    >
+                      {getUpcomingDays().map((day) => {
+                        const isSelected = selectedDate === day.fullDate;
+                        return (
+                          <div
+                            key={day.fullDate}
+                            onClick={() => setSelectedDate(day.fullDate)}
+                            style={{
+                              padding: '12px 6px',
+                              borderRadius: '10px',
+                              border: isSelected ? '1px solid var(--color-burgundy)' : '1px solid var(--border-color)',
+                              background: isSelected ? 'var(--color-burgundy)' : 'var(--input-bg)',
+                              color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
+                              cursor: 'pointer',
+                              textAlign: 'center',
+                              transition: 'var(--transition-fast)'
+                            }}
+                          >
+                            <div style={{ fontSize: '10px', opacity: isSelected ? '0.8' : '0.6', textTransform: 'uppercase' }}>
+                              {day.dayName}
+                            </div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, marginTop: '4px' }}>
+                              {day.dayNum}
+                            </div>
                           </div>
-                          <div style={{ fontSize: '16px', fontWeight: 700, marginTop: '4px' }}>
-                            {day.dayNum}
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="days-scroll-btn"
+                      onClick={() => scrollDays('right')}
+                      style={{ flexShrink: 0 }}
+                    >
+                      ›
+                    </button>
                   </div>
 
                   {/* Hours Title */}

@@ -63,10 +63,16 @@ export const ContactForm: React.FC = () => {
         <div className="grid-2" style={{ gap: '50px' }}>
           
           {/* Left Column: Info Cards and Map */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            
-            {/* Info Cards Row */}
-            <div className="form-grid-2" style={{ gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>            {/* Responsive styles */}
+            <style>{`
+              @media (max-width: 768px) {
+                .contact-info-desktop { display: none !important; }
+                .contact-info-mobile { display: block !important; }
+              }
+            `}</style>
+
+            {/* Info Cards Row (Desktop) */}
+            <div className="contact-info-desktop form-grid-2" style={{ gap: '20px' }}>
               
               {/* Card 1: Phone */}
               <div className="glass-card" style={{ padding: '24px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)' }}>
@@ -100,6 +106,47 @@ export const ContactForm: React.FC = () => {
                 <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>{isEn ? 'Weekends: Closed' : 'Hafta Sonu: Kapalı'}</p>
               </div>
 
+            </div>
+
+            {/* Info Cards Single Compact Box (Mobile) */}
+            <div className="contact-info-mobile" style={{ display: 'none' }}>
+              <div className="glass-card" style={{ padding: '20px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Phone */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <Phone size={18} style={{ color: 'var(--color-burgundy)', marginTop: '2px', flexShrink: 0 }} />
+                  <div>
+                    <h5 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>{isEn ? 'Phone' : 'Telefon'}</h5>
+                    <a href="tel:+902125554433" style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'block', textDecoration: 'none' }}>+90 (212) 555 44 33</a>
+                    <a href="https://wa.me/905321234567" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px', textDecoration: 'none' }}>WhatsApp: +90 532 123 45 67</a>
+                  </div>
+                </div>
+                {/* Email */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', borderTop: '1px solid rgba(240, 218, 197, 0.06)', paddingTop: '12px' }}>
+                  <Mail size={18} style={{ color: 'var(--color-burgundy)', marginTop: '2px', flexShrink: 0 }} />
+                  <div>
+                    <h5 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>{isEn ? 'Email' : 'E-posta'}</h5>
+                    <a href="mailto:contact@erenakarsu.av.tr" style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'block', textDecoration: 'none' }}>contact@erenakarsu.av.tr</a>
+                    <a href="mailto:maliye@erenakarsu.av.tr" style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px', textDecoration: 'none' }}>maliye@erenakarsu.av.tr</a>
+                  </div>
+                </div>
+                {/* Address */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', borderTop: '1px solid rgba(240, 218, 197, 0.06)', paddingTop: '12px' }}>
+                  <MapPin size={18} style={{ color: 'var(--color-burgundy)', marginTop: '2px', flexShrink: 0 }} />
+                  <div>
+                    <h5 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>{isEn ? 'Office Address' : 'Ofis Adresi'}</h5>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>{isEn ? 'AHIM Law Firm, Besiktas / Istanbul' : 'AHİM Hukuk Bürosu, Beşiktaş / İstanbul'}</p>
+                  </div>
+                </div>
+                {/* Hours */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', borderTop: '1px solid rgba(240, 218, 197, 0.06)', paddingTop: '12px' }}>
+                  <Clock size={18} style={{ color: 'var(--color-burgundy)', marginTop: '2px', flexShrink: 0 }} />
+                  <div>
+                    <h5 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '2px' }}>{isEn ? 'Working Hours' : 'Çalışma Saatleri'}</h5>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>{isEn ? 'Weekdays: 09:00 - 18:00' : 'Hafta İçi: 09:00 - 18:00'}</p>
+                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, marginTop: '2px' }}>{isEn ? 'Weekends: Closed' : 'Hafta Sonu: Kapalı'}</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Premium map graphic/mockup representing Beşiktaş */}

@@ -107,6 +107,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     >
       {/* Editor Toolbar */}
       <div 
+        className="custom-rte-toolbar"
         style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -351,6 +352,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           border-radius: 8px;
           margin: 15px 0;
           border: 1px solid rgba(240, 218, 197, 0.1);
+        }
+        .custom-rte-toolbar {
+          scrollbar-width: thin;
+        }
+        @media (max-width: 600px) {
+          .custom-rte-toolbar {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px !important;
+          }
+          .custom-rte-toolbar::-webkit-scrollbar {
+            height: 4px;
+          }
+          .custom-rte-toolbar::-webkit-scrollbar-thumb {
+            background: rgba(240, 218, 197, 0.2);
+            border-radius: 2px;
+          }
         }
       `}</style>
     </div>

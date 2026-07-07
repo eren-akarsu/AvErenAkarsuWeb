@@ -73,6 +73,17 @@ export const AdminPanel: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (isAdminSidebarOpen && window.innerWidth <= 1024) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isAdminSidebarOpen]);
+
   // Sidebar navigation state
   const [activeTab, setActiveTab] = useState<
     'dashboard' | 'blog' | 'clients' | 'cases' | 'calendar' | 'appointments' | 'chatbot' | 'kanban' | 'stats' | 'settings'
@@ -782,6 +793,38 @@ export const AdminPanel: React.FC = () => {
   return (
     <div className={`admin-layout ${isAdminSidebarOpen ? 'sidebar-open' : ''}`}>
       
+      {/* Responsive styles */}
+      <style>{`
+        @media (max-width: 1024px) {
+          .admin-mobile-header {
+            display: flex !important;
+          }
+          .admin-sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            width: 280px !important;
+            transform: translateX(-100%) !important;
+            z-index: 10001 !important;
+            overflow-y: auto !important;
+          }
+          .admin-layout.sidebar-open .admin-sidebar {
+            transform: translateX(0) !important;
+          }
+        }
+        .admin-grid-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+        }
+        @media (max-width: 768px) {
+          .admin-grid-2 {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+      
       {/* Sidebar Backdrop Overlay on Mobile */}
       {isAdminSidebarOpen && (
         <div 
@@ -1458,7 +1501,7 @@ export const AdminPanel: React.FC = () => {
                         {isEn ? 'Document Settings' : 'Şablon Doküman Detayları'}
                       </h3>
                       
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                      <div className="admin-grid-2">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <label style={{ fontSize: '11px', color: '#A0AEC0', marginBottom: '4px' }}>{isEn ? 'Document Type' : 'Doküman Türü'}</label>
                           <CustomSelect
@@ -1530,7 +1573,7 @@ export const AdminPanel: React.FC = () => {
                         <textarea rows={2} value={articleAbstract} onChange={(e) => setArticleAbstract(e.target.value)} className="glass-input" style={{ width: '100%', resize: 'none', fontFamily: 'inherit' }} />
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                      <div className="admin-grid-2">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <label style={{ fontSize: '11px', color: '#A0AEC0' }}>{isEn ? 'Related Codes / Acts' : 'İlgili Kanun Maddeleri'}</label>
                           <input type="text" value={articleLawArticles} onChange={(e) => setArticleLawArticles(e.target.value)} className="glass-input" placeholder="Örn: TMK m. 166, TBK m. 19" style={{ width: '100%' }} />
@@ -1546,7 +1589,7 @@ export const AdminPanel: React.FC = () => {
                         <textarea rows={2} value={articleBibliography} onChange={(e) => setArticleBibliography(e.target.value)} className="glass-input" placeholder="Örn: Akarsu, E. (2025). Yapay Zeka Hukuku..." style={{ width: '100%', resize: 'none', fontFamily: 'inherit' }} />
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                      <div className="admin-grid-2">
                         <CustomCheckbox
                           checked={articleAutoTOC}
                           onChange={setArticleAutoTOC}
@@ -1568,7 +1611,7 @@ export const AdminPanel: React.FC = () => {
                         {isEn ? 'Judicial Ruling Settings' : 'Mahkeme ve Karar Künyesi'}
                       </h3>
                       
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                      <div className="admin-grid-2">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <label style={{ fontSize: '11px', color: '#A0AEC0' }}>{isEn ? 'Court Name' : 'Mahkeme / Daire Adı'}</label>
                           <input type="text" value={decCourtName} onChange={(e) => setDecCourtName(e.target.value)} className="glass-input" placeholder="Örn: Yargıtay 9. Hukuk Dairesi" style={{ width: '100%' }} />
@@ -1579,7 +1622,7 @@ export const AdminPanel: React.FC = () => {
                         </div>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                      <div className="admin-grid-2">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <label style={{ fontSize: '11px', color: '#A0AEC0' }}>{isEn ? 'Merit (Esas) No' : 'Esas Numarası'}</label>
                           <input type="text" value={decEsas} onChange={(e) => setDecEsas(e.target.value)} className="glass-input" placeholder="Örn: 2025/110 E." style={{ width: '100%' }} />
@@ -1590,7 +1633,7 @@ export const AdminPanel: React.FC = () => {
                         </div>
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                      <div className="admin-grid-2">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <label style={{ fontSize: '11px', color: '#A0AEC0' }}>{isEn ? 'Law Field' : 'İlgili Hukuk Alanı'}</label>
                           <input type="text" value={decLawArea} onChange={(e) => setDecLawArea(e.target.value)} className="glass-input" placeholder="Örn: İş Hukuku" style={{ width: '100%' }} />
@@ -2085,7 +2128,7 @@ export const AdminPanel: React.FC = () => {
 
             <div className="glass-card" style={{ background: '#0C101E', border: '1px solid rgba(240,218,197,0.08)', padding: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="admin-grid-2" style={{ gap: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <label style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>{isEn ? 'Active / Passive Status' : 'Aktif / Pasif Durumu'}</label>
                   <CustomSelect

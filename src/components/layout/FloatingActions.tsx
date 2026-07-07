@@ -12,6 +12,17 @@ export const FloatingActions: React.FC = () => {
   const isEn = language === 'en';
 
   useEffect(() => {
+    if (isOpen && window.innerWidth <= 768) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -141,7 +152,7 @@ export const FloatingActions: React.FC = () => {
             flexDirection: 'column',
             overflow: 'hidden',
             boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
-            zIndex: 999,
+            zIndex: 9999,
             animation: 'chatFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             fontFamily: 'Inter, sans-serif'
           }}
@@ -180,9 +191,19 @@ export const FloatingActions: React.FC = () => {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              style={{ background: 'transparent', border: 'none', color: '#FFFFFF', cursor: 'pointer' }}
+              style={{ 
+                background: 'transparent', 
+                border: 'none', 
+                color: '#FFFFFF', 
+                cursor: 'pointer',
+                padding: '12px',
+                margin: '-12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
             >
-              <X size={18} />
+              <X size={24} />
             </button>
           </div>
 
@@ -437,6 +458,16 @@ export const FloatingActions: React.FC = () => {
         @keyframes chatFadeIn {
           from { opacity: 0; transform: translateY(20px) scale(0.95); }
           to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @media (max-width: 768px) {
+          .chatbot-panel {
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            border-radius: 0 !important;
+            border: none !important;
+          }
         }
       `}</style>
     </>
