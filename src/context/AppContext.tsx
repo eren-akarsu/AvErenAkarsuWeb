@@ -1,4 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { isSupabaseConfigured } from '../lib/supabaseClient';
+import * as contentService from '../services/contentService';
+import * as precedentService from '../services/precedentService';
+import type { Content, PrecedentDecisionDB } from '../types/database';
 
 // Definitions of Types
 export interface BlogPost {
@@ -113,8 +117,8 @@ interface AppContextType {
   toggleTheme: () => void;
   language: 'tr' | 'en';
   toggleLanguage: () => void;
-  currentRoute: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani';
-  navigateTo: (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani') => void;
+  currentRoute: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail';
+  navigateTo: (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail') => void;
   
   // Toast notifications
   toasts: Toast[];
@@ -147,6 +151,14 @@ interface AppContextType {
   tasks: Task[];
   chatbotLogs: ChatbotLog[];
   
+  // Loading / Error states for DB-backed data
+  isLoadingContents: boolean;
+  isLoadingDecisions: boolean;
+  contentsError: string | null;
+  decisionsError: string | null;
+  refetchContents: () => void;
+  refetchDecisions: () => void;
+
   // CRUD Actions
   addBlogPost: (post: Omit<BlogPost, 'id' | 'viewCount' | 'likeCount' | 'publishedAt'>) => void;
   updateBlogPost: (id: string, post: Partial<BlogPost>) => void;
@@ -178,6 +190,8 @@ interface AppContextType {
   setSelectedPost: (post: BlogPost | null) => void;
   selectedCategory: string | null;
   setSelectedCategory: (category: string | null) => void;
+  contentSlug: string | null;
+  setContentSlug: (slug: string | null) => void;
 
   
   // Translation function
@@ -186,14 +200,16 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Realistic initial blog posts in Turkish (no Lorem Ipsum)
-const initialBlogPosts: BlogPost[] = [
+// ============================================================
+// FALLBACK MOCK DATA — Used only when Supabase is NOT configured
+// ============================================================
+const fallbackBlogPosts: BlogPost[] = [
   {
     id: 'post-1',
     title: 'Kıdem Tazminatı Hesaplama Rehberi 2026',
     slug: 'kidem-tazminati-hesaplama-rehberi-2026',
-    excerpt: 'Yeni dönem asgari ücret artışları ve Yargıtay’ın en son emsal kararları ışığında kıdem tazminatı tavanı ve hesaplama detayları.',
-    content: 'İş Hukuku uygulamasında en sık karşılaşılan uyuşmazlıkların başında kıdem tazminatı hesaplamaları gelmektedir. Kıdem tazminatına hak kazanabilmek için işçinin en az 1 tam yıl çalışmış olması ve iş sözleşmesinin kanunda belirtilen haklı nedenlerle sona ermiş olması gerekir.\n\nKıdem tazminatının hesabında işçiye ödenen brüt ücrete ek olarak süreklilik arz eden ayni ve nakdi yardımlar (yemek, yol, ikramiye vb.) da dikkate alınır. 2026 yılı tavan tutarları ve güncel Yargıtay içtihatları doğrultusunda giydirilmiş brüt ücret üzerinden hesaplama yapılması önem taşımaktadır.\n\nÖnemli Noktalar:\n- Son brüt ücret esas alınır.\n- Her tam yıl için 30 günlük brüt ücret ödenir.\n- Kıdem tazminatı tavanı aşılamaz.\n- Yalnızca damga vergisi kesintisi yapılır.',
+    excerpt: 'Yeni dönem asgari ücret artışları ve Yargıtay\'ın en son emsal kararları ışığında kıdem tazminatı tavanı ve hesaplama detayları.',
+    content: 'İş Hukuku uygulamasında en sık karşılaşılan uyuşmazlıkların başında kıdem tazminatı hesaplamaları gelmektedir...',
     coverImage: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=800&q=80',
     category: 'Makaleler',
     readingTime: '6 Dakika',
@@ -207,7 +223,7 @@ const initialBlogPosts: BlogPost[] = [
     title: 'İstinaf Başvuru Dilekçesi Örneği',
     slug: 'istinaf-basvuru-dilekcesi-ornegi',
     excerpt: 'Ağır Ceza Mahkemeleri kararlarına karşı yapılacak istinaf başvurularında usul ve esas bakımından dikkat edilmesi gereken noktalar ve şablon.',
-    content: 'İstinaf başvurusu, ilk derece mahkemesi kararlarının hem hukuki hem de fiili açıdan denetlenmesini sağlayan önemli bir kanun yoludur. Ceza yargılamasında istinaf süresi gerekçeli kararın tebliğinden itibaren başlar. Dilekçede kararın hangi yönlerden hukuka aykırı olduğu, delillerin değerlendirilmesindeki hatalar açıkça belirtilmelidir.\n\nDilekçe Yapısı:\n1. Başlık (İlgili Bölge Adliye Mahkemesine Gönderilmek Üzere İlk Derece Mahkemesine)\n2. Dosya Numarası ve Tarafların Bilgileri\n3. Kararın Özeti ve Tebliğ Tarihi\n4. İstinaf Nedenleri ve Ayrıntılı Açıklamalar\n5. Talep ve Sonuç (Bozma veya Yeniden Yargılama Talebi)\n\nÖrnek Şablon dosyasını indirerek kendi davanıza göre uyarlayabilirsiniz.',
+    content: 'İstinaf başvurusu, ilk derece mahkemesi kararlarının hem hukuki hem de fiili açıdan denetlenmesini sağlayan önemli bir kanun yoludur...',
     coverImage: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
     category: 'Dilekçeler',
     readingTime: 'Şablon',
@@ -221,7 +237,7 @@ const initialBlogPosts: BlogPost[] = [
     title: 'Bilişim Sistemleri Aracılığıyla Dolandırıcılık Suçu',
     slug: 'bilisim-sistemleri-araciligiyla-dolandiricilik-sucu',
     excerpt: 'Türk Ceza Kanunu 158/1-f maddesi kapsamında bilişim sistemlerinin araç olarak kullanılması suretiyle dolandırıcılık suçunun unsurları.',
-    content: 'Teknolojinin gelişmesi ile birlikte ceza hukuku alanında bilişim suçları ve bilişim sistemleri vasıtasıyla işlenen suçlarda ciddi bir artış yaşanmaktadır. TCK md. 158/1-f uyarınca dolandırıcılık suçunun bilişim sistemlerinin sağladığı kolaylıklardan faydalanarak işlenmesi, suçun nitelikli hali olarak kabul edilmiş ve ağır yaptırımlara bağlanmıştır.\n\nSuçun Oluşma Şartları:\n- Failin hileli davranışlarda bulunması ve bu davranışların mağduru aldatabilecek nitelikte olması.\n- Hileli işlemlerin bilişim sistemleri (internet siteleri, sosyal medya, banka entegrasyonları vb.) kullanılarak gerçekleştirilmesi.\n- Mağdurun veya bir başkasının zararına olarak failin kendisine veya bir başkasına haksız bir yarar sağlaması.\n\nSiber güvenlik tedbirleri ve hukuki savunma stratejileri için makalemizi inceleyebilirsiniz.',
+    content: 'Teknolojinin gelişmesi ile birlikte ceza hukuku alanında bilişim suçları ve bilişim sistemleri vasıtasıyla işlenen suçlarda ciddi bir artış yaşanmaktadır...',
     coverImage: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
     category: 'Değerlendirmeler',
     readingTime: '8 Dakika',
@@ -232,7 +248,7 @@ const initialBlogPosts: BlogPost[] = [
   }
 ];
 
-const initialPrecedentDecisions: PrecedentDecision[] = [
+const fallbackPrecedentDecisions: PrecedentDecision[] = [
   {
     id: 'dec-1',
     title: 'Kıdem Tazminatında Yol ve Yemek Yardımı Dahiliyeti',
@@ -242,8 +258,8 @@ const initialPrecedentDecisions: PrecedentDecision[] = [
     decisionDate: '2026-02-15',
     category: 'İş Hukuku',
     tags: ['İş Hukuku', 'Kıdem Tazminatı', 'Giydirilmiş Ücret'],
-    summary: 'İşçi tarafından haklı nedenle yapılan fesihte kıdem tazminatı giydirilmiş brüt ücretinin hesabında süreklilik arz eden ayni ve nakdi yardımların (yol ve yemek yardımı) tam olarak dahil edilmesi gerektiği kararı.',
-    fullText: 'İLK DERECE MAHKEMESİ KARARI:\nDavacı vekili, müvekkilinin davalı iş yerinde çalışırken iş akdinin haklı nedenle feshedildiğini, kıdem tazminatının eksik hesaplandığını ileri sürerek fark kıdem tazminatı alacağının tahsilini talep etmiştir. Mahkemece yol ve yemek yardımlarının giydirilmiş brüt ücrete dahil edilmediği gerekçesiyle davanın kısmen kabulüne karar verilmiştir.\n\nYARGITAY HUKUK GENEL KURULU DEĞERLENDİRMESİ:\nKıdem tazminatının hesabında işçiye ödenen brüt ücrete ek olarak süreklilik gösteren para veya para ile ölçülmesi mümkün menfaatlerin (yemek, yol, ikramiye vb.) de dikkate alınması İş Kanunu’nun emredici hükümlerindendir. Dosya kapsamı uyarınca davalı işveren tarafından davacıya nakdi yol yardımı ile fiili yemek sağlandığı sabittir. Yapılan hesaplamada bu kalemlerin giydirilmiş ücrete eklenmesi zorunludur. İlk derece mahkemesinin bu yöndeki kararı yerinde olup, direnme kararının bozulması gerekmiştir.',
+    summary: 'İşçi tarafından haklı nedenle yapılan fesihte kıdem tazminatı giydirilmiş brüt ücretinin hesabında süreklilik arz eden ayni ve nakdi yardımların tam olarak dahil edilmesi gerektiği kararı.',
+    fullText: 'Kıdem tazminatının hesabında işçiye ödenen brüt ücrete ek olarak süreklilik gösteren para veya para ile ölçülmesi mümkün menfaatlerin de dikkate alınması İş Kanunu\'nun emredici hükümlerindendir.',
     isFeatured: true,
     status: 'Yayında',
     sortOrder: 1,
@@ -259,8 +275,8 @@ const initialPrecedentDecisions: PrecedentDecision[] = [
     decisionDate: '2025-11-20',
     category: 'Bilişim Hukuku',
     tags: ['Bilişim Hukuku', 'El Koyma', 'Anayasa Mahkemesi'],
-    summary: 'Sosyal medya paylaşımları nedeniyle yapılan soruşturmalarda bilişim sistemleri üzerinde yapılan arama ve el koyma işlemlerinin Anayasa 20. maddesi kapsamındaki özel hayatın gizliliği ve hak ihlali değerlendirmesi.',
-    fullText: 'BAŞVURUNUN KONUSU:\nBaşvurucu, sosyal medya paylaşımı gerekçe gösterilerek siber suçlar şube müdürlüğünce cep telefonu ve dijital materyallerine el konulduğunu, hakim kararı olmaksızın yapılan inceleme ile özel hayatın gizliliğinin ihlal edildiğini iddia etmiştir.\n\nANAYASA MAHKEMESİ KARARI:\nCMK md. 134 uyarınca bilgisayarlarda, bilgisayar programlarında ve kütüklerinde arama, kopyalama ve el koyma işlemleri ancak hakim kararı ile yapılabilir. Gecikmesinde sakınca bulunan hal olsa dahi savcılık emriyle dijital materyallerin şifresinin kırılarak içeriklerinin incelenmesi hak ihlali teşkil eder. Anayasa md. 20 ile koruma altına alınan özel hayatın gizliliği hakkının ihlal edildiğine karar verilmiş ve dosya yeniden yargılama için mahkemesine gönderilmiştir.',
+    summary: 'Sosyal medya paylaşımları nedeniyle yapılan soruşturmalarda bilişim sistemleri üzerinde yapılan arama ve el koyma işlemlerinin özel hayatın gizliliği ve hak ihlali değerlendirmesi.',
+    fullText: 'CMK md. 134 uyarınca bilgisayarlarda, bilgisayar programlarında ve kütüklerinde arama, kopyalama ve el koyma işlemleri ancak hakim kararı ile yapılabilir.',
     isFeatured: true,
     status: 'Yayında',
     sortOrder: 2,
@@ -276,8 +292,8 @@ const initialPrecedentDecisions: PrecedentDecision[] = [
     decisionDate: '2025-09-12',
     category: 'Bilişim Ceza',
     tags: ['Kripto Varlık', 'Nitelikli Hırsızlık', 'Siber Suçlar'],
-    summary: 'Kripto varlık cüzdanı şifresinin izinsiz ele geçirilerek varlıkların başka cüzdana aktarılması eyleminin TCK md. 142/2-e uyarınca bilişim sistemlerinin kullanılması suretiyle nitelikli hırsızlık suçunu oluşturduğu kararı.',
-    fullText: 'YARGITAY 8. CEZA DAİRESİ KARARI:\nSanığın, katılanın rızası dışında elde ettiği özel anahtar (private key) ve şifreleri kullanmak suretiyle katılanın kripto varlık cüzdanına erişim sağladığı ve burada bulunan dijital varlıkları kendi kontrolündeki soğuk cüzdan hesaplarına aktardığı tespit edilmiştir. Mahkemece eylemin TCK 244. maddesindeki sistemi engelleme bozma verileri yok etme kapsamında kaldığı gerekçesiyle hüküm kurulmuş ise de; kripto varlıklerin ekonomik bir değer taşıdığı, bu nedenle bilişim sistemi aracılığıyla gerçekleştirilen bu transfer eyleminin sistemi bozmaktan ziyade mal edinme amacı taşıdığı ve dolayısıyla TCK md. 142/2-e kapsamında bilişim sistemlerinin kullanılması suretiyle nitelikli hırsızlık suçunu oluşturduğu gözetilerek hükmün bozulmasına oy birliğiyle karar verilmiştir.',
+    summary: 'Kripto varlık cüzdanı şifresinin izinsiz ele geçirilerek varlıkların başka cüzdana aktarılması eyleminin TCK md. 142/2-e uyarınca nitelikli hırsızlık suçunu oluşturduğu kararı.',
+    fullText: 'Sanığın, katılanın rızası dışında elde ettiği özel anahtar ve şifreleri kullanmak suretiyle katılanın kripto varlık cüzdanına erişim sağladığı tespit edilmiştir.',
     isFeatured: true,
     status: 'Yayında',
     sortOrder: 3,
@@ -293,8 +309,8 @@ const initialPrecedentDecisions: PrecedentDecision[] = [
     decisionDate: '2026-01-20',
     category: 'Fikri Mülkiyet',
     tags: ['Yapay Zeka', 'Fikir ve Sanat Eserleri', 'Telif Hakkı'],
-    summary: 'Yapay zekâ algoritmaları tarafından insan müdahalesi olmaksızın üretilen görsel ve metinsel çıktıların 5846 sayılı FSEK kapsamında "eser" niteliği taşımayacağı ve telif korumasından yararlanamayacağı kararı.',
-    fullText: 'YARGITAY 11. HUKUK DAİRESİ İNCELEMESİ:\nDavacı, tasarladığı yapay zekâ programına yazdırdığı görsel kodların davalı tarafından izinsiz kullanıldığını ileri sürerek telif ihlali tazminatı talep etmiştir. İlk derece mahkemesince davanın kabulüne karar verilmiş, karar davalı tarafından temyiz edilmiştir.\n\nİstikrarlı içtihatlar ve Fikir ve Sanat Eserleri Kanunu md. 1 uyarınca bir ürünün "eser" olarak nitelendirilebilmesi için sahibinin hususiyetini taşıması ve insan yaratıcılığının ürünü olması şarttır. Tamamen yapay zekâ komutları ile insan eli değmeden üretilen tasarımların bağımsız bir eser sahibi bulunmadığından telif korumasına konu edilemeyeceği, davacının ancak yapay zekâyı besleyen kendi özgün kodları üzerinde hak iddia edebileceği dikkate alınarak davanın reddi gerekirken kabulü hatalı bulunmuştur.',
+    summary: 'Yapay zekâ algoritmaları tarafından insan müdahalesi olmaksızın üretilen çıktıların FSEK kapsamında eser niteliği taşımayacağı kararı.',
+    fullText: 'Fikir ve Sanat Eserleri Kanunu md. 1 uyarınca bir ürünün eser olarak nitelendirilebilmesi için sahibinin hususiyetini taşıması ve insan yaratıcılığının ürünü olması şarttır.',
     isFeatured: true,
     status: 'Yayında',
     sortOrder: 4,
@@ -310,8 +326,8 @@ const initialPrecedentDecisions: PrecedentDecision[] = [
     decisionDate: '2025-05-18',
     category: 'Kira Hukuku',
     tags: ['Kira Hukuku', 'Tahliye Taahhüdü', 'İmza İtirazı'],
-    summary: 'Kira sözleşmesinin imzalanması sırasında boş olarak verilen ve sonradan doldurulan tahliye taahhütnamelerinin, kiracının boş kağıda imza atmakla doğacak hukuki sonuçları peşinen kabullenmiş sayılacağı gerekçesiyle geçerli olduğu kararı.',
-    fullText: 'YARGITAY 6. HUKUK DAİRESİ DEĞERLENDİRMESİ:\nDavacı alacaklı, davalı kiracının yazılı tahliye taahhüdüne dayanarak icra takibi başlatmış, kiracı ise taahhütnamenin kira sözleşmesiyle birlikte boş olarak imza ettirildiğini, üzerinin sonradan doldurulduğunu iddia ederek takibe itiraz etmiştir.\n\nBeyaza imza (boş kağıda imza) atan kimse, bu davranışının hukuki sonuçlarına katlanmak zorundadır. Kiracı boş kağıda imza atarak kiralayana bu belgenin üzerini dilediği gibi doldurma yetkisi vermiş sayılır. Taahhütnamedeki imzanın davalı kiracının eli ürünü olduğu tespit edildiğine göre, tanzim ve tahliye tarihlerinin sonradan doldurulmuş olması taahhütnamenin geçerliliğini etkilemez. Mahkemenin davanın reddine dair kararı usul ve yasaya aykırı olup bozulması gerekmiştir.',
+    summary: 'Boş olarak verilen ve sonradan doldurulan tahliye taahhütnamelerinin geçerli olduğu kararı.',
+    fullText: 'Beyaza imza atan kimse, bu davranışının hukuki sonuçlarına katlanmak zorundadır.',
     isFeatured: true,
     status: 'Yayında',
     sortOrder: 5,
@@ -320,6 +336,7 @@ const initialPrecedentDecisions: PrecedentDecision[] = [
   }
 ];
 
+// Clients, cases, appointments, etc. — kept as local mock (out of scope)
 const initialClients: Client[] = [
   { id: 'c-1', fullName: 'Ahmet Yılmaz', tcIdentityNumber: '12345678901', phone: '0532 123 45 67', email: 'ahmet@gmail.com', address: 'Kadıköy, İstanbul', occupation: 'Mühendis', notes: '', createdAt: '2026-05-10' },
   { id: 'c-2', fullName: 'Elif Kaya', tcIdentityNumber: '98765432109', phone: '0544 987 65 43', email: 'elif.kaya@outlook.com', address: 'Beşiktaş, İstanbul', occupation: 'Mimar', notes: '', createdAt: '2026-06-02' },
@@ -342,6 +359,7 @@ const initialHearings: Hearing[] = [
   { id: 'h-1', caseFileId: 'case-1', caseTitle: 'İşe İade Davası', clientName: 'Ahmet Yılmaz', courtName: 'İstanbul 4. İş Mahkemesi', hearingDate: '2026-07-08', hearingTime: '09:45', courtroom: 'C-201 Salonu', status: 'Yaklaşan', notes: 'Bilirkişi raporuna karşı beyan sunulacak.' },
   { id: 'h-2', caseFileId: 'case-2', caseTitle: 'Nitelikli Dolandırıcılık Savunması', clientName: 'Elif Kaya', courtName: 'İstanbul 12. Ağır Ceza Mahkemesi', hearingDate: '2026-07-15', hearingTime: '11:30', courtroom: 'A-104 Salonu', status: 'Yaklaşan', notes: 'Karar duruşması. Esas hakkında savunma yapılacak.' }
 ];
+
 const initialTasks: Task[] = [
   { id: 't-1', title: 'İşe İade Davası Bilirkişi Raporuna İtiraz Dilekçesi Hazırla', status: 'Yapılacak', priority: 'Yüksek', dueDate: '2026-07-07' },
   { id: 't-2', title: 'CMK Eğitim Sertifikalarını Baro Paneline Yükle', status: 'Devam Ediyor', priority: 'Orta', dueDate: '2026-07-10' },
@@ -349,169 +367,9 @@ const initialTasks: Task[] = [
   { id: 't-4', title: 'Kira Artış Formülünü Hesaplama Modülüne Entegre Et', status: 'Yapılacak', priority: 'Acil', dueDate: '2026-07-05' }
 ];
 
-const initialBlogPostsEn: BlogPost[] = [
-  {
-    id: 'post-1',
-    title: 'Severance Pay Calculation Guide 2026',
-    slug: 'severance-pay-calculation-guide-2026',
-    excerpt: 'Details on severance pay ceilings, Yargıtay\'s latest precedent rulings, and calculations in light of the new minimum wage adjustments.',
-    content: 'In Labor Law practice, severance pay calculations are among the most common legal disputes. To qualify for severance pay, an employee must have completed at least 1 full year of service and the employment contract must have been terminated due to one of the just causes specified in the law.\n\nIn addition to the gross salary paid, regular benefits (meals, transportation, bonuses, etc.) are also considered. In light of 2026 ceilings and Yargıtay precedents, calculations must be made over the adjusted gross salary.\n\nKey Points:\n- The final gross salary is taken as base.\n- 30 days of gross pay is paid for each full year of service.\n- The severance pay ceiling cannot be exceeded.\n- Only stamp tax deduction is applicable.',
-    coverImage: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=800&q=80',
-    category: 'Makaleler',
-    readingTime: '6 Mins',
-    viewCount: 1240,
-    likeCount: 94,
-    publishedAt: '2026-06-15',
-    tags: ['Labor Law', 'Severance Pay', 'Yargıtay Precedents']
-  },
-  {
-    id: 'post-2',
-    title: 'Model Appeal Petition for High Criminal Court',
-    slug: 'model-appeal-petition-for-high-criminal-court',
-    excerpt: 'Key procedural and substantive points to consider when appealing decisions of High Criminal Courts, including a downloadable template.',
-    content: 'An appeal (istinaf) is an important legal remedy that ensures the review of first-instance court decisions in terms of both law and facts. In criminal proceedings, the appeal period starts from the notification of the reasoned decision. The petition must clearly state in which aspects the decision is unlawful and show errors in the evaluation of evidence.\n\nPetition Structure:\n1. Title (To the Regional Appellate Court, to be submitted via the First Instance Court)\n2. File Number and Parties Information\n3. Summary of Decision and Notification Date\n4. Grounds of Appeal and Detailed Explanations\n5. Request and Conclusion (Demand for reversal or retrial)\n\nYou can download the template file (.docx) and adapt it to your case.',
-    coverImage: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
-    category: 'Dilekçeler',
-    readingTime: 'Template',
-    viewCount: 2310,
-    likeCount: 182,
-    publishedAt: '2026-06-20',
-    tags: ['Criminal Law', 'Appeal Petition', 'Template']
-  },
-  {
-    id: 'post-3',
-    title: 'Cyber Systems Fraud Crime Analysis',
-    slug: 'cyber-systems-fraud-crime-analysis',
-    excerpt: 'Elements of the crime of qualified fraud committed via the use of information systems under Article 158/1-f of the Turkish Penal Code.',
-    content: 'With the advancement of technology, cyber crimes and offenses committed through information systems have increased significantly. Under Art. 158/1-f of the Turkish Penal Code, committing fraud by utilizing the convenience provided by information systems is considered a qualified form of the offense, carrying severe penalties.\n\nRequired Elements:\n- The perpetrator must perform fraudulent acts that are deceptive in nature.\n- Fraudulent acts must be executed utilizing information systems (websites, social media, banking integrations, etc.).\n- The perpetrator must obtain an unfair advantage to the detriment of the victim or another person.\n\nExplore our article for siber security measures and legal defense strategies.',
-    coverImage: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
-    category: 'Değerlendirmeler',
-    readingTime: '8 Mins',
-    viewCount: 890,
-    likeCount: 57,
-    publishedAt: '2026-07-01',
-    tags: ['Cyber Law', 'TPC 158', 'Qualified Fraud']
-  }
-];
-
-const initialPrecedentDecisionsEn: PrecedentDecision[] = [
-  {
-    id: 'dec-1',
-    title: 'Inclusion of Food and Transport Allowances in Severance Pay',
-    court: 'Court of Cassation General Assembly of Civil Chambers',
-    esas: '2025/12-344 Merit',
-    karar: '2026/89 Decision',
-    decisionDate: '2026-02-15',
-    category: 'Labor Law',
-    tags: ['Labor Law', 'Severance Pay', 'Adjusted Wage'],
-    summary: 'Ruling that regular in-kind and cash benefits (meal and transportation allowances) must be fully included in the calculation of the adjusted gross salary for severance pay in terminations made by the employee for just cause.',
-    fullText: 'FIRST INSTANCE COURT DECISION:\nThe plaintiff\'s counsel claimed that their client\'s employment contract was terminated for just cause, but the severance pay was calculated incorrectly, requesting the collection of the missing severance pay. The court decided to partially accept the case on the grounds that road and food allowances were not included in the adjusted gross wage.\n\nCOURT OF CASSATION CIVIL GENERAL ASSEMBLY EVALUATION:\nIncluding regular cash or in-kind benefits (food, transport, bonuses, etc.) in the calculation of the worker\'s severance pay in addition to the gross salary is a mandatory provision of the Labor Law. Based on the file content, it is established that the defendant employer provided cash transport support and physical meals to the plaintiff. Adding these items to the adjusted wage is compulsory in calculations. The decision of the first instance court in this direction is appropriate, and the opposition decision must be reversed.',
-    isFeatured: true,
-    status: 'Yayında',
-    sortOrder: 1,
-    showOnHome: true,
-    showOnLegalDocs: true
-  },
-  {
-    id: 'dec-2',
-    title: 'Search and Seizure on Digital Materials Without Judicial Warrant',
-    court: 'Constitutional Court General Assembly',
-    esas: '2024/4512 Application',
-    karar: '2025/112 Decision',
-    decisionDate: '2025-11-20',
-    category: 'Cyber Law',
-    tags: ['Cyber Law', 'Seizure', 'Constitutional Court'],
-    summary: 'Evaluation of search and seizure operations on information systems during social media investigations, regarding the privacy of private life under Article 20 of the Constitution and rights violation claims.',
-    fullText: 'SUBJECT OF THE APPLICATION:\nThe applicant claimed that their cell phone and digital materials were seized by the cyber crimes branch on the grounds of a social media post, and that the review conducted without a judge\'s decision violated the privacy of private life.\n\nCONSTITUTIONAL COURT DECISION:\nAccording to Art. 134 of the CMK (Criminal Procedure Code), search, copying, and seizure operations in computers, computer programs, and computer files can only be done by a judge\'s decision. Even if there is urgency, checking the contents by breaking the passwords of digital materials on the prosecutor\'s order constitutes a violation of rights. It was decided that the right to privacy of private life protected by Art. 20 of the Constitution was violated, and the file was sent to the court for a retrial.',
-    isFeatured: true,
-    status: 'Yayında',
-    sortOrder: 2,
-    showOnHome: true,
-    showOnLegalDocs: true
-  },
-  {
-    id: 'dec-3',
-    title: 'Qualified Theft in Unauthorized Cryptocurrency Transfers',
-    court: 'Court of Cassation 8th Criminal Chamber',
-    esas: '2024/1145 Merit',
-    karar: '2025/322 Decision',
-    decisionDate: '2025-09-12',
-    category: 'Cyber Criminal',
-    tags: ['Cryptocurrency', 'Qualified Theft', 'Cyber Crimes'],
-    summary: 'Ruling that accessing a crypto wallet by unlawfully acquiring its private key and password, and transferring digital assets to another wallet, constitutes qualified theft via information systems under TPC Art. 142/2-e.',
-    fullText: 'COURT OF CASSATION 8TH CRIMINAL CHAMBER RULING:\nIt was established that the defendant accessed the complainant\'s cryptocurrency wallet by using private keys and passwords obtained without consent, transferring the digital assets to cold wallets under his control. The lower court ruled under Art. 244 (preventing/disrupting systems), but cryptocurrency possesses economic value, making this transfer an act of unlawful acquisition rather than system disruption. Thus, it constitutes qualified theft via information systems under TPC Art. 142/2-e. The judgment is unanimously reversed.',
-    isFeatured: true,
-    status: 'Yayında',
-    sortOrder: 3,
-    showOnHome: true,
-    showOnLegalDocs: true
-  },
-  {
-    id: 'dec-4',
-    title: 'Authorship and Copyright on AI-Generated Outputs',
-    court: 'Court of Cassation 11th Civil Chamber',
-    esas: '2025/445 Merit',
-    karar: '2026/18 Decision',
-    decisionDate: '2026-01-20',
-    category: 'IP Law',
-    tags: ['Artificial Intelligence', 'Intellectual Property', 'Copyright'],
-    summary: 'Ruling that visual and textual outputs generated entirely by AI algorithms without human intervention do not qualify as "works" under Copyright Law No. 5846 and cannot benefit from copyright protection.',
-    fullText: 'COURT OF CASSATION 11TH CIVIL CHAMBER EVALUATION:\nThe plaintiff claimed copyright infringement, alleging unauthorized use of visual assets generated by an AI program he designed. The first instance court accepted the case, and the defendant appealed. Under Art. 1 of Law No. 5846, a product must carry the author\'s unique characteristics and be a result of human creativity to qualify as a "work". Designs created entirely by AI commands without human touch lack an author and cannot be protected by copyright. The plaintiff can only claim rights on his original software code feeding the AI. The judgment is reversed.',
-    isFeatured: true,
-    status: 'Yayında',
-    sortOrder: 4,
-    showOnHome: true,
-    showOnLegalDocs: true
-  },
-  {
-    id: 'dec-5',
-    title: 'Validity of Eviction Commitments Signed in Blank',
-    court: 'Court of Cassation 6th Civil Chamber',
-    esas: '2024/991 Merit',
-    karar: '2025/41 Decision',
-    decisionDate: '2025-05-18',
-    category: 'Rent Law',
-    tags: ['Rent Law', 'Eviction Commitment', 'Signature Objection'],
-    summary: 'Ruling that eviction commitments signed in blank during contract execution and filled in later by the landlord remain legally valid, as the tenant accepts all legal consequences by signing a blank document.',
-    fullText: 'COURT OF CASSATION 6TH CIVIL CHAMBER EVALUATION:\nThe landlord initiated enforcement proceedings based on a written eviction commitment. The tenant objected, claiming they were forced to sign a blank commitment alongside the lease contract, which was filled in later. A person signing a blank document must bear its legal consequences. The tenant is deemed to have authorized the landlord to fill in the document. Since the signature belongs to the tenant, filling dates later does not affect validity. The lower court\'s dismissal is reversed.',
-    isFeatured: true,
-    status: 'Yayında',
-    sortOrder: 5,
-    showOnHome: true,
-    showOnLegalDocs: true
-  }
-];
-
-const initialClientsEn: Client[] = [
-  { id: 'c-1', fullName: 'Ahmet Yilmaz', tcIdentityNumber: '12345678901', phone: '0532 123 45 67', email: 'ahmet@gmail.com', address: 'Kadikoy, Istanbul', occupation: 'Engineer', notes: '', createdAt: '2026-05-10' },
-  { id: 'c-2', fullName: 'Elif Kaya', tcIdentityNumber: '98765432109', phone: '0544 987 65 43', email: 'elif.kaya@outlook.com', address: 'Besiktas, Istanbul', occupation: 'Architect', notes: '', createdAt: '2026-06-02' },
-  { id: 'c-3', fullName: 'Mustafa Demir', tcIdentityNumber: '55667788990', phone: '0505 456 78 90', email: 'mustafa@demirinsaat.com', address: 'Sisli, Istanbul', occupation: 'Businessman', notes: '', createdAt: '2026-06-25' }
-];
-
-const initialCaseFilesEn: CaseFile[] = [
-  { id: 'case-1', clientId: 'c-1', clientName: 'Ahmet Yilmaz', title: 'Reinstatement Case', caseNumber: '2026/145 Esas', courtName: 'Istanbul 4th Labor Court', opposingParty: 'Technology Inc.', caseType: 'HUKUK', caseCategory: 'Labor Law', stage: 'Trial Stage', status: 'Devam Ediyor', description: 'Reinstatement and severance claims filed for unfair dismissal.' },
-  { id: 'case-2', clientId: 'c-2', clientName: 'Elif Kaya', title: 'Qualified Fraud Defense', caseNumber: '2026/322 Esas', courtName: 'Istanbul 12th High Criminal Court', opposingParty: 'Public Prosecutor (Complainant H.K.)', caseType: 'CEZA', caseCategory: 'Cyber Criminal', stage: 'Decision Stage', status: 'Devam Ediyor', description: 'Criminal defense representation against charges of fraud through information systems.' },
-  { id: 'case-3', clientId: 'c-3', clientName: 'Mustafa Demir', title: 'Public Defense (Police Interrogation)', caseNumber: '2026/89 Sor.', courtName: 'Besiktas District Police Dept.', opposingParty: 'State', caseType: 'CMK', caseCategory: 'Public Defense', stage: 'Investigation', status: 'Tamamlandı', description: 'Legal assistance provided as defense counsel during police interrogation.' }
-];
-
-const initialAppointmentsEn: Appointment[] = [
-  { id: 'app-1', clientName: 'Selin Yurt', phone: '0533 111 22 33', email: 'selin@yurtlaw.com', appointmentDate: '2026-07-05', appointmentTime: '10:30', consultationType: 'Online', status: 'Onaylandı', notes: 'Consultancy on start-up contracts in IT law.', paymentStatus: 'Tamamlandı', paymentAmount: 2500 },
-  { id: 'app-2', clientName: 'Can Ozturk', phone: '0542 222 33 44', email: 'can@ozturk.com', appointmentDate: '2026-07-06', appointmentTime: '14:00', consultationType: 'Yüz Yüze', status: 'Bekliyor', notes: 'Evaluation of rent increase rates and eviction commitment.', paymentStatus: 'Bekliyor', paymentAmount: 2000 },
-  { id: 'app-3', clientName: 'Merve Aslan', phone: '0507 333 44 55', email: 'merve@aslan.net', appointmentDate: '2026-07-04', appointmentTime: '16:30', consultationType: 'Telefon', status: 'Tamamlandı', notes: 'Preliminary consultation on divorce protocol and custody rights.', paymentStatus: 'Tamamlandı', paymentAmount: 1500 }
-];
-
-const initialHearingsEn: Hearing[] = [
-  { id: 'h-1', caseFileId: 'case-1', caseTitle: 'Reinstatement Case', clientName: 'Ahmet Yilmaz', courtName: 'Istanbul 4th Labor Court', hearingDate: '2026-07-08', hearingTime: '09:45', courtroom: 'Courtroom C-201', status: 'Yaklaşan', notes: 'Objections to the expert report will be submitted.' },
-  { id: 'h-2', caseFileId: 'case-2', caseTitle: 'Qualified Fraud Defense', clientName: 'Elif Kaya', courtName: 'Istanbul 12th High Criminal Court', hearingDate: '2026-07-15', hearingTime: '11:30', courtroom: 'Courtroom A-104', status: 'Yaklaşan', notes: 'Final hearing. Defense on merits will be delivered.' }
-];
-
-const initialTasksEn: Task[] = [
-  { id: 't-1', title: 'Draft objection to the expert report in Reinstatement case', status: 'Yapılacak', priority: 'Yüksek', dueDate: '2026-07-07' },
-  { id: 't-2', title: 'Upload public defense training certificates to Bar association portal', status: 'Devam Ediyor', priority: 'Orta', dueDate: '2026-07-10' },
-  { id: 't-3', title: 'Log meeting notes for client Mustafa Demir', status: 'Tamamlandı', priority: 'Düşük', dueDate: '2026-07-03' },
-  { id: 't-4', title: 'Integrate rent increase formula into calculations module', status: 'Yapılacak', priority: 'Acil', dueDate: '2026-07-05' }
-];
-
+// ============================================================
+// TRANSLATIONS (unchanged)
+// ============================================================
 const translations = {
   tr: {
     'brand.title': 'Av. Eren Akarsu',
@@ -697,6 +555,62 @@ const translations = {
   }
 };
 
+// ============================================================
+// HELPER: Convert Supabase Content row → BlogPost shape
+// ============================================================
+function contentToBlogPost(c: Content): BlogPost {
+  const categoryMap: Record<string, BlogPost['category']> = {
+    'document_template': 'Dilekçeler',
+    'article': 'Makaleler',
+    'legal_review': 'Değerlendirmeler',
+    'precedent_decision': 'Kararlar',
+    'case_law_analysis': 'Analizler',
+    'professional_note': 'Notlar',
+    'legal_calculator': 'Notlar',
+  };
+
+  return {
+    id: c.id,
+    title: c.title,
+    slug: c.slug,
+    excerpt: c.excerpt,
+    content: c.content_body,
+    coverImage: c.cover_image_url || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
+    category: categoryMap[c.content_type] || 'Makaleler',
+    readingTime: c.reading_time || '',
+    viewCount: c.view_count,
+    likeCount: c.like_count,
+    publishedAt: c.published_at ? c.published_at.split('T')[0] : c.created_at.split('T')[0],
+    tags: c.tags || [],
+  };
+}
+
+// ============================================================
+// HELPER: Convert Supabase PrecedentDecisionDB row → PrecedentDecision shape
+// ============================================================
+function dbToPrecedentDecision(d: PrecedentDecisionDB): PrecedentDecision {
+  return {
+    id: d.id,
+    title: d.title,
+    court: d.court_name,
+    esas: d.esas_no,
+    karar: d.karar_no,
+    decisionDate: d.decision_date || '',
+    category: d.category,
+    tags: d.tags || [],
+    summary: d.short_summary,
+    fullText: d.full_decision_text,
+    isFeatured: d.is_featured,
+    status: d.status === 'published' ? 'Yayında' : 'Taslak',
+    sortOrder: d.sort_order,
+    showOnHome: d.show_on_homepage,
+    showOnLegalDocs: d.show_on_legal_contents,
+  };
+}
+
+// ============================================================
+// PROVIDER
+// ============================================================
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
@@ -706,9 +620,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return (localStorage.getItem('language') as 'tr' | 'en') || 'tr';
   });
   
-  const [currentRoute, setCurrentRoute] = useState<'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani'>(() => {
+  const [currentRoute, setCurrentRoute] = useState<'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail'>(() => {
     const path = window.location.pathname;
     const hash = window.location.hash;
+    if (path.startsWith('/icerik/')) {
+      return 'content-detail';
+    }
     if (path === '/cerez-politikasi' || hash === '#cerez-politikasi') {
       return 'cerez-politikasi';
     }
@@ -734,6 +651,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return 'knowledge-hub';
     }
     return 'home';
+  });
+
+  const [contentSlug, setContentSlug] = useState<string | null>(() => {
+    const path = window.location.pathname;
+    if (path.startsWith('/icerik/')) {
+      return path.replace('/icerik/', '');
+    }
+    return null;
   });
 
   const [cookieConsent, setCookieConsent] = useState<{
@@ -772,8 +697,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('cookieConsent', JSON.stringify(consent));
   };
 
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(initialBlogPosts);
-  const [precedentDecisions, setPrecedentDecisions] = useState<PrecedentDecision[]>(initialPrecedentDecisions);
+  // ============================================================
+  // DATA STATE — Blog Posts & Precedent Decisions
+  // ============================================================
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [precedentDecisions, setPrecedentDecisions] = useState<PrecedentDecision[]>([]);
+  const [isLoadingContents, setIsLoadingContents] = useState(true);
+  const [isLoadingDecisions, setIsLoadingDecisions] = useState(true);
+  const [contentsError, setContentsError] = useState<string | null>(null);
+  const [decisionsError, setDecisionsError] = useState<string | null>(null);
+
+  // Other data (remains local/mock)
   const [clients, setClients] = useState<Client[]>(initialClients);
   const [caseFiles, setCaseFiles] = useState<CaseFile[]>(initialCaseFiles);
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
@@ -793,6 +727,64 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     modelName: 'HuggingFace - Llama 3.1 8B Instruct'
   });
 
+  // ============================================================
+  // FETCH DATA FROM SUPABASE (or fallback to mock)
+  // ============================================================
+  const fetchContents = useCallback(async () => {
+    setIsLoadingContents(true);
+    setContentsError(null);
+
+    if (!isSupabaseConfigured()) {
+      // Fallback to mock data
+      setBlogPosts(fallbackBlogPosts);
+      setIsLoadingContents(false);
+      return;
+    }
+
+    try {
+      const data = await contentService.getAllContents();
+      setBlogPosts(data.map(contentToBlogPost));
+    } catch (err: any) {
+      console.error('[AppContext] Failed to fetch contents:', err);
+      setContentsError(err.message || 'İçerikler yüklenemedi');
+      // Fallback to mock data on error
+      setBlogPosts(fallbackBlogPosts);
+    } finally {
+      setIsLoadingContents(false);
+    }
+  }, []);
+
+  const fetchDecisions = useCallback(async () => {
+    setIsLoadingDecisions(true);
+    setDecisionsError(null);
+
+    if (!isSupabaseConfigured()) {
+      setPrecedentDecisions(fallbackPrecedentDecisions);
+      setIsLoadingDecisions(false);
+      return;
+    }
+
+    try {
+      const data = await precedentService.getAllPrecedentDecisions();
+      setPrecedentDecisions(data.map(dbToPrecedentDecision));
+    } catch (err: any) {
+      console.error('[AppContext] Failed to fetch precedent decisions:', err);
+      setDecisionsError(err.message || 'Emsal kararlar yüklenemedi');
+      setPrecedentDecisions(fallbackPrecedentDecisions);
+    } finally {
+      setIsLoadingDecisions(false);
+    }
+  }, []);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchContents();
+    fetchDecisions();
+  }, [fetchContents, fetchDecisions]);
+
+  // ============================================================
+  // THEME & LANGUAGE EFFECTS
+  // ============================================================
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
@@ -802,7 +794,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const handlePopState = () => {
       const path = window.location.pathname;
       const hash = window.location.hash;
-      if (path === '/cerez-politikasi' || hash === '#cerez-politikasi') {
+      if (path.startsWith('/icerik/')) {
+        setCurrentRoute('content-detail');
+        setContentSlug(path.replace('/icerik/', ''));
+      } else if (path === '/cerez-politikasi' || hash === '#cerez-politikasi') {
         setCurrentRoute('cerez-politikasi');
       } else if (path === '/hukuki-hesaplama-araclari' || hash === '#hukuki-hesaplama-araclari') {
         setCurrentRoute('hukuki-hesaplama-araclari');
@@ -828,77 +823,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     localStorage.setItem('language', language);
-
-    // Dynamically translate default items when language changes
-    setBlogPosts(prev => prev.map(post => {
-      const defaultPost = initialBlogPosts.find(p => p.id === post.id);
-      if (defaultPost) {
-        return language === 'en' ? initialBlogPostsEn.find(p => p.id === post.id) || post : defaultPost;
-      }
-      return post;
-    }));
-
-    setClients(prev => prev.map(c => {
-      const defaultClient = initialClients.find(p => p.id === c.id);
-      if (defaultClient) {
-        return language === 'en' ? initialClientsEn.find(p => p.id === c.id) || c : defaultClient;
-      }
-      return c;
-    }));
-
-    setCaseFiles(prev => prev.map(cf => {
-      const defaultCase = initialCaseFiles.find(p => p.id === cf.id);
-      if (defaultCase) {
-        return language === 'en' ? initialCaseFilesEn.find(p => p.id === cf.id) || cf : defaultCase;
-      }
-      return cf;
-    }));
-
-    setAppointments(prev => prev.map(app => {
-      const defaultApp = initialAppointments.find(p => p.id === app.id);
-      if (defaultApp) {
-        return language === 'en' ? initialAppointmentsEn.find(p => p.id === app.id) || app : defaultApp;
-      }
-      return app;
-    }));
-
-    setHearings(prev => prev.map(h => {
-      const defaultHearing = initialHearings.find(p => p.id === h.id);
-      if (defaultHearing) {
-        return language === 'en' ? initialHearingsEn.find(p => p.id === h.id) || h : defaultHearing;
-      }
-      return h;
-    }));
-
-    setTasks(prev => prev.map(t => {
-      const defaultTask = initialTasks.find(p => p.id === t.id);
-      if (defaultTask) {
-        return language === 'en' ? initialTasksEn.find(p => p.id === t.id) || t : defaultTask;
-      }
-      return t;
-    }));
-
-    setPrecedentDecisions(prev => prev.map(dec => {
-      const defaultDec = initialPrecedentDecisions.find(p => p.id === dec.id);
-      if (defaultDec) {
-        return language === 'en' ? initialPrecedentDecisionsEn.find(p => p.id === dec.id) || dec : defaultDec;
-      }
-      return dec;
-    }));
-
-    setChatbotLogs(prev => {
-      if (prev.length === 1 && prev[0].sender === 'bot') {
-        return [{
-          sender: 'bot',
-          text: language === 'en' 
-            ? 'Hello! I am Att. Eren Akarsu AI Assistant. How can I help you with legal questions or appointments?'
-            : 'Merhaba! Ben Av. Eren Akarsu Yapay Zekâ Asistanıyım. Size hukuki konularda veya randevu işlemlerinde nasıl yardımcı olabilirim?',
-          timestamp: new Date()
-        }];
-      }
-      return prev;
-    });
-
   }, [language]);
 
   const toggleTheme = () => {
@@ -909,12 +833,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLanguage(prev => prev === 'tr' ? 'en' : 'tr');
   };
 
-  const navigateTo = (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani') => {
+  const navigateTo = (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail') => {
     setCurrentRoute(route);
     
     // Sync browser address bar URL path or hash
     if (route === 'home') {
       window.history.pushState(null, '', '/');
+    } else if (route === 'content-detail' && contentSlug) {
+      window.history.pushState(null, '', `/icerik/${contentSlug}`);
     } else if (['cerez-politikasi', 'hukuki-hesaplama-araclari', 'kvkk-aydinlatma-metni', 'acik-riza-metni', 'kullanim-kosullari', 'sorumluluk-reddi-beyani'].includes(route)) {
       window.history.pushState(null, '', `/${route}`);
     } else {
@@ -924,42 +850,208 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // CRUD Implementations
-  const addBlogPost = (post: Omit<BlogPost, 'id' | 'viewCount' | 'likeCount' | 'publishedAt'>) => {
-    const newPost: BlogPost = {
-      ...post,
-      id: `post-${Date.now()}`,
-      viewCount: 0,
-      likeCount: 0,
-      publishedAt: new Date().toISOString().split('T')[0]
-    };
-    setBlogPosts(prev => [newPost, ...prev]);
+  // ============================================================
+  // CRUD IMPLEMENTATIONS — Now calling Supabase services
+  // ============================================================
+  const addBlogPost = async (post: Omit<BlogPost, 'id' | 'viewCount' | 'likeCount' | 'publishedAt'>) => {
+    if (!isSupabaseConfigured()) {
+      // Fallback: local-only
+      const newPost: BlogPost = {
+        ...post,
+        id: `post-${Date.now()}`,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: new Date().toISOString().split('T')[0]
+      };
+      setBlogPosts(prev => [newPost, ...prev]);
+      return;
+    }
+
+    try {
+      const contentTypeMap: Record<string, string> = {
+        'Dilekçeler': 'document_template',
+        'Makaleler': 'article',
+        'Değerlendirmeler': 'legal_review',
+        'Kararlar': 'precedent_decision',
+        'Analizler': 'case_law_analysis',
+        'Notlar': 'professional_note',
+      };
+
+      const created = await contentService.createContent({
+        title: post.title,
+        slug: '',
+        excerpt: post.excerpt,
+        content_body: post.content,
+        content_type: (contentTypeMap[post.category] || 'article') as any,
+        category: post.category,
+        sub_category: '',
+        tags: post.tags,
+        cover_image_url: post.coverImage,
+        author: 'Av. Eren Akarsu',
+        status: 'published',
+        is_featured: false,
+        show_on_homepage: true,
+        show_on_legal_contents: true,
+        allow_comments: true,
+        download_enabled: false,
+        reading_time: post.readingTime,
+        sort_order: 0,
+        published_at: new Date().toISOString(),
+        seo_title: '',
+        seo_description: '',
+        seo_keywords: '',
+        canonical_url: '',
+        doc_type: '',
+        doc_law_area: '',
+        doc_file_url: '',
+        doc_warning_text: '',
+        article_abstract: '',
+        article_law_articles: '',
+        article_precedents: '',
+        article_bibliography: '',
+        article_auto_toc: false,
+        article_scroll_progress: false,
+        calc_type: '',
+        calc_warning: '',
+        calc_order: 1,
+      });
+      setBlogPosts(prev => [contentToBlogPost(created), ...prev]);
+    } catch (err: any) {
+      console.error('[AppContext] addBlogPost error:', err);
+      showToast(err.message || 'İçerik eklenirken hata oluştu', 'error');
+    }
   };
 
-  const updateBlogPost = (id: string, updatedFields: Partial<BlogPost>) => {
-    setBlogPosts(prev => prev.map(post => post.id === id ? { ...post, ...updatedFields } : post));
+  const updateBlogPost = async (id: string, updatedFields: Partial<BlogPost>) => {
+    if (!isSupabaseConfigured()) {
+      setBlogPosts(prev => prev.map(post => post.id === id ? { ...post, ...updatedFields } : post));
+      return;
+    }
+
+    try {
+      const dbUpdates: any = {};
+      if (updatedFields.title !== undefined) dbUpdates.title = updatedFields.title;
+      if (updatedFields.excerpt !== undefined) dbUpdates.excerpt = updatedFields.excerpt;
+      if (updatedFields.content !== undefined) dbUpdates.content_body = updatedFields.content;
+      if (updatedFields.coverImage !== undefined) dbUpdates.cover_image_url = updatedFields.coverImage;
+      if (updatedFields.tags !== undefined) dbUpdates.tags = updatedFields.tags;
+      if (updatedFields.readingTime !== undefined) dbUpdates.reading_time = updatedFields.readingTime;
+
+      const updated = await contentService.updateContent(id, dbUpdates);
+      setBlogPosts(prev => prev.map(post => post.id === id ? contentToBlogPost(updated) : post));
+    } catch (err: any) {
+      console.error('[AppContext] updateBlogPost error:', err);
+      showToast(err.message || 'İçerik güncellenirken hata oluştu', 'error');
+    }
   };
 
-  const deleteBlogPost = (id: string) => {
-    setBlogPosts(prev => prev.filter(post => post.id !== id));
+  const deleteBlogPost = async (id: string) => {
+    if (!isSupabaseConfigured()) {
+      setBlogPosts(prev => prev.filter(post => post.id !== id));
+      return;
+    }
+
+    try {
+      await contentService.deleteContent(id);
+      setBlogPosts(prev => prev.filter(post => post.id !== id));
+    } catch (err: any) {
+      console.error('[AppContext] deleteBlogPost error:', err);
+      showToast(err.message || 'İçerik silinirken hata oluştu', 'error');
+    }
   };
 
-  const addPrecedentDecision = (dec: Omit<PrecedentDecision, 'id'>) => {
-    const newDec: PrecedentDecision = {
-      ...dec,
-      id: `dec-${Date.now()}`
-    };
-    setPrecedentDecisions(prev => [...prev, newDec]);
+  const addPrecedentDecision = async (dec: Omit<PrecedentDecision, 'id'>) => {
+    if (!isSupabaseConfigured()) {
+      const newDec: PrecedentDecision = { ...dec, id: `dec-${Date.now()}` };
+      setPrecedentDecisions(prev => [...prev, newDec]);
+      return;
+    }
+
+    try {
+      const created = await precedentService.createPrecedentDecision({
+        title: dec.title,
+        slug: '',
+        court_name: dec.court,
+        esas_no: dec.esas,
+        karar_no: dec.karar,
+        decision_date: dec.decisionDate || null,
+        legal_area: dec.category,
+        decision_type: '',
+        category: dec.category,
+        tags: dec.tags,
+        keywords: '',
+        short_summary: dec.summary,
+        important_points: '',
+        full_decision_text: dec.fullText,
+        legal_commentary: '',
+        related_laws: '',
+        conclusion: '',
+        cover_image_url: '',
+        status: dec.status === 'Yayında' ? 'published' : 'draft',
+        is_featured: dec.isFeatured,
+        show_on_homepage: dec.showOnHome,
+        show_on_legal_contents: dec.showOnLegalDocs,
+        sort_order: dec.sortOrder,
+        published_at: dec.status === 'Yayında' ? new Date().toISOString() : null,
+        seo_title: '',
+        seo_description: '',
+      });
+      setPrecedentDecisions(prev => [...prev, dbToPrecedentDecision(created)]);
+    } catch (err: any) {
+      console.error('[AppContext] addPrecedentDecision error:', err);
+      showToast(err.message || 'Emsal karar eklenirken hata oluştu', 'error');
+    }
   };
 
-  const updatePrecedentDecision = (id: string, updatedFields: Partial<PrecedentDecision>) => {
-    setPrecedentDecisions(prev => prev.map(dec => dec.id === id ? { ...dec, ...updatedFields } : dec));
+  const updatePrecedentDecision = async (id: string, updatedFields: Partial<PrecedentDecision>) => {
+    if (!isSupabaseConfigured()) {
+      setPrecedentDecisions(prev => prev.map(dec => dec.id === id ? { ...dec, ...updatedFields } : dec));
+      return;
+    }
+
+    try {
+      const dbUpdates: any = {};
+      if (updatedFields.title !== undefined) dbUpdates.title = updatedFields.title;
+      if (updatedFields.court !== undefined) dbUpdates.court_name = updatedFields.court;
+      if (updatedFields.esas !== undefined) dbUpdates.esas_no = updatedFields.esas;
+      if (updatedFields.karar !== undefined) dbUpdates.karar_no = updatedFields.karar;
+      if (updatedFields.decisionDate !== undefined) dbUpdates.decision_date = updatedFields.decisionDate;
+      if (updatedFields.category !== undefined) dbUpdates.category = updatedFields.category;
+      if (updatedFields.tags !== undefined) dbUpdates.tags = updatedFields.tags;
+      if (updatedFields.summary !== undefined) dbUpdates.short_summary = updatedFields.summary;
+      if (updatedFields.fullText !== undefined) dbUpdates.full_decision_text = updatedFields.fullText;
+      if (updatedFields.isFeatured !== undefined) dbUpdates.is_featured = updatedFields.isFeatured;
+      if (updatedFields.status !== undefined) dbUpdates.status = updatedFields.status === 'Yayında' ? 'published' : 'draft';
+      if (updatedFields.sortOrder !== undefined) dbUpdates.sort_order = updatedFields.sortOrder;
+      if (updatedFields.showOnHome !== undefined) dbUpdates.show_on_homepage = updatedFields.showOnHome;
+      if (updatedFields.showOnLegalDocs !== undefined) dbUpdates.show_on_legal_contents = updatedFields.showOnLegalDocs;
+
+      const updated = await precedentService.updatePrecedentDecision(id, dbUpdates);
+      setPrecedentDecisions(prev => prev.map(dec => dec.id === id ? dbToPrecedentDecision(updated) : dec));
+    } catch (err: any) {
+      console.error('[AppContext] updatePrecedentDecision error:', err);
+      showToast(err.message || 'Emsal karar güncellenirken hata oluştu', 'error');
+    }
   };
 
-  const deletePrecedentDecision = (id: string) => {
-    setPrecedentDecisions(prev => prev.filter(dec => dec.id !== id));
+  const deletePrecedentDecision = async (id: string) => {
+    if (!isSupabaseConfigured()) {
+      setPrecedentDecisions(prev => prev.filter(dec => dec.id !== id));
+      return;
+    }
+
+    try {
+      await precedentService.deletePrecedentDecision(id);
+      setPrecedentDecisions(prev => prev.filter(dec => dec.id !== id));
+    } catch (err: any) {
+      console.error('[AppContext] deletePrecedentDecision error:', err);
+      showToast(err.message || 'Emsal karar silinirken hata oluştu', 'error');
+    }
   };
 
+  // ============================================================
+  // LOCAL-ONLY CRUD (Clients, Cases, Appointments, etc.)
+  // ============================================================
   const addClient = (client: Omit<Client, 'id' | 'createdAt'>) => {
     const newClient: Client = {
       ...client,
@@ -1053,6 +1145,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       hearings,
       tasks,
       chatbotLogs,
+      isLoadingContents,
+      isLoadingDecisions,
+      contentsError,
+      decisionsError,
+      refetchContents: fetchContents,
+      refetchDecisions: fetchDecisions,
       addBlogPost,
       updateBlogPost,
       deleteBlogPost,
@@ -1074,6 +1172,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSelectedPost,
       selectedCategory,
       setSelectedCategory,
+      contentSlug,
+      setContentSlug,
       t
     }}>
       {children}

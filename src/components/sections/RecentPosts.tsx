@@ -1,13 +1,16 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { BookOpen, Eye, ThumbsUp, MessageSquare, ArrowRight } from 'lucide-react';
+import { ContentSkeleton } from '../ui/ContentSkeleton';
+import { EmptyState } from '../ui/EmptyState';
 
 export const RecentPosts: React.FC = () => {
-  const { blogPosts, navigateTo, language } = useApp();
+  const { blogPosts, navigateTo, language, isLoadingContents, setContentSlug } = useApp();
   const isEn = language === 'en';
 
-  // Show only first 3 posts
+  // Show only first 3 published posts
   const displayPosts = blogPosts.slice(0, 3);
+
 
   return (
     <section
@@ -42,12 +45,24 @@ export const RecentPosts: React.FC = () => {
         </div>
 
         {/* Posts Grid */}
+        {isLoadingContents ? (
+          <ContentSkeleton variant="card" count={3} />
+        ) : displayPosts.length === 0 ? (
+          <EmptyState
+            title={isEn ? 'No content yet' : 'Henüz içerik yok'}
+            description={isEn ? 'Published articles will appear here.' : 'Yayınlanan yazılar burada görünecektir.'}
+          />
+        ) : (
         <div className="grid-3">
           {displayPosts.map((post) => (
             <article
               key={post.id}
               className="glass-card"
-              onClick={() => navigateTo('knowledge-hub')}
+              onClick={() => {
+                setContentSlug(post.slug);
+                window.history.pushState(null, '', `/icerik/${post.slug}`);
+                navigateTo('content-detail');
+              }}
               style={{
                 border: '1px solid var(--glass-border)',
                 background: 'var(--bg-card)',
@@ -140,6 +155,7 @@ export const RecentPosts: React.FC = () => {
             </article>
           ))}
         </div>
+        )}
 
       </div>
       <style>{`

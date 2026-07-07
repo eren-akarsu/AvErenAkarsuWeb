@@ -10,6 +10,7 @@ import { KvkkDisclosure } from './pages/KvkkDisclosure';
 import { ExplicitConsent } from './pages/ExplicitConsent';
 import { TermsOfUse } from './pages/TermsOfUse';
 import { Disclaimer } from './pages/Disclaimer';
+import { ContentDetailPage } from './pages/ContentDetailPage';
 import { ToastContainer } from './components/layout/ToastContainer';
 
 const AppContent: React.FC = () => {
@@ -24,6 +25,7 @@ const AppContent: React.FC = () => {
     <Layout>
       {currentRoute === 'home' && <Home />}
       {currentRoute === 'knowledge-hub' && <KnowledgeHub />}
+      {currentRoute === 'content-detail' && <ContentDetailPage />}
       {currentRoute === 'cerez-politikasi' && <CookiePolicy />}
       {currentRoute === 'hukuki-hesaplama-araclari' && <LegalCalculatorPage />}
       {currentRoute === 'kvkk-aydinlatma-metni' && <KvkkDisclosure />}

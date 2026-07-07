@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Scale, X, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ContentSkeleton } from '../ui/ContentSkeleton';
+import { EmptyState } from '../ui/EmptyState';
 
 export const LegalDecisions: React.FC = () => {
-  const { precedentDecisions, language, theme } = useApp();
+  const { precedentDecisions, language, theme, isLoadingDecisions } = useApp();
   const [activeDecisionId, setActiveDecisionId] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cardsPerPage, setCardsPerPage] = useState(2);
@@ -80,6 +82,18 @@ export const LegalDecisions: React.FC = () => {
     >
       <div className="container" style={{ position: 'relative' }}>
         
+        {isLoadingDecisions ? (
+          <div style={{ paddingTop: '20px' }}>
+            <ContentSkeleton variant="carousel" count={3} />
+          </div>
+        ) : visibleDecisions.length === 0 ? (
+          <EmptyState
+            title={language === 'en' ? 'No precedent decisions yet' : 'Henüz emsal karar eklenmemiş'}
+            description={language === 'en' ? 'Published precedent decisions will appear here.' : 'Yayınlanan emsal kararlar burada görünecektir.'}
+            icon={<Scale size={28} />}
+          />
+        ) : (
+        <>
         {/* Header Block with Carousel Controls */}
         <div 
           style={{ 
@@ -266,6 +280,8 @@ export const LegalDecisions: React.FC = () => {
             ))}
           </div>
         </div>
+        </>
+        )}
 
       </div>
 
@@ -360,7 +376,8 @@ export const LegalDecisions: React.FC = () => {
         </div>
       )}
 
-      {/* Styled JSX for Scaling Modal */}
+
+
       <style>{`
         @keyframes modalScaleIn {
           from { opacity: 0; transform: scale(0.95); }

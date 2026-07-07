@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { BlogPost } from '../context/AppContext';
 import { Search, Scale, FileText, ArrowRight, Eye, ThumbsUp, Printer, MessageSquare, Download, Share2, ZoomIn, ZoomOut, ChevronDown } from 'lucide-react';
+import { ContentSkeleton } from '../components/ui/ContentSkeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 
 export const KnowledgeHub: React.FC = () => {
-  const { blogPosts, precedentDecisions, t, language, theme, navigateTo, showToast, selectedCategory, setSelectedCategory } = useApp();
+  const { blogPosts, precedentDecisions, t, language, theme, navigateTo, showToast, selectedCategory, setSelectedCategory, isLoadingContents, isLoadingDecisions, setContentSlug } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('Hepsi');
   const [sortBy, setSortBy] = useState<'newest' | 'views' | 'likes'>('newest');
@@ -399,10 +401,14 @@ export const KnowledgeHub: React.FC = () => {
         )}
 
         {/* Content Listing Grid */}
-        {filteredPosts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-secondary)' }}>
-            {isEn ? 'No matching legal content was found.' : 'Aramanızla eşleşen hukuki içerik bulunamadı.'}
-          </div>
+        {(isLoadingContents || isLoadingDecisions) ? (
+          <ContentSkeleton variant="card" count={6} />
+        ) : filteredPosts.length === 0 ? (
+          <EmptyState
+            title={isEn ? 'No matching content found' : 'Eşleşen içerik bulunamadı'}
+            description={isEn ? 'Try a different search term or category filter.' : 'Farklı bir arama terimi veya kategori filtresi deneyin.'}
+            icon={<Search size={28} />}
+          />
         ) : (
           <div className="grid-3">
             {filteredPosts.map((post) => (
