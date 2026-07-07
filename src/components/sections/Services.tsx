@@ -159,7 +159,7 @@ export const Services: React.FC = () => {
     <section
       id="practice"
       style={{
-        padding: '100px 0',
+        padding: '50px 0 70px',
         background: 'var(--bg-primary)',
         position: 'relative'
       }}
@@ -167,7 +167,7 @@ export const Services: React.FC = () => {
       <div className="container">
         
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <h4 style={{ fontSize: '14px', color: 'var(--color-burgundy)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
             {isEn ? 'Practice Areas' : 'Hukuki Hizmetler'}
           </h4>

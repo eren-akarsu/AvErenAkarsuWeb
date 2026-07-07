@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { isSupabaseConfigured } from '../lib/supabaseClient';
 import * as contentService from '../services/contentService';
 import * as precedentService from '../services/precedentService';
+import * as settingsService from '../services/siteSettingsService';
+import type { SiteSettings } from '../services/siteSettingsService';
 import type { Content, PrecedentDecisionDB } from '../types/database';
 
 // Definitions of Types
@@ -184,6 +186,9 @@ interface AppContextType {
     modelName: string;
   };
   updateChatbotSettings: (settings: any) => void;
+  siteSettings: SiteSettings;
+  updateSiteSettings: (group: keyof SiteSettings, data: any) => Promise<boolean>;
+  resetSiteSettings: (group: keyof SiteSettings) => Promise<boolean>;
   
   // Dynamic Page states
   selectedPost: BlogPost | null;
@@ -720,6 +725,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => settingsService.getDefaultSettings());
+
   const [chatbotSettings, setChatbotSettings] = useState({
     welcomeMessage: 'Merhaba! Ben Av. Eren Akarsu Yapay Zekâ Asistanıyım. Size hukuki konularda veya randevu işlemlerinde nasıl yardımcı olabilirim?',
     systemPrompt: 'Sen Av. Eren Akarsu platformunun yapay zekâ asistanısın. Ziyaretçilere hukuki konularda genel ön bilgi ver, kesinlikle resmi hukuki danışmanlık yapmadığını ve bu bilgilerin danışmanlık niteliği taşımadığını belirt. Ziyaretçileri iletişim formu veya randevu alma modüllerine yönlendir.',
@@ -781,6 +788,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchContents();
     fetchDecisions();
   }, [fetchContents, fetchDecisions]);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const data = await settingsService.getSiteSettings();
+        setSiteSettings(data);
+        if (data.ai_settings) {
+          setChatbotSettings({
+            welcomeMessage: data.ai_settings.welcomeMessage || 'Merhaba! Ben Av. Eren Akarsu Yapay Zekâ Asistanıyım. Size hukuki konularda veya randevu işlemlerinde nasıl yardımcı olabilirim?',
+            systemPrompt: data.ai_settings.systemPrompt || 'Sen Av. Eren Akarsu platformunun yapay zekâ asistanısın. Ziyaretçilere hukuki konularda genel ön bilgi ver, kesinlikle resmi hukuki danışmanlık yapmadığını ve bu bilgilerin danışmanlık niteliği taşımadığını belirt. Ziyaretçileri iletişim formu veya randevu alma modüllerine yönlendir.',
+            isActive: data.ai_settings.isActive !== undefined ? data.ai_settings.isActive : true,
+            modelName: data.ai_settings.modelProvider || 'Gemini'
+          });
+        }
+      } catch (err) {
+        console.error('[AppContext] Failed to load site settings:', err);
+      }
+    }
+    loadSettings();
+  }, []);
 
   // ============================================================
   // THEME & LANGUAGE EFFECTS
@@ -1120,6 +1147,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateChatbotSettings = (settings: any) => {
     setChatbotSettings(prev => ({ ...prev, ...settings }));
+    // Also save into siteSettings to keep unified config aligned
+    updateSiteSettings('ai_settings', settings);
+  };
+
+  const updateSiteSettings = async (group: keyof SiteSettings, data: any): Promise<boolean> => {
+    const success = await settingsService.updateSiteSettingsGroup(group, data);
+    if (success) {
+      setSiteSettings(prev => {
+        const updated = { ...prev };
+        updated[group] = { ...updated[group], ...data };
+        return updated;
+      });
+      // Sync legacy chatbotSettings if updating AI group
+      if (group === 'ai_settings') {
+        setChatbotSettings(prev => ({
+          ...prev,
+          welcomeMessage: data.welcomeMessage !== undefined ? data.welcomeMessage : prev.welcomeMessage,
+          systemPrompt: data.systemPrompt !== undefined ? data.systemPrompt : prev.systemPrompt,
+          isActive: data.isActive !== undefined ? data.isActive : prev.isActive,
+          modelName: data.modelProvider !== undefined ? data.modelProvider : prev.modelName
+        }));
+      }
+    }
+    return success;
+  };
+
+  const resetSiteSettings = async (group: keyof SiteSettings): Promise<boolean> => {
+    const defaults = settingsService.getDefaultSettings();
+    const success = await settingsService.updateSiteSettingsGroup(group, defaults[group]);
+    if (success) {
+      setSiteSettings(prev => {
+        const updated = { ...prev };
+        updated[group] = defaults[group];
+        return updated;
+      });
+      if (group === 'ai_settings') {
+        const aiDefaults = defaults.ai_settings;
+        setChatbotSettings({
+          welcomeMessage: aiDefaults.welcomeMessage,
+          systemPrompt: aiDefaults.systemPrompt,
+          isActive: aiDefaults.isActive,
+          modelName: aiDefaults.modelProvider
+        });
+      }
+    }
+    return success;
   };
 
   // i18n dynamic selector
@@ -1174,6 +1247,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addChatbotLog,
       chatbotSettings,
       updateChatbotSettings,
+      siteSettings,
+      updateSiteSettings,
+      resetSiteSettings,
       selectedPost,
       setSelectedPost,
       selectedCategory,

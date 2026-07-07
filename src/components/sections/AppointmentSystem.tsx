@@ -7,10 +7,118 @@ export const AppointmentSystem: React.FC = () => {
   const { t, addAppointment, language, showToast, navigateTo } = useApp();
   
   const isEn = language === 'en';
+  const timeslots = ['09:30', '10:30', '11:30', '14:00', '15:00', '16:30'];
 
-  // Date selector
-  const [selectedDate, setSelectedDate] = useState('2026-07-06');
-  const [selectedTime, setSelectedTime] = useState('10:30');
+  // Helper to check if a timeslot is past today
+  const isTimeslotPast = (timeStr: string, dateStr: string) => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    if (dateStr < todayStr) return true;
+    if (dateStr > todayStr) return false;
+
+    const [h, m] = timeStr.split(':').map(Number);
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+
+    return (h < currentHour) || (h === currentHour && m <= currentMinute);
+  };
+
+  // Helper to check if all slots today are past
+  const allSlotsPassedToday = () => {
+    const today = new Date();
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    return timeslots.every(slot => {
+      const [h, m] = slot.split(':').map(Number);
+      return (h < currentHour) || (h === currentHour && m <= currentMinute);
+    });
+  };
+
+  // Helper to find Monday of the week
+  const getMondayOfCurrentWeek = (today: Date) => {
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(today);
+    monday.setDate(diff);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  };
+
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  // Date selector (defaults to current system date or first available non-past date)
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    const monday = getMondayOfCurrentWeek(today);
+    const allPassedToday = allSlotsPassedToday();
+
+    for (let i = 0; i < 7; i++) {
+      const nextDate = new Date(monday);
+      nextDate.setDate(monday.getDate() + i);
+      const isString = nextDate.toISOString().split('T')[0];
+      
+      const dateOnly = new Date(nextDate);
+      dateOnly.setHours(0, 0, 0, 0);
+      const todayOnly = new Date(today);
+      todayOnly.setHours(0, 0, 0, 0);
+
+      const isPast = dateOnly.getTime() < todayOnly.getTime();
+      const isToday = dateOnly.getTime() === todayOnly.getTime();
+
+      if (!isPast && !(isToday && allPassedToday)) {
+        return isString;
+      }
+    }
+
+    const nextMonday = new Date(monday);
+    nextMonday.setDate(monday.getDate() + 7);
+    return nextMonday.toISOString().split('T')[0];
+  });
+
+  // Time selector (defaults to first active non-past slot of selectedDate)
+  const [selectedTime, setSelectedTime] = useState(() => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // We want to calculate the initial date first to match the default selectedDate hook
+    const initialDate = (() => {
+      const monday = getMondayOfCurrentWeek(today);
+      const allPassedToday = allSlotsPassedToday();
+
+      for (let i = 0; i < 7; i++) {
+        const nextDate = new Date(monday);
+        nextDate.setDate(monday.getDate() + i);
+        const isString = nextDate.toISOString().split('T')[0];
+        
+        const dateOnly = new Date(nextDate);
+        dateOnly.setHours(0, 0, 0, 0);
+        const todayOnly = new Date(today);
+        todayOnly.setHours(0, 0, 0, 0);
+
+        const isPast = dateOnly.getTime() < todayOnly.getTime();
+        const isToday = dateOnly.getTime() === todayOnly.getTime();
+
+        if (!isPast && !(isToday && allPassedToday)) {
+          return isString;
+        }
+      }
+      const nextMonday = new Date(monday);
+      nextMonday.setDate(monday.getDate() + 7);
+      return nextMonday.toISOString().split('T')[0];
+    })();
+
+    if (initialDate === todayStr) {
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      const firstActiveSlot = timeslots.find(slot => {
+        const [h, m] = slot.split(':').map(Number);
+        return (h > currentHour) || (h === currentHour && m > currentMinute);
+      });
+      return firstActiveSlot || '10:30';
+    }
+    return '10:30';
+  });
+
   const [clientName, setClientName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -19,6 +127,7 @@ export const AppointmentSystem: React.FC = () => {
   const [isBooked, setIsBooked] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const daysContainerRef = useRef<HTMLDivElement>(null);
+
   const scrollDays = (direction: 'left' | 'right') => {
     if (daysContainerRef.current) {
       const scrollAmount = direction === 'left' ? -80 : 80;
@@ -26,28 +135,44 @@ export const AppointmentSystem: React.FC = () => {
     }
   };
 
-  // Generates 6 upcoming calendar day selectors
+  // Generates 7 calendar days of the week based on weekOffset
   const getUpcomingDays = () => {
+    const today = new Date();
+    const monday = getMondayOfCurrentWeek(today);
+    monday.setDate(monday.getDate() + weekOffset * 7);
+    const allPassedToday = allSlotsPassedToday();
+
     const days = [];
-    const dateNames = isEn 
-      ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-      : ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
-    const start = new Date('2026-07-06'); // Start date reference
-    
-    for (let i = 0; i < 6; i++) {
-      const nextDate = new Date(start);
-      nextDate.setDate(start.getDate() + i);
+    const dateNamesTR = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    const dateNamesEN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    for (let i = 0; i < 7; i++) {
+      const nextDate = new Date(monday);
+      nextDate.setDate(monday.getDate() + i);
       const isString = nextDate.toISOString().split('T')[0];
+      
+      const dateOnly = new Date(nextDate);
+      dateOnly.setHours(0, 0, 0, 0);
+      const todayOnly = new Date(today);
+      todayOnly.setHours(0, 0, 0, 0);
+
+      let isPast = dateOnly.getTime() < todayOnly.getTime();
+      const isToday = dateOnly.getTime() === todayOnly.getTime();
+
+      if (isToday && allPassedToday) {
+        isPast = true;
+      }
+
       days.push({
         fullDate: isString,
         dayNum: nextDate.getDate(),
-        dayName: dateNames[nextDate.getDay() === 0 ? 5 : nextDate.getDay() - 1]
+        dayName: isEn ? dateNamesEN[i] : dateNamesTR[i],
+        isPast,
+        isToday
       });
     }
     return days;
   };
-
-  const timeslots = ['09:30', '10:30', '11:30', '14:00', '15:00', '16:30'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +215,7 @@ export const AppointmentSystem: React.FC = () => {
     <section
       id="appointment"
       style={{
-        padding: '100px 0',
+        padding: '50px 0 70px',
         background: 'var(--bg-primary)',
         position: 'relative'
       }}
@@ -98,7 +223,7 @@ export const AppointmentSystem: React.FC = () => {
       <div className="container">
         
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <h4 style={{ fontSize: '14px', color: 'var(--color-burgundy)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
             {isEn ? 'Appointment Hub' : 'Randevu Merkezi'}
           </h4>
@@ -132,10 +257,50 @@ export const AppointmentSystem: React.FC = () => {
                 
                 {/* Left Column: Visual Calendar & Time Slots */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  
-                  {/* Calendar Title */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-burgundy)', fontWeight: 600, fontSize: '14px' }}>
-                    <CalendarIcon size={18} /> {t('appointment.date')}
+                   {/* Calendar Title with Week Navigation */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--color-burgundy)', fontWeight: 600, fontSize: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CalendarIcon size={18} /> {t('appointment.date')}
+                    </div>
+                    
+                    {/* Week Navigation */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setWeekOffset(prev => Math.max(0, prev - 1))}
+                        disabled={weekOffset === 0}
+                        style={{
+                          background: 'transparent',
+                          border: '1px solid ' + (weekOffset === 0 ? 'rgba(240, 218, 197, 0.1)' : 'rgba(240, 218, 197, 0.25)'),
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          color: weekOffset === 0 ? 'rgba(240, 218, 197, 0.2)' : 'var(--text-primary)',
+                          cursor: weekOffset === 0 ? 'not-allowed' : 'pointer',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          transition: 'var(--transition-fast)'
+                        }}
+                      >
+                        {isEn ? 'Prev' : 'Geri'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWeekOffset(prev => prev + 1)}
+                        style={{
+                          background: 'transparent',
+                          border: '1px solid rgba(240, 218, 197, 0.25)',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          color: 'var(--text-primary)',
+                          cursor: 'pointer',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          transition: 'var(--transition-fast)'
+                        }}
+                      >
+                        {isEn ? 'Next' : 'İleri'}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Days grid with scroll buttons on mobile */}
@@ -195,7 +360,7 @@ export const AppointmentSystem: React.FC = () => {
                       className="appointment-days-row"
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(6, 1fr)',
+                        gridTemplateColumns: 'repeat(7, 1fr)',
                         gap: '10px',
                         width: '100%',
                         overflowX: 'visible'
@@ -203,72 +368,129 @@ export const AppointmentSystem: React.FC = () => {
                     >
                       {getUpcomingDays().map((day) => {
                         const isSelected = selectedDate === day.fullDate;
+                        const isPast = day.isPast;
                         return (
                           <div
-                            key={day.fullDate}
-                            onClick={() => setSelectedDate(day.fullDate)}
-                            style={{
-                              padding: '12px 6px',
-                              borderRadius: '10px',
-                              border: isSelected ? '1px solid var(--color-burgundy)' : '1px solid var(--border-color)',
-                              background: isSelected ? 'var(--color-burgundy)' : 'var(--input-bg)',
-                              color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
-                              cursor: 'pointer',
-                              textAlign: 'center',
-                              transition: 'var(--transition-fast)'
-                            }}
-                          >
-                            <div style={{ fontSize: '10px', opacity: isSelected ? '0.8' : '0.6', textTransform: 'uppercase' }}>
-                              {day.dayName}
-                            </div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, marginTop: '4px' }}>
-                              {day.dayNum}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      type="button"
-                      className="days-scroll-btn"
-                      onClick={() => scrollDays('right')}
-                      style={{ flexShrink: 0 }}
-                    >
-                      ›
-                    </button>
-                  </div>
-
-                  {/* Hours Title */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-burgundy)', fontWeight: 600, fontSize: '14px', marginTop: '10px' }}>
-                    <Clock size={18} /> {t('appointment.time')}
-                  </div>
-
-                  {/* Hour slots grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                    {timeslots.map((time) => {
-                      const isSelected = selectedTime === time;
-                      return (
-                        <div
-                          key={time}
-                          onClick={() => setSelectedTime(time)}
-                          style={{
-                            padding: '10px',
-                            borderRadius: '8px',
-                            border: isSelected ? '1px solid var(--color-burgundy)' : '1px solid var(--border-color)',
-                            background: isSelected ? 'var(--color-burgundy)' : 'var(--input-bg)',
-                            color: isSelected ? '#FFFFFF' : 'var(--text-primary)',
-                            cursor: 'pointer',
-                            textAlign: 'center',
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            transition: 'var(--transition-fast)'
-                          }}
-                        >
-                          {time}
-                        </div>
-                      );
-                    })}
+                                                       onClick={() => {
+                               if (!isPast) {
+                                 setSelectedDate(day.fullDate);
+                                 
+                                 // Auto-reset selectedTime if it is today and the currently selected slot is past
+                                 const today = new Date();
+                                 const todayStr = today.toISOString().split('T')[0];
+                                 if (day.fullDate === todayStr) {
+                                   const [currH, currM] = selectedTime.split(':').map(Number);
+                                   const nowH = today.getHours();
+                                   const nowM = today.getMinutes();
+                                   const isCurrentSlotPast = (currH < nowH) || (currH === nowH && currM <= nowM);
+                                   
+                                   if (isCurrentSlotPast) {
+                                     const firstActiveSlot = timeslots.find(slot => {
+                                       const [h, m] = slot.split(':').map(Number);
+                                       return (h > nowH) || (h === nowH && m > nowM);
+                                     });
+                                     if (firstActiveSlot) {
+                                       setSelectedTime(firstActiveSlot);
+                                     }
+                                   }
+                                 }
+                               }
+                             }}
+                             style={{
+                               padding: '12px 6px',
+                               borderRadius: '10px',
+                               border: isSelected 
+                                 ? '1px solid var(--color-burgundy)' 
+                                 : isPast 
+                                   ? '1px dashed rgba(240, 218, 197, 0.12)' 
+                                   : '1px solid var(--border-color)',
+                               background: isSelected 
+                                 ? 'var(--color-burgundy)' 
+                                 : isPast 
+                                   ? 'rgba(240, 218, 197, 0.01)' 
+                                   : 'var(--input-bg)',
+                               color: isSelected 
+                                 ? '#FFFFFF' 
+                                 : isPast 
+                                   ? 'rgba(240, 218, 197, 0.25)' 
+                                   : 'var(--text-primary)',
+                               cursor: isPast ? 'not-allowed' : 'pointer',
+                               textAlign: 'center',
+                               transition: 'var(--transition-fast)',
+                               opacity: isPast ? 0.45 : 1,
+                               pointerEvents: isPast ? 'none' : 'auto'
+                             }}
+                           >
+                             <div style={{ fontSize: '10px', opacity: isSelected ? '0.8' : isPast ? '0.5' : '0.6', textTransform: 'uppercase' }}>
+                               {day.dayName}
+                             </div>
+                             <div style={{ fontSize: '16px', fontWeight: 700, marginTop: '4px' }}>
+                               {day.dayNum}
+                             </div>
+                           </div>
+                         );
+                       })}
+                     </div>
+ 
+                     <button
+                       type="button"
+                       className="days-scroll-btn"
+                       onClick={() => scrollDays('right')}
+                       style={{ flexShrink: 0 }}
+                     >
+                       ›
+                     </button>
+                   </div>
+ 
+                   {/* Hours Title */}
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-burgundy)', fontWeight: 600, fontSize: '14px', marginTop: '10px' }}>
+                     <Clock size={18} /> {t('appointment.time')}
+                   </div>
+ 
+                   {/* Hour slots grid */}
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                     {timeslots.map((time) => {
+                       const isSelected = selectedTime === time;
+                       const isPastSlot = isTimeslotPast(time, selectedDate);
+                       return (
+                         <div
+                           key={time}
+                           onClick={() => {
+                             if (!isPastSlot) {
+                               setSelectedTime(time);
+                             }
+                           }}
+                           style={{
+                             padding: '10px',
+                             borderRadius: '8px',
+                             border: isSelected 
+                               ? '1px solid var(--color-burgundy)' 
+                               : isPastSlot
+                                 ? '1px dashed rgba(240, 218, 197, 0.12)'
+                                 : '1px solid var(--border-color)',
+                             background: isSelected 
+                               ? 'var(--color-burgundy)' 
+                               : isPastSlot
+                                 ? 'rgba(240, 218, 197, 0.01)'
+                                 : 'var(--input-bg)',
+                             color: isSelected 
+                               ? '#FFFFFF' 
+                               : isPastSlot
+                                 ? 'rgba(240, 218, 197, 0.25)'
+                                 : 'var(--text-primary)',
+                             cursor: isPastSlot ? 'not-allowed' : 'pointer',
+                             textAlign: 'center',
+                             fontSize: '13px',
+                             fontWeight: 600,
+                             transition: 'var(--transition-fast)',
+                             opacity: isPastSlot ? 0.45 : 1,
+                             pointerEvents: isPastSlot ? 'none' : 'auto'
+                           }}
+                         >
+                           {time}
+                         </div>
+                       );
+                     })}
                   </div>
 
                 </div>

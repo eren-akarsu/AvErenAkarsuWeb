@@ -77,6 +77,35 @@ export const Header: React.FC = () => {
     setIsMegaMenuOpen(false);
   };
 
+  const handleAnchorClick = (e: React.MouseEvent, targetId: string) => {
+    e.preventDefault();
+    handleNavClick('home');
+
+    setTimeout(() => {
+      const element = document.getElementById(targetId);
+      if (element) {
+        const headerElement = document.querySelector('header');
+        const headerHeight = headerElement ? headerElement.offsetHeight : 64;
+        
+        const viewportHeight = window.innerHeight;
+        const remainingHeight = viewportHeight - headerHeight;
+        
+        const rect = element.getBoundingClientRect();
+        const sectionHeight = rect.height;
+        const absoluteElementTop = rect.top + window.scrollY;
+        
+        // Symmetrically center the section in the visible viewport area below header
+        const scrollOffset = Math.max(0, (remainingHeight - sectionHeight) / 2);
+        const targetScrollTop = absoluteElementTop - headerHeight - scrollOffset;
+        
+        window.scrollTo({
+          top: targetScrollTop,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+  };
+
   const recentPosts = blogPosts.slice(0, 4);
 
   return (
@@ -143,14 +172,14 @@ export const Header: React.FC = () => {
         </span>
         <a
           href="#about"
-          onClick={() => handleNavClick('home')}
+          onClick={(e) => handleAnchorClick(e, 'about')}
           className={`nav-link ${currentRoute === 'home' && activeSection === 'about' ? 'active' : ''}`}
         >
           {t('nav.about')}
         </a>
         <a
           href="#practice"
-          onClick={() => handleNavClick('home')}
+          onClick={(e) => handleAnchorClick(e, 'practice')}
           className={`nav-link ${currentRoute === 'home' && activeSection === 'practice' ? 'active' : ''}`}
         >
           {t('nav.practice')}
@@ -336,14 +365,14 @@ export const Header: React.FC = () => {
 
         <a
           href="#contact"
-          onClick={() => handleNavClick('home')}
+          onClick={(e) => handleAnchorClick(e, 'contact')}
           className={`nav-link ${currentRoute === 'home' && activeSection === 'contact' ? 'active' : ''}`}
         >
           {t('nav.contact')}
         </a>
         <a
           href="#appointment"
-          onClick={() => handleNavClick('home')}
+          onClick={(e) => handleAnchorClick(e, 'appointment')}
           className={`nav-link ${currentRoute === 'home' && activeSection === 'appointment' ? 'active' : ''}`}
         >
           {t('nav.appointment')}
@@ -485,9 +514,9 @@ export const Header: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {[
                 { id: 'home', label: t('nav.home'), onClick: () => { handleNavClick('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
-                { id: 'about', label: t('nav.about'), href: '#about' },
-                { id: 'practice', label: t('nav.practice'), href: '#practice' },
-              ].map((link, idx) => {
+                { id: 'about', label: t('nav.about'), onClick: (e: any) => handleAnchorClick(e, 'about') },
+                { id: 'practice', label: t('nav.practice'), onClick: (e: any) => handleAnchorClick(e, 'practice') },
+              ].map((link: any, idx) => {
                 const isLinkActive = currentRoute === 'home' && activeSection === link.id;
                 return link.href ? (
                   <a
@@ -598,11 +627,11 @@ export const Header: React.FC = () => {
 
               {/* Rest of standard links */}
               {[
-                { id: 'contact', label: t('nav.contact'), href: '#contact' },
-                { id: 'appointment', label: t('nav.appointment'), href: '#appointment' }
-              ].map((link, idx) => {
+                { id: 'contact', label: t('nav.contact'), onClick: (e: any) => handleAnchorClick(e, 'contact') },
+                { id: 'appointment', label: t('nav.appointment'), onClick: (e: any) => handleAnchorClick(e, 'appointment') }
+              ].map((link: any, idx) => {
                 const isLinkActive = currentRoute === 'home' && activeSection === link.id;
-                return (
+                return link.href ? (
                   <a
                     key={idx}
                     href={link.href}
@@ -619,6 +648,26 @@ export const Header: React.FC = () => {
                   >
                     {link.label}
                   </a>
+                ) : (
+                  <span
+                    key={idx}
+                    onClick={(e) => {
+                      setIsMobileMenuOpen(false);
+                      if (link.onClick) link.onClick(e);
+                    }}
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: isLinkActive ? 700 : 500,
+                      color: isLinkActive ? 'var(--color-burgundy)' : 'var(--text-primary)',
+                      padding: '8px 0',
+                      borderLeft: isLinkActive ? '3px solid var(--color-burgundy)' : 'none',
+                      paddingLeft: isLinkActive ? '10px' : '0',
+                      display: 'block',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {link.label}
+                  </span>
                 );
               })}
             </div>

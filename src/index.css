@@ -58,7 +58,13 @@ html, body {
   color: var(--text-primary);
   transition: background-color 0.5s ease, color 0.5s ease;
   scroll-behavior: smooth;
+  scroll-padding-top: 100px;
   overflow-x: hidden;
+}
+
+#practice,
+#appointment {
+  scroll-margin-top: 100px;
 }
 
 h1, h2, h3, h4, h5, h6 {
