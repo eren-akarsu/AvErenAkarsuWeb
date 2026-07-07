@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import { useApp } from '../context/AppContext';
 import type { BlogPost, Client, CaseFile, Appointment, Hearing, Task, PrecedentDecision } from '../context/AppContext';
 import { 
@@ -35,10 +36,42 @@ export const AdminPanel: React.FC = () => {
 
   // Authentication states
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [email, setEmail] = useState('admin@akarsu.av.tr');
-  const [password, setPassword] = useState('admin123');
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    // Check initial session
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setIsLoggedIn(true);
+        }
+      } catch (err) {
+        console.error('Session check error:', err);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+    checkSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Sidebar navigation state
   const [activeTab, setActiveTab] = useState<
@@ -154,18 +187,54 @@ export const AdminPanel: React.FC = () => {
   const [newTaskPriority, setNewTaskPriority] = useState<'Düşük' | 'Orta' | 'Yüksek' | 'Acil'>('Orta');
   const [newTaskDue, setNewTaskDue] = useState('2026-07-08');
 
-  // Simulated login check
-  const handleLogin = (e: React.FormEvent) => {
+  // Real login check
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === 'admin@akarsu.av.tr' && password === 'admin123') {
-      setIsLoggedIn(true);
-    } else {
+    if (isLoggingIn) return;
+    setIsLoggingIn(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setIsLoggedIn(false);
+        showToast(
+          isEn 
+            ? 'Giriş bilgileri hatalı veya kullanıcı yetkili değil.'
+            : 'Giriş bilgileri hatalı veya kullanıcı yetkili değil.',
+          'error'
+        );
+      } else if (data.session) {
+        setIsLoggedIn(true);
+        showToast(
+          isEn ? 'Yönetici girişi başarılı.' : 'Yönetici girişi başarılı.',
+          'success'
+        );
+      }
+    } catch (err) {
+      console.error(err);
       showToast(
-        isEn 
-          ? 'Incorrect login details. Email: admin@akarsu.av.tr / Password: admin123'
-          : 'Hatalı giriş bilgileri. E-posta: admin@akarsu.av.tr / Şifre: admin123',
+        isEn ? 'An error occurred during sign in.' : 'Giriş yapılırken bir hata oluştu.',
         'error'
       );
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setIsLoggedIn(false);
+      setIsAdminSidebarOpen(false);
+      showToast(
+        isEn ? 'Signed out successfully.' : 'Başarıyla çıkış yapıldı.',
+        'success'
+      );
+    } catch (err) {
+      console.error('Sign out error:', err);
+      setIsLoggedIn(false);
     }
   };
 
@@ -269,6 +338,33 @@ export const AdminPanel: React.FC = () => {
     .filter(app => app.status === 'Onaylandı' || app.status === 'Tamamlandı')
     .reduce((sum, app) => sum + app.paymentAmount, 0);
 
+  // Return Loading Screen while checking session
+  if (isAuthLoading) {
+    return (
+      <div 
+        style={{ 
+          minHeight: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          background: 'radial-gradient(circle at 50% 50%, #1C2340 0%, #0A0D18 100%)',
+          color: '#F0DAC5',
+          fontFamily: 'Outfit, sans-serif'
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+          <div style={{
+            width: '40px', height: '40px', borderRadius: '50%',
+            border: '3px solid rgba(240,218,197,0.1)', borderTopColor: '#F0DAC5',
+            animation: 'spin 0.8s linear infinite'
+          }} />
+          <p style={{ color: '#A0AEC0', fontSize: '14px' }}>{isEn ? 'Verifying Session...' : 'Oturum Kontrol Ediliyor...'}</p>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
   // Return Login Panel if not logged in
   if (!isLoggedIn) {
     return (
@@ -354,13 +450,30 @@ export const AdminPanel: React.FC = () => {
                 onChange={setRememberMe} 
                 label={isEn ? 'Remember Me' : 'Beni Hatırla'} 
               />
-              <span style={{ color: '#F0DAC5', cursor: 'pointer' }} onClick={() => showToast(isEn ? 'Default password is admin123.' : 'Varsayılan şifre admin123\'tür.', 'info')}>
+              <span style={{ color: '#F0DAC5', cursor: 'pointer' }} onClick={() => showToast(isEn ? 'Please contact system administrator to reset password.' : 'Şifrenizi sıfırlamak için lütfen sistem yöneticisiyle iletişime geçin.', 'info')}>
                 {isEn ? 'Forgot Password' : 'Şifremi Unuttum'}
               </span>
             </div>
 
-            <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', background: '#F0DAC5', color: '#1C2340', border: 'none', boxShadow: 'none', fontWeight: 600 }}>
-              {isEn ? 'Secure Login' : 'Güvenli Giriş Yap'}
+            <button 
+              type="submit" 
+              className="btn-primary" 
+              disabled={isLoggingIn}
+              style={{ 
+                width: '100%', 
+                justifyContent: 'center', 
+                background: '#F0DAC5', 
+                color: '#1C2340', 
+                border: 'none', 
+                boxShadow: 'none', 
+                fontWeight: 600,
+                opacity: isLoggingIn ? 0.7 : 1,
+                cursor: isLoggingIn ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {isLoggingIn 
+                ? (isEn ? 'Signing in...' : 'Giriş yapılıyor...') 
+                : (isEn ? 'Secure Login' : 'Güvenli Giriş Yap')}
             </button>
           </form>
 
@@ -369,8 +482,8 @@ export const AdminPanel: React.FC = () => {
             <Info size={14} style={{ color: '#F0DAC5', flexShrink: 0 }} />
             <span>
               {isEn
-                ? 'Development Preview: Form is auto-filled. You can directly click Secure Login.'
-                : 'Geliştirme Önizlemesi: Form doldurulmuş haldedir. Doğrudan Giriş Yap butonuna tıklayabilirsiniz.'}
+                ? 'Authorized Access Only: This panel is protected by secure authentication.'
+                : 'Yetkili Erişimi: Bu panel güvenli kimlik doğrulama ile korunmaktadır.'}
             </span>
           </div>
 
@@ -516,7 +629,7 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleSaveContent = (statusOverride?: string) => {
+  const handleSaveContent = async (statusOverride?: string) => {
     if (!contentTitle.trim()) {
       showToast(isEn ? 'Title is required.' : 'Başlık alanı zorunludur.', 'warning');
       return;
@@ -542,14 +655,18 @@ export const AdminPanel: React.FC = () => {
         tags: cleanTags
       };
 
-      if (editingContentId) {
-        updateBlogPost(editingContentId, postData);
-        showToast(isEn ? 'Content updated successfully.' : 'İçerik başarıyla güncellendi.', 'success');
-      } else {
-        addBlogPost(postData);
-        showToast(isEn ? 'Content published successfully.' : 'İçerik başarıyla yayınlandı.', 'success');
+      try {
+        if (editingContentId) {
+          await updateBlogPost(editingContentId, postData);
+          showToast(isEn ? 'Content updated successfully.' : 'İçerik başarıyla güncellendi.', 'success');
+        } else {
+          await addBlogPost(postData);
+          showToast(isEn ? 'Content published successfully.' : 'İçerik başarıyla yayınlandı.', 'success');
+        }
+        setCmsMode('LIST');
+      } catch (err) {
+        console.error('Save blog post error:', err);
       }
-      setCmsMode('LIST');
     }
 
     else if (cmsCategory === 'degerlendirme' && cmsSubCategory === 'karar') {
@@ -570,14 +687,18 @@ export const AdminPanel: React.FC = () => {
         showOnLegalDocs: contentShowOnHub
       };
 
-      if (editingContentId) {
-        updatePrecedentDecision(editingContentId, decisionData);
-        showToast(isEn ? 'Precedent decision updated.' : 'Emsal karar güncellendi.', 'success');
-      } else {
-        addPrecedentDecision(decisionData);
-        showToast(isEn ? 'Precedent decision added.' : 'Emsal karar başarıyla eklendi.', 'success');
+      try {
+        if (editingContentId) {
+          await updatePrecedentDecision(editingContentId, decisionData);
+          showToast(isEn ? 'Precedent decision updated.' : 'Emsal karar güncellendi.', 'success');
+        } else {
+          await addPrecedentDecision(decisionData);
+          showToast(isEn ? 'Precedent decision added.' : 'Emsal karar başarıyla eklendi.', 'success');
+        }
+        setCmsMode('LIST');
+      } catch (err) {
+        console.error('Save precedent decision error:', err);
       }
-      setCmsMode('LIST');
     }
 
     else if (cmsCategory === 'hesaplama') {
@@ -739,10 +860,7 @@ export const AdminPanel: React.FC = () => {
 
         {/* Exit link */}
         <div
-          onClick={() => {
-            setIsLoggedIn(false);
-            setIsAdminSidebarOpen(false);
-          }}
+          onClick={handleSignOut}
           style={{
             display: 'flex',
             alignItems: 'center',

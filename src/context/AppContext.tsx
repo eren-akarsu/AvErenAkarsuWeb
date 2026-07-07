@@ -919,6 +919,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       console.error('[AppContext] addBlogPost error:', err);
       showToast(err.message || 'İçerik eklenirken hata oluştu', 'error');
+      throw err;
     }
   };
 
@@ -942,6 +943,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       console.error('[AppContext] updateBlogPost error:', err);
       showToast(err.message || 'İçerik güncellenirken hata oluştu', 'error');
+      throw err;
     }
   };
 
@@ -957,6 +959,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       console.error('[AppContext] deleteBlogPost error:', err);
       showToast(err.message || 'İçerik silinirken hata oluştu', 'error');
+      throw err;
     }
   };
 
@@ -1000,6 +1003,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       console.error('[AppContext] addPrecedentDecision error:', err);
       showToast(err.message || 'Emsal karar eklenirken hata oluştu', 'error');
+      throw err;
     }
   };
 
@@ -1031,6 +1035,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       console.error('[AppContext] updatePrecedentDecision error:', err);
       showToast(err.message || 'Emsal karar güncellenirken hata oluştu', 'error');
+      throw err;
     }
   };
 
@@ -1046,6 +1051,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err: any) {
       console.error('[AppContext] deletePrecedentDecision error:', err);
       showToast(err.message || 'Emsal karar silinirken hata oluştu', 'error');
+      throw err;
     }
   };
 
