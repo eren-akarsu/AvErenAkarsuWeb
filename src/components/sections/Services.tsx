@@ -3,10 +3,14 @@ import { useApp } from '../../context/AppContext';
 import { ShieldAlert, Users, FolderHeart, Hammer, Building2, Briefcase, Cpu, FileSignature, X, Calendar } from 'lucide-react';
 
 export const Services: React.FC = () => {
-  const { t, language } = useApp();
+  const { t, language, siteSettings } = useApp();
   const [selectedService, setSelectedService] = useState<number | null>(null);
 
   const isEn = language === 'en';
+
+  if (siteSettings?.homepage_settings?.practiceActive === false) {
+    return null;
+  }
 
   const servicesData = [
     {

@@ -47,7 +47,7 @@ export const AdminPanel: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
 
-  const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'contact' | 'blog' | 'legalContent' | 'appointment' | 'ai' | 'notifications' | 'media' | 'legalPages' | 'footer' | 'homepage' | 'logs' | 'system' | 'developer'>('general');
+  const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'contact' | 'homepage' | 'appointment' | 'footer' | 'ai'>('general');
   const [editedSettings, setEditedSettings] = useState<any>(null);
 
   // Sync state values with global siteSettings context
@@ -2310,22 +2310,6 @@ export const AdminPanel: React.FC = () => {
             });
           };
 
-          const handleNestedSettingChange = (group: string, parentKey: string, childKey: string, value: any) => {
-            setEditedSettings((prev: any) => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                [group]: {
-                  ...prev[group],
-                  [parentKey]: {
-                    ...prev[group][parentKey],
-                    [childKey]: value
-                  }
-                }
-              };
-            });
-          };
-
           const handleResetGroup = async () => {
             const groupKey = `${settingsSubTab}_settings` as keyof SiteSettings;
             const success = await resetSiteSettings(groupKey);
@@ -2339,18 +2323,10 @@ export const AdminPanel: React.FC = () => {
           const settingsCategories = [
             { id: 'general', label: isEn ? 'General Settings' : 'Genel Site Ayarları' },
             { id: 'contact', label: isEn ? 'Contact Info' : 'İletişim Bilgileri' },
-            { id: 'blog', label: isEn ? 'Blog Settings' : 'Blog Ayarları' },
-            { id: 'legalContent', label: isEn ? 'Legal Content Settings' : 'Hukuki İçerik Ayarları' },
+            { id: 'homepage', label: isEn ? 'Homepage Settings' : 'Ana Sayfa Ayarları' },
             { id: 'appointment', label: isEn ? 'Appointment Settings' : 'Online Randevu Ayarları' },
-            { id: 'ai', label: isEn ? 'AI Chatbot Settings' : 'Yapay Zekâ Ayarları' },
-            { id: 'notifications', label: isEn ? 'Notification Center' : 'Bildirim Merkezi' },
-            { id: 'media', label: isEn ? 'Media Settings' : 'Medya Ayarları' },
-            { id: 'legalPages', label: isEn ? 'Legal Pages' : 'Hukuki Sayfalar' },
-            { id: 'footer', label: isEn ? 'Footer Management' : 'Footer Yönetimi' },
-            { id: 'homepage', label: isEn ? 'Homepage Management' : 'Ana Sayfa Yönetimi' },
-            { id: 'logs', label: isEn ? 'Log System' : 'Log Sistemi' },
-            { id: 'system', label: isEn ? 'System Info' : 'Sistem Bilgileri' },
-            { id: 'developer', label: isEn ? 'Developer Mode' : 'Geliştirici Modu' },
+            { id: 'footer', label: isEn ? 'Footer Settings' : 'Footer Ayarları' },
+            { id: 'ai', label: isEn ? 'Chatbot Settings' : 'Chatbot Ayarları' }
           ];
 
           const CustomToggle = ({ checked, onChange }: { checked: boolean, onChange: (val: boolean) => void }) => (
@@ -2383,25 +2359,21 @@ export const AdminPanel: React.FC = () => {
             </div>
           );
 
-          // Simulated logs database
-          const mockLogs = [
-            { user: 'admin@akarsu.av.tr', date: '2026-07-08 00:52:12', module: 'Randevu', action: 'Güncelleme', record: 'A-2144 (Onaylandı)', ip: '192.168.1.45', browser: 'Chrome / Windows', type: 'Update' },
-            { user: 'admin@akarsu.av.tr', date: '2026-07-07 21:30:15', module: 'Blog', action: 'Yayınlama', record: 'Kıdem Tazminatı Rehberi', ip: '192.168.1.45', browser: 'Chrome / Windows', type: 'Publish' },
-            { user: 'admin@akarsu.av.tr', date: '2026-07-07 18:08:12', module: 'Randevu', action: 'Oluşturma', record: 'A-2145 (Bekliyor)', ip: '85.105.42.11', browser: 'Safari / iOS', type: 'Create' },
-            { user: 'admin@akarsu.av.tr', date: '2026-07-07 15:45:00', module: 'İçerik', action: 'Güncelleme', record: 'KVKK Aydınlatma Metni', ip: '192.168.1.45', browser: 'Firefox / macOS', type: 'Update' },
-            { user: 'admin@akarsu.av.tr', date: '2026-07-07 09:30:24', module: 'Giriş', action: 'Giriş', record: 'Başarılı Admin Oturumu', ip: '192.168.1.45', browser: 'Chrome / Windows', type: 'Login' },
-          ];
+          const trDaysList = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 
-          const filteredLogs = mockLogs.filter(log => {
-            const matchesSearch = log.module.toLowerCase().includes(logsSearch.toLowerCase()) || 
-                                  log.record.toLowerCase().includes(logsSearch.toLowerCase()) ||
-                                  log.action.toLowerCase().includes(logsSearch.toLowerCase());
-            const matchesType = logsTypeFilter === 'all' || log.type.toLowerCase() === logsTypeFilter.toLowerCase();
-            return matchesSearch && matchesType;
-          });
+          const handleWorkingDayToggle = (day: string) => {
+            const currentDays = editedSettings.appointment_settings.workingDays || [];
+            let updatedDays;
+            if (currentDays.includes(day)) {
+              updatedDays = currentDays.filter((d: string) => d !== day);
+            } else {
+              updatedDays = [...currentDays, day];
+            }
+            handleSettingChange('appointment_settings', 'workingDays', updatedDays);
+          };
 
           return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minHeight: '80dvh' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minHeight: '75dvh' }}>
               
               {/* Header Title with Subtitle */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
@@ -2410,7 +2382,7 @@ export const AdminPanel: React.FC = () => {
                     {isEn ? 'Site Settings Hub' : 'Site Ayarları Yönetim Merkezi'}
                   </h2>
                   <p style={{ fontSize: '13px', color: '#A0AEC0', marginTop: '4px' }}>
-                    {isEn ? 'Configure brand details, notification parameters, calendar parameters, and developer services.' : 'Site genel kimliği, randevu parametreleri, entegrasyonlar ve geliştirici modunu yönetin.'}
+                    {isEn ? 'Manage core configuration details of the website.' : 'Web sitesinin temel yönetim parametrelerini düzenleyin.'}
                   </p>
                 </div>
               </div>
@@ -2495,18 +2467,10 @@ export const AdminPanel: React.FC = () => {
                       >
                         {cat.id === 'general' && <Globe size={15} />}
                         {cat.id === 'contact' && <Phone size={15} />}
-                        {cat.id === 'blog' && <BookOpen size={15} />}
-                        {cat.id === 'legalContent' && <Scale size={15} />}
-                        {cat.id === 'appointment' && <Calendar size={15} />}
-                        {cat.id === 'ai' && <Sparkles size={15} />}
-                        {cat.id === 'notifications' && <Bell size={15} />}
-                        {cat.id === 'media' && <Image size={15} />}
-                        {cat.id === 'legalPages' && <FileText size={15} />}
-                        {cat.id === 'footer' && <Menu size={15} />}
                         {cat.id === 'homepage' && <Home size={15} />}
-                        {cat.id === 'logs' && <Activity size={15} />}
-                        {cat.id === 'system' && <Cpu size={15} />}
-                        {cat.id === 'developer' && <Code size={15} />}
+                        {cat.id === 'appointment' && <Calendar size={15} />}
+                        {cat.id === 'footer' && <Menu size={15} />}
+                        {cat.id === 'ai' && <Sparkles size={15} />}
                         {cat.label}
                       </button>
                     );
@@ -2523,32 +2487,22 @@ export const AdminPanel: React.FC = () => {
                         {settingsCategories.find(c => c.id === settingsSubTab)?.label}
                       </h3>
                       <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                        {settingsSubTab === 'general' && (isEn ? 'Configure logo URLs, sekme title copyright, anims and defaults.' : 'Site adı, başlığı, copyright, tema ve animasyon ayarları.')}
-                        {settingsSubTab === 'contact' && (isEn ? 'Configure physical offices address, phone lines, IBAN bank and social handles.' : 'Telefon, adres, banka IBAN bilgileri ve sosyal medya bağlantıları.')}
-                        {settingsSubTab === 'blog' && (isEn ? 'Optimize pagination limits, featured content flags and author cards.' : 'Makale limitleri, kapak görselleri, yorum ve okuma süresi gösterimleri.')}
-                        {settingsSubTab === 'legalContent' && (isEn ? 'Toggle specific document types and structure filters.' : 'Makaleler, kararlar ve dilekçeler için genel listeleme ve SEO ayarları.')}
-                        {settingsSubTab === 'appointment' && (isEn ? 'Working days, reservation notice schedules and face fees.' : 'Haftalık takvim günleri, randevu süreleri, ücretler ve KVKK onay metinleri.')}
-                        {settingsSubTab === 'ai' && (isEn ? 'Chatbot tokens, model parameters, disclaimer warnings and prompts.' : 'Yapay zekâ karşılama metinleri, API anahtarları, model seçimi ve sistem promptu.')}
-                        {settingsSubTab === 'notifications' && (isEn ? 'Toast placements, sounds trigger settings and target events.' : 'Sistem bildirimleri, toast mesajları konumları ve ses ayarları.')}
-                        {settingsSubTab === 'media' && (isEn ? 'Compress settings, file type boundaries and dimensions constraints.' : 'Dosya yükleme sınırları, izin verilen uzantılar ve WebP optimizasyonu.')}
-                        {settingsSubTab === 'legalPages' && (isEn ? 'Modify GDPR guidelines, Cookie policies and Terms of use disclosures.' : 'KVKK, Çerez Politikası ve Kullanım Koşulları gibi yasal metin şablonları.')}
-                        {settingsSubTab === 'footer' && (isEn ? 'Alter link lists, copyright strings, layout grids and background effects.' : 'Footer sütunları, sosyal ikonlar, marka açıklaması ve arka plan animasyonu.')}
-                        {settingsSubTab === 'homepage' && (isEn ? 'Arrange sections priorities, Hero titles and active modules toggles.' : 'Ana sayfa sıralaması, Hero başlığı, buton metinleri ve aktif alanlar.')}
-                        {settingsSubTab === 'logs' && (isEn ? 'View simulated activity audit trials inside admin console.' : 'Yönetici oturumları ve veri değişikliklerini takip eden işlem kayıtları.')}
-                        {settingsSubTab === 'system' && (isEn ? 'Read system environment specifications and databases connections status.' : 'Platform versiyonları ve veritabanı/storage bağlantı durumları.')}
-                        {settingsSubTab === 'developer' && (isEn ? 'Test environment components, execute health checks and reset states.' : 'Konsol logları, bağlantı test butonları ve önbellek temizleme araçları.')}
+                        {settingsSubTab === 'general' && (isEn ? 'Configure logo paths, browser titles, meta description, languages and default theme.' : 'Site adı, başlığı, açıklama, favicon, varsayılan dil ve tema ayarları.')}
+                        {settingsSubTab === 'contact' && (isEn ? 'Configure office addresses, phone numbers, WhatsApp lines and social handles.' : 'Telefon, e-posta, adres, WhatsApp numarası ve sosyal medya bağlantıları.')}
+                        {settingsSubTab === 'homepage' && (isEn ? 'Customize Hero section contents, image slides and content count limits.' : 'Giriş ekranı (Hero) başlığı, açıklaması, slayt görselleri ve liste limitleri.')}
+                        {settingsSubTab === 'appointment' && (isEn ? 'Configure working days, operational hours, slot durations and session pricing.' : 'Haftalık çalışma günleri, randevu saatleri, görüşme süreleri ve ücretleri.')}
+                        {settingsSubTab === 'footer' && (isEn ? 'Configure brand name displays and footer copyright legal notes.' : 'Footer marka adı, telif hakkı / aydınlatma bildirim metinleri.')}
+                        {settingsSubTab === 'ai' && (isEn ? 'Toggle chatbot assistant visibility, welcome messages and disclaimers.' : 'Chatbot asistanının çalışma durumu, karşılama ve yasal uyarı metinleri.')}
                       </p>
                     </div>
-                    {settingsSubTab !== 'logs' && settingsSubTab !== 'system' && (
-                      <button
-                        type="button"
-                        onClick={handleResetGroup}
-                        className="btn-secondary"
-                        style={{ padding: '6px 12px', fontSize: '11px' }}
-                      >
-                        {isEn ? 'Reset to Defaults' : 'Varsayılanlara Sıfırla'}
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={handleResetGroup}
+                      className="btn-secondary"
+                      style={{ padding: '6px 12px', fontSize: '11px' }}
+                    >
+                      {isEn ? 'Reset to Defaults' : 'Varsayılanlara Sıfırla'}
+                    </button>
                   </div>
 
                   {/* FORM FIELDS PER TABS */}
@@ -2561,7 +2515,7 @@ export const AdminPanel: React.FC = () => {
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Site Name' : 'Site Adı'}</label>
                           <input
                             type="text"
-                            value={editedSettings.general_settings.siteName}
+                            value={editedSettings.general_settings.siteName || ''}
                             onChange={(e) => handleSettingChange('general_settings', 'siteName', e.target.value)}
                             className="glass-input"
                           />
@@ -2570,7 +2524,7 @@ export const AdminPanel: React.FC = () => {
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Browser Tab Title' : 'Tarayıcı Sekme Başlığı'}</label>
                           <input
                             type="text"
-                            value={editedSettings.general_settings.browserTitle}
+                            value={editedSettings.general_settings.browserTitle || ''}
                             onChange={(e) => handleSettingChange('general_settings', 'browserTitle', e.target.value)}
                             className="glass-input"
                           />
@@ -2581,7 +2535,7 @@ export const AdminPanel: React.FC = () => {
                         <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Meta Description (SEO)' : 'Meta Açıklaması (SEO)'}</label>
                         <textarea
                           rows={2}
-                          value={editedSettings.general_settings.metaDescription}
+                          value={editedSettings.general_settings.metaDescription || ''}
                           onChange={(e) => handleSettingChange('general_settings', 'metaDescription', e.target.value)}
                           className="glass-input"
                           style={{ fontFamily: 'inherit' }}
@@ -2590,9 +2544,39 @@ export const AdminPanel: React.FC = () => {
 
                       <div className="admin-grid-3">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Site Logo Path' : 'Site Logo Yolu (Logo URL)'}</label>
+                          <input
+                            type="text"
+                            value={editedSettings.general_settings.logoUrl || ''}
+                            onChange={(e) => handleSettingChange('general_settings', 'logoUrl', e.target.value)}
+                            className="glass-input"
+                          />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'EA Monogram Logo' : 'EA Monogram Logo Yolu'}</label>
+                          <input
+                            type="text"
+                            value={editedSettings.general_settings.monogramUrl || ''}
+                            onChange={(e) => handleSettingChange('general_settings', 'monogramUrl', e.target.value)}
+                            className="glass-input"
+                          />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Favicon Icon Path' : 'Favicon Dosya Yolu'}</label>
+                          <input
+                            type="text"
+                            value={editedSettings.general_settings.faviconUrl || ''}
+                            onChange={(e) => handleSettingChange('general_settings', 'faviconUrl', e.target.value)}
+                            className="glass-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="admin-grid-2">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Default Language' : 'Varsayılan Dil'}</label>
                           <select
-                            value={editedSettings.general_settings.defaultLanguage}
+                            value={editedSettings.general_settings.defaultLanguage || 'tr'}
                             onChange={(e) => handleSettingChange('general_settings', 'defaultLanguage', e.target.value)}
                             className="glass-input"
                             style={{ background: '#121727' }}
@@ -2604,120 +2588,16 @@ export const AdminPanel: React.FC = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Default Theme' : 'Varsayılan Tema'}</label>
                           <select
-                            value={editedSettings.general_settings.defaultTheme}
+                            value={editedSettings.general_settings.defaultTheme || 'dark'}
                             onChange={(e) => handleSettingChange('general_settings', 'defaultTheme', e.target.value)}
                             className="glass-input"
                             style={{ background: '#121727' }}
                           >
                             <option value="dark">Dark Mode</option>
                             <option value="light">Light Mode</option>
-                            <option value="system">System Preference</option>
-                          </select>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Timezone' : 'Saat Dilimi'}</label>
-                          <select
-                            value={editedSettings.general_settings.timezone}
-                            onChange={(e) => handleSettingChange('general_settings', 'timezone', e.target.value)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="Europe/Istanbul">Europe/Istanbul (UTC+03:00)</option>
-                            <option value="Europe/London">Europe/London (GMT/BST)</option>
-                            <option value="US/Eastern">US/Eastern (EST/EDT)</option>
                           </select>
                         </div>
                       </div>
-
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Date Format' : 'Tarih Formatı'}</label>
-                          <select
-                            value={editedSettings.general_settings.dateFormat}
-                            onChange={(e) => handleSettingChange('general_settings', 'dateFormat', e.target.value)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="DD.MM.YYYY">8.07.2026 (DD.MM.YYYY)</option>
-                            <option value="YYYY-MM-DD">2026-07-08 (YYYY-MM-DD)</option>
-                            <option value="text">8 Temmuz 2026</option>
-                          </select>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Time Format' : 'Saat Formatı'}</label>
-                          <select
-                            value={editedSettings.general_settings.timeFormat}
-                            onChange={(e) => handleSettingChange('general_settings', 'timeFormat', e.target.value)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="24h">24 Saat Formatı (15:30)</option>
-                            <option value="12h">12 Saat Formatı (03:30 PM)</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Toggles */}
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, display: 'block' }}>{isEn ? 'Opening Animation' : 'Açılış Animasyonu'}</span>
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Shows a smooth intro overlay on landing.' : 'Ana sayfada şık açılış animasyonunu aktif eder.'}</span>
-                          </div>
-                          <CustomToggle 
-                            checked={editedSettings.general_settings.openingAnimation}
-                            onChange={(val) => handleSettingChange('general_settings', 'openingAnimation', val)}
-                          />
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, display: 'block' }}>{isEn ? 'Maintenance Mode' : 'Bakım Modu'}</span>
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Temporarily blocks public access to the front end.' : 'Ziyaretçilerin siteye girişini geçici olarak kapatır.'}</span>
-                          </div>
-                          <CustomToggle 
-                            checked={editedSettings.general_settings.maintenanceMode}
-                            onChange={(val) => handleSettingChange('general_settings', 'maintenanceMode', val)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Maintenance mode detailed fields */}
-                      {editedSettings.general_settings.maintenanceMode && (
-                        <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(80, 34, 60, 0.05)', border: '1px solid rgba(80, 34, 60, 0.2)' }}>
-                          <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5' }}>{isEn ? 'Maintenance Settings' : 'Bakım Modu Detayları'}</h4>
-                          
-                          <div className="admin-grid-2">
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Maintenance Title' : 'Bakım Başlığı'}</label>
-                              <input
-                                type="text"
-                                value={editedSettings.general_settings.maintenanceTitle}
-                                onChange={(e) => handleSettingChange('general_settings', 'maintenanceTitle', e.target.value)}
-                                className="glass-input"
-                              />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Estimated Re-opening Date' : 'Tahmini Açılış Tarihi'}</label>
-                              <input
-                                type="date"
-                                value={editedSettings.general_settings.maintenanceEstimatedDate}
-                                onChange={(e) => handleSettingChange('general_settings', 'maintenanceEstimatedDate', e.target.value)}
-                                className="glass-input"
-                              />
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Maintenance Message' : 'Açıklama Metni'}</label>
-                            <input
-                              type="text"
-                              value={editedSettings.general_settings.maintenanceMessage}
-                              onChange={(e) => handleSettingChange('general_settings', 'maintenanceMessage', e.target.value)}
-                              className="glass-input"
-                            />
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
 
@@ -2729,7 +2609,7 @@ export const AdminPanel: React.FC = () => {
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Phone' : 'Telefon Numarası'}</label>
                           <input
                             type="text"
-                            value={editedSettings.contact_settings.phone}
+                            value={editedSettings.contact_settings.phone || ''}
                             onChange={(e) => handleSettingChange('contact_settings', 'phone', e.target.value)}
                             className="glass-input"
                           />
@@ -2738,7 +2618,7 @@ export const AdminPanel: React.FC = () => {
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Email' : 'E-posta Adresi'}</label>
                           <input
                             type="email"
-                            value={editedSettings.contact_settings.email}
+                            value={editedSettings.contact_settings.email || ''}
                             onChange={(e) => handleSettingChange('contact_settings', 'email', e.target.value)}
                             className="glass-input"
                           />
@@ -2747,7 +2627,7 @@ export const AdminPanel: React.FC = () => {
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'WhatsApp Number' : 'WhatsApp Numarası'}</label>
                           <input
                             type="text"
-                            value={editedSettings.contact_settings.whatsappNumber}
+                            value={editedSettings.contact_settings.whatsappNumber || ''}
                             onChange={(e) => handleSettingChange('contact_settings', 'whatsappNumber', e.target.value)}
                             className="glass-input"
                             placeholder="Örn: 905551234567"
@@ -2760,7 +2640,7 @@ export const AdminPanel: React.FC = () => {
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Office Address' : 'Ofis Adresi'}</label>
                           <input
                             type="text"
-                            value={editedSettings.contact_settings.address}
+                            value={editedSettings.contact_settings.address || ''}
                             onChange={(e) => handleSettingChange('contact_settings', 'address', e.target.value)}
                             className="glass-input"
                           />
@@ -2769,123 +2649,39 @@ export const AdminPanel: React.FC = () => {
                           <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Working Hours text' : 'Çalışma Saatleri Metni'}</label>
                           <input
                             type="text"
-                            value={editedSettings.contact_settings.workingHours}
+                            value={editedSettings.contact_settings.workingHours || ''}
                             onChange={(e) => handleSettingChange('contact_settings', 'workingHours', e.target.value)}
                             className="glass-input"
                           />
                         </div>
                       </div>
 
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Google Maps Link' : 'Google Harita Linki'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.contact_settings.googleMapsLink}
-                            onChange={(e) => handleSettingChange('contact_settings', 'googleMapsLink', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Google Maps Embed Link' : 'Google Harita Embed URL'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.contact_settings.googleMapsEmbed}
-                            onChange={(e) => handleSettingChange('contact_settings', 'googleMapsEmbed', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Social Handles */}
-                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', borderBottom: '1px solid rgba(240, 218, 197, 0.05)', paddingBottom: '6px' }}>{isEn ? 'Social Networks' : 'Sosyal Medya Bağlantıları'}</h4>
+                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', borderBottom: '1px solid rgba(240, 218, 197, 0.05)', paddingBottom: '6px', marginTop: '10px' }}>{isEn ? 'Social Networks' : 'Sosyal Medya Bağlantıları'}</h4>
                       <div className="admin-grid-3">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>Instagram</label>
-                          <input
-                            type="text"
-                            value={editedSettings.contact_settings.instagram}
-                            onChange={(e) => handleSettingChange('contact_settings', 'instagram', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <label style={{ fontSize: '11px', fontWeight: 600 }}>LinkedIn</label>
                           <input
                             type="text"
-                            value={editedSettings.contact_settings.linkedin}
+                            value={editedSettings.contact_settings.linkedin || ''}
                             onChange={(e) => handleSettingChange('contact_settings', 'linkedin', e.target.value)}
                             className="glass-input"
                           />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>X (Twitter)</label>
+                          <label style={{ fontSize: '11px', fontWeight: 600 }}>GitHub</label>
                           <input
                             type="text"
-                            value={editedSettings.contact_settings.twitter}
-                            onChange={(e) => handleSettingChange('contact_settings', 'twitter', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Billing / Legal handles */}
-                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', borderBottom: '1px solid rgba(240, 218, 197, 0.05)', paddingBottom: '6px' }}>{isEn ? 'Billing & Registration' : 'Vergi ve Baro Bilgileri'}</h4>
-                      <div className="admin-grid-3">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'Baro Reg No' : 'Baro Sicil Numarası'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.contact_settings.baroNo}
-                            onChange={(e) => handleSettingChange('contact_settings', 'baroNo', e.target.value)}
+                            value={editedSettings.contact_settings.github || ''}
+                            onChange={(e) => handleSettingChange('contact_settings', 'github', e.target.value)}
                             className="glass-input"
                           />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'Tax Office' : 'Vergi Dairesi'}</label>
+                          <label style={{ fontSize: '11px', fontWeight: 600 }}>Instagram</label>
                           <input
                             type="text"
-                            value={editedSettings.contact_settings.taxOffice}
-                            onChange={(e) => handleSettingChange('contact_settings', 'taxOffice', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'Tax No' : 'Vergi Numarası'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.contact_settings.taxNumber}
-                            onChange={(e) => handleSettingChange('contact_settings', 'taxNumber', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="admin-grid-3">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'IBAN Account' : 'IBAN Adresi'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.contact_settings.iban}
-                            onChange={(e) => handleSettingChange('contact_settings', 'iban', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'Bank Name' : 'Banka Adı'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.contact_settings.bankName}
-                            onChange={(e) => handleSettingChange('contact_settings', 'bankName', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'Account Owner' : 'Hesap Sahibi'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.contact_settings.accountHolder}
-                            onChange={(e) => handleSettingChange('contact_settings', 'accountHolder', e.target.value)}
+                            value={editedSettings.contact_settings.instagram || ''}
+                            onChange={(e) => handleSettingChange('contact_settings', 'instagram', e.target.value)}
                             className="glass-input"
                           />
                         </div>
@@ -2893,229 +2689,165 @@ export const AdminPanel: React.FC = () => {
                     </div>
                   )}
 
-                  {/* 3. BLOG SETTINGS */}
-                  {settingsSubTab === 'blog' && (
+                  {/* 3. HOMEPAGE SETTINGS */}
+                  {settingsSubTab === 'homepage' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Blog Section Title' : 'Blog Sayfa Başlığı'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.blog_settings.title}
-                            onChange={(e) => handleSettingChange('blog_settings', 'title', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Blog Default Sort' : 'Varsayılan Sıralama'}</label>
-                          <select
-                            value={editedSettings.blog_settings.defaultSort}
-                            onChange={(e) => handleSettingChange('blog_settings', 'defaultSort', e.target.value)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="newest">{isEn ? 'Newest' : 'En Yeni'}</option>
-                            <option value="views">{isEn ? 'Most Viewed' : 'En Çok Okunan'}</option>
-                            <option value="likes">{isEn ? 'Most Liked' : 'En Çok Beğenilen'}</option>
-                          </select>
-                        </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Hero Landing Title' : 'Hero Başlığı'}</label>
+                        <input
+                          type="text"
+                          value={editedSettings.homepage_settings.heroTitle || ''}
+                          onChange={(e) => handleSettingChange('homepage_settings', 'heroTitle', e.target.value)}
+                          className="glass-input"
+                        />
                       </div>
-
-                      <div className="admin-grid-3">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'Homepage Cards Limit' : 'Ana Sayfa Makale Sayısı'}</label>
-                          <input
-                            type="number"
-                            value={editedSettings.blog_settings.postsPerPageHomepage}
-                            onChange={(e) => handleSettingChange('blog_settings', 'postsPerPageHomepage', parseInt(e.target.value) || 3)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'List Page Limit' : 'Sayfa Başına Makale Sayısı'}</label>
-                          <input
-                            type="number"
-                            value={editedSettings.blog_settings.postsPerPageList}
-                            onChange={(e) => handleSettingChange('blog_settings', 'postsPerPageList', parseInt(e.target.value) || 6)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', fontWeight: 600 }}>{isEn ? 'Excerpt Excerpt Words' : 'Makale Özet Metin Uzunluğu'}</label>
-                          <input
-                            type="number"
-                            value={editedSettings.blog_settings.excerptLength}
-                            onChange={(e) => handleSettingChange('blog_settings', 'excerptLength', parseInt(e.target.value) || 120)}
-                            className="glass-input"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Multi switches card */}
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        {[
-                          { key: 'showViewCount', label: isEn ? 'Show View Counters' : 'Okunma Sayısı Gösterilsin mi?' },
-                          { key: 'showReadingTime', label: isEn ? 'Show Estimated Reading Time' : 'Okuma Süresi Gösterilsin mi?' },
-                          { key: 'showAuthor', label: isEn ? 'Show Author Info Card' : 'Yazar Bilgisi Gösterilsin mi?' },
-                          { key: 'showPublishDate', label: isEn ? 'Show Publication Dates' : 'Yayın Tarihi Gösterilsin mi?' },
-                          { key: 'autoTableOfContents', label: isEn ? 'Generate Table of Contents' : 'İçindekiler Tablosu Otomatik Oluşturulsun mu?' },
-                          { key: 'showScrollProgress', label: isEn ? 'Show Scroll Progress indicator' : 'Kaydırma Çubuğu (Scroll Progress) Gösterilsin mi?' },
-                          { key: 'likesEnabled', label: isEn ? 'Likes Enabled' : 'Beğeni Sistemi Aktif mi?' },
-                          { key: 'sharingEnabled', label: isEn ? 'Sharing Buttons Enabled' : 'Paylaşım Butonları Aktif mi?' }
-                        ].map(item => (
-                          <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{item.label}</span>
-                            <CustomToggle 
-                              checked={editedSettings.blog_settings[item.key]}
-                              onChange={(val) => handleSettingChange('blog_settings', item.key, val)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 4. LEGAL CONTENT SETTINGS */}
-                  {settingsSubTab === 'legalContent' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Archive Title' : 'Hukuki Arşiv Başlığı'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.legal_content_settings.pageTitle}
-                            onChange={(e) => handleSettingChange('legal_content_settings', 'pageTitle', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Archive Description' : 'Hukuki Arşiv Açıklaması'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.legal_content_settings.pageDescription}
-                            onChange={(e) => handleSettingChange('legal_content_settings', 'pageDescription', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        {[
-                          { key: 'searchEnabled', label: isEn ? 'Search Box Active' : 'Arama Modülü Aktif mi?' },
-                          { key: 'filterEnabled', label: isEn ? 'Category Filter Active' : 'Filtreleme Modülü Aktif mi?' },
-                          { key: 'tagSystemEnabled', label: isEn ? 'Tags Clouds System Active' : 'Etiket Sistemi Aktif mi?' },
-                          { key: 'showViewCount', label: isEn ? 'Show Views count on cards' : 'Kartlarda Okunma Sayısı Gösterilsin mi?' },
-                          { key: 'showLikes', label: isEn ? 'Show Likes count on cards' : 'Kartlarda Beğeni Sayısı Gösterilsin mi?' }
-                        ].map(item => (
-                          <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{item.label}</span>
-                            <CustomToggle 
-                              checked={editedSettings.legal_content_settings[item.key]}
-                              onChange={(val) => handleSettingChange('legal_content_settings', item.key, val)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-
-                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', marginTop: '10px' }}>{isEn ? 'Manage Document Categories' : 'Hukuki İçerik Türleri Yönetimi'}</h4>
-                      
-                      {['article', 'template', 'decision', 'analysis', 'note'].map(type => {
-                        const labelMap: any = {
-                          article: isEn ? 'Articles' : 'Makaleler',
-                          template: isEn ? 'Petition Templates' : 'Dilekçe & Doküman Örnekleri',
-                          decision: isEn ? 'Court Decisions' : 'Yargı Kararları',
-                          analysis: isEn ? 'Precedent Analyses' : 'Kanun ve İçtihat Analizleri',
-                          note: isEn ? 'Practice Notes' : 'Meslekten Notlar'
-                        };
-                        const typeSettings = editedSettings.legal_content_settings.types[type];
-                        return (
-                          <div key={type} className="glass-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px solid rgba(240, 218, 197, 0.06)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5' }}>{labelMap[type]}</span>
-                              <CustomToggle 
-                                checked={typeSettings.active}
-                                onChange={(val) => handleNestedSettingChange('legal_content_settings', 'types', type, { ...typeSettings, active: val })}
-                              />
-                            </div>
-                            
-                            {typeSettings.active && (
-                              <div className="admin-grid-4" style={{ marginTop: '5px' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                  <label style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{isEn ? 'Show In Header' : 'Headerda Göster'}</label>
-                                  <CustomToggle 
-                                    checked={typeSettings.showInHeader}
-                                    onChange={(val) => handleNestedSettingChange('legal_content_settings', 'types', type, { ...typeSettings, showInHeader: val })}
-                                  />
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                  <label style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{isEn ? 'Show In Footer' : 'Footerda Göster'}</label>
-                                  <CustomToggle 
-                                    checked={typeSettings.showInFooter}
-                                    onChange={(val) => handleNestedSettingChange('legal_content_settings', 'types', type, { ...typeSettings, showInFooter: val })}
-                                  />
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                  <label style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{isEn ? 'On Homepage' : 'Ana Sayfada Göster'}</label>
-                                  <CustomToggle 
-                                    checked={typeSettings.showOnHome}
-                                    onChange={(val) => handleNestedSettingChange('legal_content_settings', 'types', type, { ...typeSettings, showOnHome: val })}
-                                  />
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                  <label style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{isEn ? 'Listing Card Limit' : 'Listeleme Limiti'}</label>
-                                  <input 
-                                    type="number"
-                                    value={typeSettings.limit}
-                                    onChange={(e) => handleNestedSettingChange('legal_content_settings', 'types', type, { ...typeSettings, limit: parseInt(e.target.value) || 5 })}
-                                    className="glass-input"
-                                    style={{ padding: '6px 10px', fontSize: '12px' }}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* 5. APPOINTMENT SETTINGS */}
-                  {settingsSubTab === 'appointment' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <span style={{ fontSize: '14px', fontWeight: 600, display: 'block' }}>{isEn ? 'Appointment System Engine Active' : 'Online Randevu Sistemi Aktif'}</span>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{isEn ? 'Enables or disables calendar booking widget.' : 'Sitedeki online randevu sistemini genel olarak aktif/pasif yapar.'}</span>
-                        </div>
-                        <CustomToggle 
-                          checked={editedSettings.appointment_settings.isActive}
-                          onChange={(val) => handleSettingChange('appointment_settings', 'isActive', val)}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Hero Landing Description' : 'Hero Açıklaması'}</label>
+                        <textarea
+                          rows={3}
+                          value={editedSettings.homepage_settings.heroDescription || ''}
+                          onChange={(e) => handleSettingChange('homepage_settings', 'heroDescription', e.target.value)}
+                          className="glass-input"
+                          style={{ fontFamily: 'inherit' }}
                         />
                       </div>
 
+                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', borderBottom: '1px solid rgba(240, 218, 197, 0.05)', paddingBottom: '6px', marginTop: '10px' }}>{isEn ? 'Hero Slides Images' : 'Giriş Ekranı Slayt Görselleri'}</h4>
                       <div className="admin-grid-3">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Start Time' : 'Çalışma Başlangıç Saati'}</label>
+                          <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Görsel 1 (Hero Slayt 1)' : 'Giriş Görseli 1 (Hero Slayt 1)'}</label>
+                          <input
+                            type="text"
+                            value={editedSettings.homepage_settings.heroImages?.[0] || ''}
+                            onChange={(e) => {
+                              const newImages = [...(editedSettings.homepage_settings.heroImages || [])];
+                              newImages[0] = e.target.value;
+                              handleSettingChange('homepage_settings', 'heroImages', newImages);
+                            }}
+                            className="glass-input"
+                          />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Görsel 2 (Hero Slayt 2)' : 'Giriş Görseli 2 (Hero Slayt 2)'}</label>
+                          <input
+                            type="text"
+                            value={editedSettings.homepage_settings.heroImages?.[1] || ''}
+                            onChange={(e) => {
+                              const newImages = [...(editedSettings.homepage_settings.heroImages || [])];
+                              newImages[1] = e.target.value;
+                              handleSettingChange('homepage_settings', 'heroImages', newImages);
+                            }}
+                            className="glass-input"
+                          />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Görsel 3 (Hero Slayt 3)' : 'Giriş Görseli 3 (Hero Slayt 3)'}</label>
+                          <input
+                            type="text"
+                            value={editedSettings.homepage_settings.heroImages?.[2] || ''}
+                            onChange={(e) => {
+                              const newImages = [...(editedSettings.homepage_settings.heroImages || [])];
+                              newImages[2] = e.target.value;
+                              handleSettingChange('homepage_settings', 'heroImages', newImages);
+                            }}
+                            className="glass-input"
+                          />
+                        </div>
+                      </div>
+
+                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', borderBottom: '1px solid rgba(240, 218, 197, 0.05)', paddingBottom: '6px', marginTop: '10px' }}>{isEn ? 'Homepage Listing Limits' : 'Sayfa Limitleri & Görünürlük'}</h4>
+                      <div className="admin-grid-3">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Latest Blog Posts Limit' : 'Güncel Yazılar Kart Sayısı'}</label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={12}
+                            value={editedSettings.homepage_settings.blogCount !== undefined ? editedSettings.homepage_settings.blogCount : 3}
+                            onChange={(e) => handleSettingChange('homepage_settings', 'blogCount', parseInt(e.target.value) || 3)}
+                            className="glass-input"
+                          />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Precedent Decisions Limit' : 'Emsal Kararlar Kart Sayısı'}</label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={12}
+                            value={editedSettings.homepage_settings.decisionsCount !== undefined ? editedSettings.homepage_settings.decisionsCount : 3}
+                            onChange={(e) => handleSettingChange('homepage_settings', 'decisionsCount', parseInt(e.target.value) || 3)}
+                            className="glass-input"
+                          />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Practice Areas Visibility' : 'Faaliyet Alanları Görünürlük Ayarı'}</label>
+                          <div style={{ marginTop: '8px' }}>
+                            <CustomToggle 
+                              checked={editedSettings.homepage_settings.practiceActive !== false}
+                              onChange={(val) => handleSettingChange('homepage_settings', 'practiceActive', val)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 4. ONLINE APPOINTMENT SETTINGS */}
+                  {settingsSubTab === 'appointment' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Working Days selection' : 'Haftalık Çalışma Günleri'}</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                          {trDaysList.map(day => {
+                            const isChecked = (editedSettings.appointment_settings.workingDays || []).includes(day);
+                            return (
+                              <button
+                                type="button"
+                                key={day}
+                                onClick={() => handleWorkingDayToggle(day)}
+                                style={{
+                                  padding: '8px 14px',
+                                  borderRadius: '20px',
+                                  fontSize: '12px',
+                                  fontWeight: 600,
+                                  border: '1px solid var(--border-color)',
+                                  background: isChecked ? 'rgba(80, 34, 60, 0.25)' : '#121727',
+                                  color: isChecked ? '#F0DAC5' : 'var(--text-secondary)',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease'
+                                }}
+                              >
+                                {day}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="admin-grid-3">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Shift Start Time' : 'Çalışma Başlangıç Saati'}</label>
                           <input
                             type="time"
-                            value={editedSettings.appointment_settings.startTime}
+                            value={editedSettings.appointment_settings.startTime || '09:00'}
                             onChange={(e) => handleSettingChange('appointment_settings', 'startTime', e.target.value)}
                             className="glass-input"
                           />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'End Time' : 'Çalışma Bitiş Saati'}</label>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Shift End Time' : 'Çalışma Bitiş Saati'}</label>
                           <input
                             type="time"
-                            value={editedSettings.appointment_settings.endTime}
+                            value={editedSettings.appointment_settings.endTime || '18:00'}
                             onChange={(e) => handleSettingChange('appointment_settings', 'endTime', e.target.value)}
                             className="glass-input"
                           />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Appointment Duration' : 'Randevu Süresi (Dakika)'}</label>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Slot Duration (min)' : 'Randevu Görüşme Süresi'}</label>
                           <select
-                            value={editedSettings.appointment_settings.duration}
+                            value={editedSettings.appointment_settings.duration || 30}
                             onChange={(e) => handleSettingChange('appointment_settings', 'duration', parseInt(e.target.value) || 30)}
                             className="glass-input"
                             style={{ background: '#121727' }}
@@ -3128,706 +2860,114 @@ export const AdminPanel: React.FC = () => {
                         </div>
                       </div>
 
+                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', borderBottom: '1px solid rgba(240, 218, 197, 0.05)', paddingBottom: '6px', marginTop: '10px' }}>{isEn ? 'Consultation Fees (TL)' : 'Randevu Görüşme Ücretleri (TL)'}</h4>
                       <div className="admin-grid-3">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Online Video Fee' : 'Online Görüşme Ücreti (TL)'}</label>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Online Video Call Fee' : 'Online Görüşme Ücreti'}</label>
                           <input
                             type="number"
-                            value={editedSettings.appointment_settings.onlineFee}
+                            value={editedSettings.appointment_settings.onlineFee !== undefined ? editedSettings.appointment_settings.onlineFee : 2500}
                             onChange={(e) => handleSettingChange('appointment_settings', 'onlineFee', parseInt(e.target.value) || 0)}
                             className="glass-input"
                           />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Phone Consult Fee' : 'Telefon Görüşme Ücreti (TL)'}</label>
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Office Visit (Face-to-Face) Fee' : 'Yüz Yüze Görüşme Ücreti'}</label>
                           <input
                             type="number"
-                            value={editedSettings.appointment_settings.phoneFee}
-                            onChange={(e) => handleSettingChange('appointment_settings', 'phoneFee', parseInt(e.target.value) || 0)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Office Visit Fee' : 'Yüz Yüze Görüşme Ücreti (TL)'}</label>
-                          <input
-                            type="number"
-                            value={editedSettings.appointment_settings.faceToFaceFee}
+                            value={editedSettings.appointment_settings.faceToFaceFee !== undefined ? editedSettings.appointment_settings.faceToFaceFee : 3000}
                             onChange={(e) => handleSettingChange('appointment_settings', 'faceToFaceFee', parseInt(e.target.value) || 0)}
                             className="glass-input"
                           />
                         </div>
-                      </div>
-
-                      <div className="admin-grid-2">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Min Notice Period' : 'Minimum Rezervasyon Süresi'}</label>
-                          <select
-                            value={editedSettings.appointment_settings.minBookingNotice}
-                            onChange={(e) => handleSettingChange('appointment_settings', 'minBookingNotice', e.target.value)}
+                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Phone Consult Fee' : 'Telefon Görüşme Ücreti'}</label>
+                          <input
+                            type="number"
+                            value={editedSettings.appointment_settings.phoneFee !== undefined ? editedSettings.appointment_settings.phoneFee : 1500}
+                            onChange={(e) => handleSettingChange('appointment_settings', 'phoneFee', parseInt(e.target.value) || 0)}
                             className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="same-day">Aynı Gün (Serbest)</option>
-                            <option value="1-day">1 Gün Önceden</option>
-                            <option value="2-day">2 Gün Önceden</option>
-                            <option value="1-week">1 Hafta Önceden</option>
-                          </select>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Max Booking Horizon' : 'Maksimum Kaç Gün Sonrasına Alınabilir?'}</label>
-                          <select
-                            value={editedSettings.appointment_settings.maxBookingDays}
-                            onChange={(e) => handleSettingChange('appointment_settings', 'maxBookingDays', parseInt(e.target.value) || 30)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value={7}>7 Gün</option>
-                            <option value={14}>14 Gün</option>
-                            <option value={30}>30 Gün</option>
-                            <option value={60}>60 Gün</option>
-                          </select>
+                          />
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'KVKK Terms Consent Text' : 'Randevu KVKK Onay Metni'}</label>
-                        <textarea
-                          rows={2}
-                          value={editedSettings.appointment_settings.kvkkText}
-                          onChange={(e) => handleSettingChange('appointment_settings', 'kvkkText', e.target.value)}
-                          className="glass-input"
-                          style={{ fontFamily: 'inherit' }}
+                      <div className="glass-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(240, 218, 197, 0.02)' }}>
+                        <div>
+                          <span style={{ fontSize: '13px', fontWeight: 600, display: 'block' }}>{isEn ? 'Disable Past Hours Today' : 'Geçmiş Saatleri Pasif Yap'}</span>
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Locks slots for today that have already passed in clock.' : 'Bugünün içerisinde bulunulan saate göre geçmiş zaman dilimlerini rezerveye kapatır.'}</span>
+                        </div>
+                        <CustomToggle 
+                          checked={editedSettings.appointment_settings.pastHoursDisabled !== false}
+                          onChange={(val) => handleSettingChange('appointment_settings', 'pastHoursDisabled', val)}
                         />
                       </div>
                     </div>
                   )}
 
-                  {/* 6. AI CHATBOT SETTINGS */}
+                  {/* 5. FOOTER SETTINGS */}
+                  {settingsSubTab === 'footer' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Footer Brand Name' : 'Footer Marka Adı'}</label>
+                        <input
+                          type="text"
+                          value={editedSettings.footer_settings.brandName || ''}
+                          onChange={(e) => handleSettingChange('footer_settings', 'brandName', e.target.value)}
+                          className="glass-input"
+                        />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Footer Copyright & Legal Disclaimer text' : 'Footer Alt Metni / Telif Bildirimi'}</label>
+                        <textarea
+                          rows={3}
+                          value={editedSettings.footer_settings.copyrightText || ''}
+                          onChange={(e) => handleSettingChange('footer_settings', 'copyrightText', e.target.value)}
+                          className="glass-input"
+                          style={{ fontFamily: 'inherit' }}
+                        />
+                      </div>
+                      
+                      <div className="glass-card" style={{ padding: '16px', background: 'rgba(240, 218, 197, 0.02)', border: '1px solid rgba(240, 218, 197, 0.06)' }}>
+                        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '0' }}>
+                          <strong>{isEn ? 'Note:' : 'Not:'}</strong> {isEn ? 'Social Networks links and yasal links inside footer are dynamically derived from General/Contact Info configurations.' : 'Sosyal medya bağlantıları ile footer içerisindeki e-posta, telefon ve adres bilgileri "İletişim Bilgileri" sekmesinde yaptığınız değişiklikleri otomatik olarak yansıtır.'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 6. CHATBOT SETTINGS */}
                   {settingsSubTab === 'ai' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                          <span style={{ fontSize: '14px', fontWeight: 600, display: 'block' }}>{isEn ? 'AI Assistant Status' : 'Yapay Zekâ Asistanı Aktif'}</span>
-                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{isEn ? 'Enables floating AI monograms on front views.' : 'Web sitesindeki asistan asistan penceresini aktif eder.'}</span>
+                          <span style={{ fontSize: '14px', fontWeight: 600, display: 'block' }}>{isEn ? 'Chatbot Assistant Status' : 'Yapay Zekâ Asistanı (Chatbot)'}</span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{isEn ? 'Toggle chatbot float monogram display on pages.' : 'Sitedeki yüzen yapay zekâ asistan butonunun ve penceresinin görünürlüğünü kontrol edin.'}</span>
                         </div>
                         <CustomToggle 
-                          checked={editedSettings.ai_settings.isActive}
+                          checked={editedSettings.ai_settings.isActive !== false}
                           onChange={(val) => handleSettingChange('ai_settings', 'isActive', val)}
                         />
                       </div>
 
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Chatbot Avatar Name' : 'Chatbot İsmi'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.ai_settings.chatbotName}
-                            onChange={(e) => handleSettingChange('ai_settings', 'chatbotName', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Preferred Provider' : 'Yapay Zekâ Sağlayıcısı'}</label>
-                          <select
-                            value={editedSettings.ai_settings.modelProvider}
-                            onChange={(e) => handleSettingChange('ai_settings', 'modelProvider', e.target.value)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="gemini">Google Gemini 1.5 Pro</option>
-                            <option value="openai">OpenAI GPT-4o</option>
-                            <option value="claude">Anthropic Claude 3.5 Sonnet</option>
-                            <option value="huggingface">HuggingFace Serverless API</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'API Token Key' : 'API Key'}</label>
-                          <input
-                            type="password"
-                            value={editedSettings.ai_settings.apiKey}
-                            onChange={(e) => handleSettingChange('ai_settings', 'apiKey', e.target.value)}
-                            className="glass-input"
-                            placeholder="••••••••••••••••••••••••"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Custom API Endpoint (Optional)' : 'API Endpoint / URL'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.ai_settings.apiUrl}
-                            onChange={(e) => handleSettingChange('ai_settings', 'apiUrl', e.target.value)}
-                            className="glass-input"
-                            placeholder="https://api.openai.com/v1"
-                          />
-                        </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Welcome Greeting message' : 'Karşılama Mesajı'}</label>
+                        <input
+                          type="text"
+                          value={editedSettings.ai_settings.welcomeMessage || ''}
+                          onChange={(e) => handleSettingChange('ai_settings', 'welcomeMessage', e.target.value)}
+                          className="glass-input"
+                        />
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'System Instruction Prompt' : 'Sistem Promptu'}</label>
+                        <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Legal Disclaimer Notice text' : 'Yasal Uyarı Metni'}</label>
                         <textarea
-                          rows={4}
-                          value={editedSettings.ai_settings.systemPrompt}
-                          onChange={(e) => handleSettingChange('ai_settings', 'systemPrompt', e.target.value)}
+                          rows={3}
+                          value={editedSettings.ai_settings.disclaimerText || ''}
+                          onChange={(e) => handleSettingChange('ai_settings', 'disclaimerText', e.target.value)}
                           className="glass-input"
                           style={{ fontFamily: 'inherit' }}
                         />
-                      </div>
-
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Welcome Message' : 'Chatbot Karşılama Mesajı'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.ai_settings.welcomeMessage}
-                            onChange={(e) => handleSettingChange('ai_settings', 'welcomeMessage', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Disclaimer Sub-warning' : 'Alt Hukuki Uyuşmazlık Uyarısı'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.ai_settings.disclaimerText}
-                            onChange={(e) => handleSettingChange('ai_settings', 'disclaimerText', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 7. NOTIFICATION CENTER */}
-                  {settingsSubTab === 'notifications' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Toast Alerts Placement' : 'Bildirim Ekran Konumu'}</label>
-                          <select
-                            value={editedSettings.notification_settings.toastPosition}
-                            onChange={(e) => handleSettingChange('notification_settings', 'toastPosition', e.target.value)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="bottom-right">Sağ Alt (Bottom-Right)</option>
-                            <option value="bottom-left">Sol Alt (Bottom-Left)</option>
-                            <option value="top-right">Sağ Üst (Top-Right)</option>
-                            <option value="top-left">Sol Üst (Top-Left)</option>
-                          </select>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Toast Dismiss Timeout' : 'Bildirim Görünme Süresi'}</label>
-                          <select
-                            value={editedSettings.notification_settings.toastDuration}
-                            onChange={(e) => handleSettingChange('notification_settings', 'toastDuration', parseInt(e.target.value) || 5000)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value={3000}>3 Saniye</option>
-                            <option value={5000}>5 Saniye</option>
-                            <option value={8000}>8 Saniye</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        {[
-                          { key: 'toastEnabled', label: isEn ? 'Popup Toasts Messages Active' : 'Toast Mesaj Bildirimleri Aktif mi?' },
-                          { key: 'soundEnabled', label: isEn ? 'Play Sound Alerts' : 'Sesli Bildirim Uyarıları Aktif mi?' },
-                          { key: 'notifyNewAppointment', label: isEn ? 'Notify New Appointment request' : 'Yeni Randevu Taleplerinde Bildir' },
-                          { key: 'notifyNewPayment', label: isEn ? 'Notify New Client Payment' : 'Yeni Ödeme/Dekontlarda Bildir' },
-                          { key: 'notifyNewMessage', label: isEn ? 'Notify New Message form submission' : 'Yeni İletişim Formu Mesajlarında Bildir' },
-                          { key: 'showErrors', label: isEn ? 'Display System Error Messages' : 'Sistem Hata Bildirimlerini Göster' }
-                        ].map(item => (
-                          <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{item.label}</span>
-                            <CustomToggle 
-                              checked={editedSettings.notification_settings[item.key]}
-                              onChange={(val) => handleSettingChange('notification_settings', item.key, val)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 8. MEDIA SETTINGS */}
-                  {settingsSubTab === 'media' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div className="admin-grid-3">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Max Upload File Size' : 'Maksimum Dosya Boyutu (MB)'}</label>
-                          <select
-                            value={editedSettings.media_settings.maxFileSize}
-                            onChange={(e) => handleSettingChange('media_settings', 'maxFileSize', parseInt(e.target.value) || 5242880)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value={2097152}>2 MB</option>
-                            <option value={5242880}>5 MB</option>
-                            <option value={10485760}>10 MB</option>
-                            <option value={20971520}>20 MB</option>
-                          </select>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Max Image Width (px)' : 'Maksimum Görsel Genişliği'}</label>
-                          <input
-                            type="number"
-                            value={editedSettings.media_settings.maxWidth}
-                            onChange={(e) => handleSettingChange('media_settings', 'maxWidth', parseInt(e.target.value) || 1920)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Default Cover Aspect Ratio' : 'Kapak Görsel Oranı'}</label>
-                          <select
-                            value={editedSettings.media_settings.aspectRatio}
-                            onChange={(e) => handleSettingChange('media_settings', 'aspectRatio', e.target.value)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="16-9">16:9 Geniş Ekran</option>
-                            <option value="4-3">4:3 Standart</option>
-                            <option value="1-1">1:1 Kare</option>
-                            <option value="auto">Otomatik</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        {[
-                          { key: 'convertToWebp', label: isEn ? 'Convert Images to WebP format' : 'Görselleri Otomatik WebP Formatına Dönüştür' },
-                          { key: 'autoResize', label: isEn ? 'Auto Resize over-dimension images' : 'Çözünürlüğü Otomatik Yeniden Boyutlandır' },
-                          { key: 'lazyLoading', label: isEn ? 'Lazy load images viewport checks' : 'Görsellerde Lazy Loading Aktif mi?' },
-                          { key: 'altTextRequired', label: isEn ? 'Force Alt description values' : 'Yüklenen Medyalarda Alt Metin Girmeyi Zorunlu Kıl' }
-                        ].map(item => (
-                          <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{item.label}</span>
-                            <CustomToggle 
-                              checked={editedSettings.media_settings[item.key]}
-                              onChange={(val) => handleSettingChange('media_settings', item.key, val)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 9. LEGAL PAGES */}
-                  {settingsSubTab === 'legalPages' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      {['kvkk', 'cerez', 'kullanim'].map(page => {
-                        const pageData = editedSettings.legal_pages_settings[page];
-                        return (
-                          <div key={page} className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#F0DAC5' }}>{pageData.title}</h4>
-                              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Slug:' : 'Link:'} /{pageData.slug}</span>
-                            </div>
-                            
-                            <textarea
-                              rows={6}
-                              value={pageData.content}
-                              onChange={(e) => handleNestedSettingChange('legal_pages_settings', page, 'content', e.target.value)}
-                              className="glass-input"
-                              style={{ fontFamily: 'inherit', fontSize: '12px', lineHeight: '1.5' }}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* 10. FOOTER MANAGEMENT */}
-                  {settingsSubTab === 'footer' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div className="admin-grid-2">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Footer Brand Name' : 'Footer Marka Adı'}</label>
-                          <input
-                            type="text"
-                            value={editedSettings.footer_settings.brandName}
-                            onChange={(e) => handleSettingChange('footer_settings', 'brandName', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '12px', fontWeight: 600 }}>{isEn ? 'Footer Animation Density' : 'Arka Plan Çizgi Yoğunluğu'}</label>
-                          <select
-                            value={editedSettings.footer_settings.animationDensity}
-                            onChange={(e) => handleSettingChange('footer_settings', 'animationDensity', e.target.value)}
-                            className="glass-input"
-                            style={{ background: '#121727' }}
-                          >
-                            <option value="low">Düşük (Low)</option>
-                            <option value="medium">Orta (Medium)</option>
-                            <option value="high">Yüksek (High)</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        {[
-                          { key: 'isActive', label: isEn ? 'Footer Section Displayed' : 'Footer Bölümü Genel Olarak Aktif mi?' },
-                          { key: 'showMonogram', label: isEn ? 'Show Monogram monogram icon' : 'Footer Kısmında Monogram Logo Göster' },
-                          { key: 'showSocialIcons', label: isEn ? 'Show Social network links' : 'Footer Kısmında Sosyal Medya İkonlarını Göster' },
-                          { key: 'lineAnimation', label: isEn ? 'Show Floating lines animation' : 'Footer Arka Planında Kayan Çizgi Animasyonunu Göster' }
-                        ].map(item => (
-                          <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{item.label}</span>
-                            <CustomToggle 
-                              checked={editedSettings.footer_settings[item.key]}
-                              onChange={(val) => handleSettingChange('footer_settings', item.key, val)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 11. HOMEPAGE MANAGEMENT */}
-                  {settingsSubTab === 'homepage' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', borderBottom: '1px solid rgba(240, 218, 197, 0.05)', paddingBottom: '6px' }}>{isEn ? 'Hero Landing Section' : 'Karşılama Ekranı (Hero) Ayarları'}</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Main Headline Title' : 'Hero Ana Başlık Metni'}</label>
-                          <input 
-                            type="text" 
-                            value={editedSettings.homepage_settings.hero.heroTitle}
-                            onChange={(e) => handleNestedSettingChange('homepage_settings', 'hero', 'heroTitle', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Hero Description Subtitle' : 'Hero Alt Açıklama Metni'}</label>
-                          <input 
-                            type="text" 
-                            value={editedSettings.homepage_settings.hero.heroDescription}
-                            onChange={(e) => handleNestedSettingChange('homepage_settings', 'hero', 'heroDescription', e.target.value)}
-                            className="glass-input"
-                          />
-                        </div>
-                      </div>
-
-                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', marginTop: '10px' }}>{isEn ? 'Homepage Modules Activation' : 'Ana Sayfa Bölüm Aktivasyonları'}</h4>
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        {['hero', 'about', 'practice', 'blog', 'appointment', 'contact'].map(sec => {
-                          const secLabelMap: any = {
-                            hero: isEn ? 'Hero Section' : 'Karşılama Ekranı (Hero)',
-                            about: isEn ? 'About Us Section' : 'Hakkımda Bölümü',
-                            practice: isEn ? 'Practice Areas Grid' : 'Faaliyet Alanları',
-                            blog: isEn ? 'Recent Posts Feed' : 'Güncel Hukuki Yazılar',
-                            appointment: isEn ? 'Appointment Booking Box' : 'Online Randevu Sistemi',
-                            contact: isEn ? 'Contact Channels Card' : 'İletişim Bölümü'
-                          };
-                          return (
-                            <div key={sec} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 500 }}>{secLabelMap[sec]}</span>
-                              <CustomToggle 
-                                checked={editedSettings.homepage_settings[sec].active}
-                                onChange={(val) => handleNestedSettingChange('homepage_settings', sec, 'active', val)}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 12. LOG SYSTEM */}
-                  {settingsSubTab === 'logs' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                      
-                      {/* Filtering Header */}
-                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <input
-                          type="text"
-                          value={logsSearch}
-                          onChange={(e) => setLogsSearch(e.target.value)}
-                          placeholder={isEn ? "Search by action, module..." : "Arama yapın..."}
-                          className="glass-input"
-                          style={{ flex: 1, minWidth: '200px', padding: '8px 12px', fontSize: '12px' }}
-                        />
-                        <select
-                          value={logsTypeFilter}
-                          onChange={(e) => setLogsTypeFilter(e.target.value)}
-                          className="glass-input"
-                          style={{ width: '150px', background: '#121727', padding: '8px 12px', fontSize: '12px' }}
-                        >
-                          <option value="all">{isEn ? 'All Logs' : 'Tüm Kayıtlar'}</option>
-                          <option value="Login">{isEn ? 'Logins' : 'Giriş/Oturumlar'}</option>
-                          <option value="Update">{isEn ? 'Updates' : 'Güncellemeler'}</option>
-                          <option value="Create">{isEn ? 'Creations' : 'Oluşturmalar'}</option>
-                          <option value="Publish">{isEn ? 'Publications' : 'Yayınlamalar'}</option>
-                        </select>
-                      </div>
-
-                      {/* Responsive Logs table */}
-                      <div className="glass-card" style={{ padding: '0', overflowX: 'auto', border: '1px solid rgba(240, 218, 197, 0.08)' }}>
-                        <style>{`
-                          .logs-table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            font-size: 12px;
-                            text-align: left;
-                          }
-                          .logs-table th {
-                            background: rgba(240, 218, 197, 0.03);
-                            padding: 12px 16px;
-                            font-weight: 600;
-                            color: #F0DAC5;
-                            border-bottom: 1px solid rgba(240, 218, 197, 0.08);
-                          }
-                          .logs-table td {
-                            padding: 12px 16px;
-                            border-bottom: 1px solid rgba(240, 218, 197, 0.04);
-                            color: var(--text-primary);
-                          }
-                          @media (max-width: 768px) {
-                            .logs-table-desktop {
-                              display: none !important;
-                            }
-                            .logs-cards-mobile {
-                              display: flex !important;
-                              flex-direction: column;
-                              gap: 10px;
-                              padding: 12px;
-                            }
-                          }
-                          .logs-cards-mobile {
-                            display: none;
-                          }
-                        `}</style>
-
-                        {/* Desktop version */}
-                        <table className="logs-table logs-table-desktop">
-                          <thead>
-                            <tr>
-                              <th>{isEn ? 'Date' : 'Tarih'}</th>
-                              <th>{isEn ? 'User' : 'Kullanıcı'}</th>
-                              <th>{isEn ? 'Module' : 'Modül'}</th>
-                              <th>{isEn ? 'Action' : 'İşlem'}</th>
-                              <th>{isEn ? 'Impacted Record' : 'Etkilenen Kayıt'}</th>
-                              <th>IP</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredLogs.map((log, index) => (
-                              <tr key={index}>
-                                <td style={{ color: 'var(--text-secondary)' }}>{log.date}</td>
-                                <td style={{ fontWeight: 500 }}>{log.user}</td>
-                                <td>
-                                  <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(240, 218, 197, 0.06)', fontSize: '11px' }}>
-                                    {log.module}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span style={{ 
-                                    color: log.type === 'Update' ? '#E9D8A6' : log.type === 'Create' ? '#94D2BD' : log.type === 'Login' ? '#0A9396' : '#EE9B00' 
-                                  }}>
-                                    {log.action}
-                                  </span>
-                                </td>
-                                <td>{log.record}</td>
-                                <td style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>{log.ip}</td>
-                              </tr>
-                            ))}
-                            {filteredLogs.length === 0 && (
-                              <tr>
-                                <td colSpan={6} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-secondary)' }}>
-                                  {isEn ? 'No logs matching current criteria.' : 'Kriterlere uygun kayıt bulunamadı.'}
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-
-                        {/* Mobile version */}
-                        <div className="logs-cards-mobile">
-                          {filteredLogs.map((log, index) => (
-                            <div key={index} className="glass-card" style={{ padding: '12px', background: 'rgba(240, 218, 197, 0.01)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{log.date}</span>
-                                <span style={{ fontSize: '10px', color: log.type === 'Update' ? '#E9D8A6' : '#94D2BD' }}>{log.action}</span>
-                              </div>
-                              <div style={{ fontWeight: 600 }}>{log.record}</div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                <span>{log.user} • {log.module}</span>
-                                <span>IP: {log.ip}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 13. SYSTEM INFO */}
-                  {settingsSubTab === 'system' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div className="admin-grid-3">
-                        
-                        <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{isEn ? 'Supabase Connection' : 'Supabase Bağlantısı'}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: isSupabaseConfigured() ? '#10B981' : '#F59E0B' }} />
-                            <span style={{ fontSize: '14px', fontWeight: 700 }}>
-                              {isSupabaseConfigured() ? (isEn ? 'CONNECTED' : 'ÇALIŞIYOR') : (isEn ? 'OFFLINE MOCK' : 'LOKAL MOCK')}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{isEn ? 'Storage System Status' : 'Medya Storage'}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: isSupabaseConfigured() ? '#10B981' : '#F59E0B' }} />
-                            <span style={{ fontSize: '14px', fontWeight: 700 }}>
-                              {isSupabaseConfigured() ? (isEn ? 'ACTIVE' : 'ÇALIŞIYOR') : (isEn ? 'LOCAL FALLBACK' : 'LOKAL GEÇİCİ')}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{isEn ? 'Auth Session Status' : 'Güvenlik & Oturum'}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }} />
-                            <span style={{ fontSize: '14px', fontWeight: 700 }}>{isEn ? 'SECURED' : 'AKTİF & GÜVENLİ'}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Technical Specs List */}
-                      <div className="glass-card" style={{ padding: '20px' }}>
-                        <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#F0DAC5', marginBottom: '14px', borderBottom: '1px solid rgba(240, 218, 197, 0.05)', paddingBottom: '6px' }}>{isEn ? 'Technical Specifications' : 'Yazılım ve Donanım Bilgileri'}</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(240, 218, 197, 0.02)', paddingBottom: '6px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>{isEn ? 'App Version' : 'Uygulama Versiyonu'}</span>
-                            <span style={{ fontWeight: 600 }}>v1.4.2-premium</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(240, 218, 197, 0.02)', paddingBottom: '6px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>React Framework</span>
-                            <span style={{ fontWeight: 600 }}>v18.3.1</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(240, 218, 197, 0.02)', paddingBottom: '6px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>TypeScript Spec</span>
-                            <span style={{ fontWeight: 600 }}>v5.5.2</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(240, 218, 197, 0.02)', paddingBottom: '6px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>Vite Bundler</span>
-                            <span style={{ fontWeight: 600 }}>v5.4.1</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(240, 218, 197, 0.02)', paddingBottom: '6px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>{isEn ? 'Database Engine' : 'Veritabanı Motoru'}</span>
-                            <span style={{ fontWeight: 600 }}>PostgreSQL (Supabase)</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 14. DEVELOPER MODE */}
-                  {settingsSubTab === 'developer' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      
-                      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(240, 218, 197, 0.02)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, display: 'block' }}>{isEn ? 'Debug Mode' : 'Geliştirici Hata Ayıklama (Debug)'}</span>
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Prints stack traces in front console views.' : 'Sistem hatalarını tarayıcı konsolunda detaylı listeler.'}</span>
-                          </div>
-                          <CustomToggle 
-                            checked={editedSettings.developer_settings.debugMode}
-                            onChange={(val) => handleSettingChange('developer_settings', 'debugMode', val)}
-                          />
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, display: 'block' }}>{isEn ? 'Console Logging' : 'Console Logları Açık'}</span>
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{isEn ? 'Logs fetch operations to browser console.' : 'API çağrıları ve loglama hareketlerini konsolda gösterir.'}</span>
-                          </div>
-                          <CustomToggle 
-                            checked={editedSettings.developer_settings.consoleLogs}
-                            onChange={(val) => handleSettingChange('developer_settings', 'consoleLogs', val)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Integration Test Suite */}
-                      <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F0DAC5', marginTop: '10px' }}>{isEn ? 'Service Connection Diagnostics' : 'Bağlantı ve Entegrasyon Testleri'}</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        
-                        <div className="glass-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 600 }}>{isEn ? 'Database Connection Diagnostics' : 'Veritabanı Sağlık Kontrolü'}</span>
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                setDbTestResult('Testing database...');
-                                const res = await settingsService.testDatabaseConnection();
-                                setDbTestResult(res.message);
-                              }}
-                              className="btn-secondary"
-                              style={{ padding: '5px 12px', fontSize: '11px' }}
-                            >
-                              {isEn ? 'Run DB Test' : 'Veritabanı Testini Çalıştır'}
-                            </button>
-                          </div>
-                          {dbTestResult && (
-                            <pre style={{ margin: '0', padding: '10px', background: '#0C101E', color: dbTestResult.includes('success') ? '#10B981' : '#F59E0B', borderRadius: '6px', fontSize: '11px', overflowX: 'auto' }}>
-                              {dbTestResult}
-                            </pre>
-                          )}
-                        </div>
-
-                        <div className="glass-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 600 }}>{isEn ? 'Storage Connection Diagnostics' : 'Storage Sağlık Kontrolü'}</span>
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                setStorageTestResult('Testing storage buckets...');
-                                const res = await settingsService.testStorageConnection();
-                                setStorageTestResult(res.message);
-                              }}
-                              className="btn-secondary"
-                              style={{ padding: '5px 12px', fontSize: '11px' }}
-                            >
-                              {isEn ? 'Run Storage Test' : 'Storage Testini Çalıştır'}
-                            </button>
-                          </div>
-                          {storageTestResult && (
-                            <pre style={{ margin: '0', padding: '10px', background: '#0C101E', color: storageTestResult.includes('active') ? '#10B981' : '#F59E0B', borderRadius: '6px', fontSize: '11px', overflowX: 'auto' }}>
-                              {storageTestResult}
-                            </pre>
-                          )}
-                        </div>
-
-                        <div className="glass-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 600 }}>{isEn ? 'Env Variables Diagnostics' : 'Çevre (Env) Değişkenleri'}</span>
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                setEnvTestResult('Testing env config...');
-                                const res = await settingsService.testEnvironmentVariables();
-                                setEnvTestResult(res.message);
-                              }}
-                              className="btn-secondary"
-                              style={{ padding: '5px 12px', fontSize: '11px' }}
-                            >
-                              {isEn ? 'Run Env Test' : 'Env Testini Çalıştır'}
-                            </button>
-                          </div>
-                          {envTestResult && (
-                            <pre style={{ margin: '0', padding: '10px', background: '#0C101E', color: envTestResult.includes('verified') ? '#10B981' : '#F59E0B', borderRadius: '6px', fontSize: '11px', overflowX: 'auto' }}>
-                              {envTestResult}
-                            </pre>
-                          )}
-                        </div>
                       </div>
                     </div>
                   )}
@@ -3883,9 +3023,9 @@ export const AdminPanel: React.FC = () => {
                             const groupData = editedSettings[groupKey];
                             const success = await updateSiteSettings(groupKey, groupData);
                             if (success) {
-                              showToast(isEn ? 'Settings successfully updated.' : 'Ayarlar başarıyla güncellendi.', 'success');
+                              showToast(isEn ? 'Settings successfully saved.' : 'Ayarlar başarıyla kaydedildi.', 'success');
                             } else {
-                              showToast(isEn ? 'Failed to update settings.' : 'Ayarlar kaydedilirken hata oluştu.', 'error');
+                              showToast(isEn ? 'An error occurred while saving.' : 'Kaydedilirken bir hata oluştu.', 'error');
                             }
                           }}
                           className="btn-primary"

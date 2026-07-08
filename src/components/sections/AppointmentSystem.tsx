@@ -4,10 +4,43 @@ import { Calendar as CalendarIcon, Clock, Video, Users, PhoneCall, Check } from 
 import { CustomCheckbox } from '../ui/CustomCheckbox';
 
 export const AppointmentSystem: React.FC = () => {
-  const { t, addAppointment, language, showToast, navigateTo } = useApp();
+  const { t, addAppointment, language, showToast, navigateTo, siteSettings } = useApp();
   
   const isEn = language === 'en';
-  const timeslots = ['09:30', '10:30', '11:30', '14:00', '15:00', '16:30'];
+  
+  const generateTimeslots = () => {
+    const settings = siteSettings?.appointment_settings;
+    if (!settings) return ['09:30', '10:30', '11:30', '14:00', '15:00', '16:30'];
+    
+    const start = settings.startTime || '09:00';
+    const end = settings.endTime || '18:00';
+    const duration = settings.duration || 30;
+    
+    const [startH, startM] = start.split(':').map(Number);
+    const [endH, endM] = end.split(':').map(Number);
+    
+    const slots = [];
+    let current = new Date();
+    current.setHours(startH, startM, 0, 0);
+    
+    const endTimeLimit = new Date();
+    endTimeLimit.setHours(endH, endM, 0, 0);
+    
+    while (current.getTime() + duration * 60 * 1000 <= endTimeLimit.getTime()) {
+      const currentH = current.getHours();
+      const currentM = current.getMinutes();
+      const timeString = `${String(currentH).padStart(2, '0')}:${String(currentM).padStart(2, '0')}`;
+      
+      const isLunchBreak = (currentH === 12 && currentM >= 30) || (currentH === 13 && currentM < 30);
+      if (!isLunchBreak) {
+        slots.push(timeString);
+      }
+      current.setTime(current.getTime() + duration * 60 * 1000);
+    }
+    return slots.length > 0 ? slots : ['09:30', '10:30', '11:30', '14:00', '15:00', '16:30'];
+  };
+
+  const timeslots = generateTimeslots();
 
   // Helper to check if a timeslot is past today
   const isTimeslotPast = (timeStr: string, dateStr: string) => {
@@ -15,6 +48,10 @@ export const AppointmentSystem: React.FC = () => {
     const todayStr = today.toISOString().split('T')[0];
     if (dateStr < todayStr) return true;
     if (dateStr > todayStr) return false;
+
+    if (siteSettings?.appointment_settings?.pastHoursDisabled === false) {
+      return false;
+    }
 
     const [h, m] = timeStr.split(':').map(Number);
     const currentHour = today.getHours();
@@ -156,10 +193,22 @@ export const AppointmentSystem: React.FC = () => {
       const todayOnly = new Date(today);
       todayOnly.setHours(0, 0, 0, 0);
 
+      const dayIndex = nextDate.getDay(); // 0 is Sunday, 1 is Monday ...
+      const trDays = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+      const currentDayTR = trDays[dayIndex];
+
+      const isWorkingDay = siteSettings?.appointment_settings?.workingDays
+        ? siteSettings.appointment_settings.workingDays.includes(currentDayTR)
+        : [1, 2, 3, 4, 5].includes(dayIndex); // fallback Mon-Fri
+
       let isPast = dateOnly.getTime() < todayOnly.getTime();
       const isToday = dateOnly.getTime() === todayOnly.getTime();
 
       if (isToday && allPassedToday) {
+        isPast = true;
+      }
+
+      if (!isWorkingDay) {
         isPast = true;
       }
 
@@ -185,6 +234,10 @@ export const AppointmentSystem: React.FC = () => {
       return;
     }
 
+    const onlineFee = siteSettings?.appointment_settings?.onlineFee !== undefined ? siteSettings.appointment_settings.onlineFee : 2500;
+    const faceFee = siteSettings?.appointment_settings?.faceToFaceFee !== undefined ? siteSettings.appointment_settings.faceToFaceFee : 3000;
+    const phoneFee = siteSettings?.appointment_settings?.phoneFee !== undefined ? siteSettings.appointment_settings.phoneFee : 1500;
+
     // Add to shared application context (mock database)
     addAppointment({
       clientName,
@@ -194,7 +247,7 @@ export const AppointmentSystem: React.FC = () => {
       appointmentTime: selectedTime,
       consultationType,
       notes,
-      paymentAmount: consultationType === 'Online' ? 2500 : consultationType === 'Yüz Yüze' ? 3000 : 1500
+      paymentAmount: consultationType === 'Online' ? onlineFee : consultationType === 'Yüz Yüze' ? faceFee : phoneFee
     });
 
     setIsBooked(true);
@@ -545,9 +598,9 @@ export const AppointmentSystem: React.FC = () => {
                     <label style={{ fontSize: '12px', fontWeight: 600 }}>{t('appointment.type')}</label>
                     <div className="appointment-types-grid">
                       {[
-                        { type: 'Online', nameTr: 'Online', nameEn: 'Online', icon: <Video size={14} />, price: '2500 TL' },
-                        { type: 'Yüz Yüze', nameTr: 'Yüz Yüze', nameEn: 'Face to Face', icon: <Users size={14} />, price: '3000 TL' },
-                        { type: 'Telefon', nameTr: 'Telefon', nameEn: 'Phone Call', icon: <PhoneCall size={14} />, price: '1500 TL' }
+                        { type: 'Online', nameTr: 'Online', nameEn: 'Online', icon: <Video size={14} />, price: `${siteSettings?.appointment_settings?.onlineFee !== undefined ? siteSettings.appointment_settings.onlineFee : 2500} TL` },
+                        { type: 'Yüz Yüze', nameTr: 'Yüz Yüze', nameEn: 'Face to Face', icon: <Users size={14} />, price: `${siteSettings?.appointment_settings?.faceToFaceFee !== undefined ? siteSettings.appointment_settings.faceToFaceFee : 3000} TL` },
+                        { type: 'Telefon', nameTr: 'Telefon', nameEn: 'Phone Call', icon: <PhoneCall size={14} />, price: `${siteSettings?.appointment_settings?.phoneFee !== undefined ? siteSettings.appointment_settings.phoneFee : 1500} TL` }
                       ].map((item) => {
                         const isSelected = consultationType === item.type;
                         return (

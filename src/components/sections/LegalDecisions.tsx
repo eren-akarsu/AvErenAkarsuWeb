@@ -5,7 +5,7 @@ import { ContentSkeleton } from '../ui/ContentSkeleton';
 import { EmptyState } from '../ui/EmptyState';
 
 export const LegalDecisions: React.FC = () => {
-  const { precedentDecisions, language, theme, isLoadingDecisions } = useApp();
+  const { precedentDecisions, language, theme, isLoadingDecisions, siteSettings } = useApp();
   const [activeDecisionId, setActiveDecisionId] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cardsPerPage, setCardsPerPage] = useState(2);
@@ -13,10 +13,12 @@ export const LegalDecisions: React.FC = () => {
 
   const isEn = language === 'en';
 
-  // Filter published decisions marked for home page, sorted by sortOrder
+  // Filter and slice published decisions based on homepage_settings decisionsCount
+  const limit = siteSettings?.homepage_settings?.decisionsCount !== undefined ? siteSettings.homepage_settings.decisionsCount : 3;
   const visibleDecisions = precedentDecisions
     .filter(dec => dec.status === 'Yayında' && dec.showOnHome)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .slice(0, limit);
 
   useEffect(() => {
     const handleResize = () => {

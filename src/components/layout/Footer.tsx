@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { Phone, MapPin, Clock, Mail } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { navigateTo, language, setIsCookieModalOpen } = useApp();
+  const { navigateTo, language, setIsCookieModalOpen, siteSettings } = useApp();
   const isEn = language === 'en';
 
   const handleNav = (route: string) => {
@@ -65,7 +65,7 @@ export const Footer: React.FC = () => {
         <div className="footer-col-brand" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <img 
-              src="/monogram-ea.png" 
+              src={siteSettings?.general_settings?.monogramUrl || "/monogram-ea.png"} 
               alt="EA Monogram" 
               style={{ 
                 height: '42px', 
@@ -83,14 +83,14 @@ export const Footer: React.FC = () => {
                 letterSpacing: '0.02em'
               }}
             >
-              Avukat Eren Akarsu
+              {siteSettings?.footer_settings?.brandName || siteSettings?.general_settings?.siteName || "Avukat Eren Akarsu"}
             </span>
           </div>
 
           {/* Social media icons with premium custom inline SVGs */}
           <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
             <a 
-              href="https://www.linkedin.com/in/erenakarsu/" 
+              href={siteSettings?.contact_settings?.linkedin || "https://www.linkedin.com/in/erenakarsu/"} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="footer-social-icon"
@@ -103,7 +103,7 @@ export const Footer: React.FC = () => {
               </svg>
             </a>
             <a 
-              href="https://github.com/eren-akarsu" 
+              href={siteSettings?.contact_settings?.github || "https://github.com/eren-akarsu"} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="footer-social-icon"
@@ -114,7 +114,7 @@ export const Footer: React.FC = () => {
               </svg>
             </a>
             <a 
-              href="mailto:erenakarsu@istanbul.av.tr" 
+              href={`mailto:${siteSettings?.contact_settings?.email || "erenakarsu@istanbul.av.tr"}`} 
               className="footer-social-icon"
               title="E-posta"
             >
@@ -124,7 +124,7 @@ export const Footer: React.FC = () => {
               </svg>
             </a>
             <a 
-              href="#" 
+              href={siteSettings?.contact_settings?.instagram || "https://instagram.com/av.erenakarsu"} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="footer-social-icon"
@@ -269,23 +269,23 @@ export const Footer: React.FC = () => {
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px', color: '#A0AEC0', padding: 0 }}>
             <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Mail size={14} style={{ color: '#F0DAC5', flexShrink: 0 }} />
-              <a href="mailto:erenakarsu@istanbul.av.tr" style={{ color: 'inherit', textDecoration: 'none', transition: 'var(--transition-fast)' }} onMouseEnter={(e) => e.currentTarget.style.color = '#F0DAC5'} onMouseLeave={(e) => e.currentTarget.style.color = 'inherit'}>
-                erenakarsu@istanbul.av.tr
+              <a href={`mailto:${siteSettings?.contact_settings?.email || "erenakarsu@istanbul.av.tr"}`} style={{ color: 'inherit', textDecoration: 'none', transition: 'var(--transition-fast)' }} onMouseEnter={(e) => e.currentTarget.style.color = '#F0DAC5'} onMouseLeave={(e) => e.currentTarget.style.color = 'inherit'}>
+                {siteSettings?.contact_settings?.email || "erenakarsu@istanbul.av.tr"}
               </a>
             </li>
             <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Phone size={14} style={{ color: '#F0DAC5', flexShrink: 0 }} />
-              <a href="tel:02167556334" style={{ color: 'inherit', textDecoration: 'none', transition: 'var(--transition-fast)' }} onMouseEnter={(e) => e.currentTarget.style.color = '#F0DAC5'} onMouseLeave={(e) => e.currentTarget.style.color = 'inherit'}>
-                0216 755 63 34
+              <a href={`tel:${siteSettings?.contact_settings?.phone?.replace(/\s/g, '') || "02167556334"}`} style={{ color: 'inherit', textDecoration: 'none', transition: 'var(--transition-fast)' }} onMouseEnter={(e) => e.currentTarget.style.color = '#F0DAC5'} onMouseLeave={(e) => e.currentTarget.style.color = 'inherit'}>
+                {siteSettings?.contact_settings?.phone || "0216 755 63 34"}
               </a>
             </li>
             <li style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
               <MapPin size={14} style={{ color: '#F0DAC5', flexShrink: 0, marginTop: '2px' }} />
-              <span>{isEn ? 'Istanbul, Turkey' : 'İstanbul, Türkiye'}</span>
+              <span>{siteSettings?.contact_settings?.address || (isEn ? 'Istanbul, Turkey' : 'İstanbul, Türkiye')}</span>
             </li>
             <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Clock size={14} style={{ color: '#F0DAC5', flexShrink: 0 }} />
-              <span>10:00 - 18:00</span>
+              <span>{siteSettings?.contact_settings?.workingHours || "10:00 - 18:00"}</span>
             </li>
           </ul>
         </div>
@@ -312,10 +312,10 @@ export const Footer: React.FC = () => {
             margin: '0 auto' 
           }}
         >
-          {isEn 
+          {siteSettings?.footer_settings?.copyrightText || (isEn 
             ? 'All rights of our website are reserved. You can share our articles by providing a link indicating that you have quoted. Legal action will be initiated in case of quoting from our articles without referencing the source.'
             : 'Web sitemizin tüm hakları saklıdır. Alıntı yaptığınıza ilişkin link vermek suretiyle makalelerimizi paylaşabilirsiniz. Kaynak belirtmeksizin makalelerimizden alıntı yapılması durumunda yasal işlem başlatılmaktadır.'
-          }
+          )}
         </p>
       </div>
 

@@ -5,11 +5,12 @@ import { ContentSkeleton } from '../ui/ContentSkeleton';
 import { EmptyState } from '../ui/EmptyState';
 
 export const RecentPosts: React.FC = () => {
-  const { blogPosts, navigateTo, language, isLoadingContents, setContentSlug } = useApp();
+  const { blogPosts, navigateTo, language, isLoadingContents, setContentSlug, siteSettings } = useApp();
   const isEn = language === 'en';
 
-  // Show only first 3 published posts
-  const displayPosts = blogPosts.slice(0, 3);
+  // Show dynamic count of published posts from settings
+  const limit = siteSettings?.homepage_settings?.blogCount !== undefined ? siteSettings.homepage_settings.blogCount : 3;
+  const displayPosts = blogPosts.slice(0, limit);
 
 
   return (
@@ -46,7 +47,7 @@ export const RecentPosts: React.FC = () => {
 
         {/* Posts Grid */}
         {isLoadingContents ? (
-          <ContentSkeleton variant="card" count={3} />
+          <ContentSkeleton variant="card" count={limit} />
         ) : displayPosts.length === 0 ? (
           <EmptyState
             title={isEn ? 'No content yet' : 'Henüz içerik yok'}

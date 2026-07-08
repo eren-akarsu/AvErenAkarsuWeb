@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { Sun, Moon, Menu, X, ChevronDown, BookOpen, Clock, Eye, Scale } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const { theme, toggleTheme, language, toggleLanguage, currentRoute, navigateTo, blogPosts, t, setSelectedCategory } = useApp();
+  const { theme, toggleTheme, language, toggleLanguage, currentRoute, navigateTo, blogPosts, t, setSelectedCategory, siteSettings } = useApp();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
@@ -146,7 +146,7 @@ export const Header: React.FC = () => {
         style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
       >
         <img
-          src="/ea-monogram.png"
+          src={siteSettings?.general_settings?.monogramUrl || "/ea-monogram.png"}
           alt="EA Monogram"
           style={{
             height: isScrolled ? '32px' : '42px',
@@ -157,7 +157,7 @@ export const Header: React.FC = () => {
         />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'Outfit', color: 'var(--text-primary)' }}>
-            {t('brand.title')}
+            {siteSettings?.general_settings?.siteName || t('brand.title')}
           </span>
         </div>
       </div>
@@ -503,10 +503,10 @@ export const Header: React.FC = () => {
             }}
           >
             {/* Menu Title / Header inside drawer */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
-              <img src="/ea-monogram.png" alt="EA Logo" style={{ height: '30px', width: 'auto' }} />
+             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', borderBottom: '1px solid var(--border-color)', paddingBottom: '15px' }}>
+              <img src={siteSettings?.general_settings?.monogramUrl || "/ea-monogram.png"} alt="EA Logo" style={{ height: '30px', width: 'auto' }} />
               <span style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'Outfit', color: 'var(--text-primary)' }}>
-                {t('brand.title')}
+                {siteSettings?.general_settings?.siteName || t('brand.title')}
               </span>
             </div>
 

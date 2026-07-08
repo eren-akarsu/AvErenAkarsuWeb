@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 
 export const HeroPhotoCarousel: React.FC = () => {
-  const { theme } = useApp();
+  const { theme, siteSettings } = useApp();
   const [activeIndex, setActiveIndex] = useState(0);
   const imageUrls = [
-    '/hero-carousel-1.jpg',
-    '/hero-carousel-2.jpg',
-    '/hero-carousel-3.jpg'
+    siteSettings?.homepage_settings?.heroImages?.[0] || '/hero-carousel-1.jpg',
+    siteSettings?.homepage_settings?.heroImages?.[1] || '/hero-carousel-2.jpg',
+    siteSettings?.homepage_settings?.heroImages?.[2] || '/hero-carousel-3.jpg'
   ];
 
   useEffect(() => {

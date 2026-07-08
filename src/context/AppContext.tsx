@@ -797,17 +797,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (data.ai_settings) {
           setChatbotSettings({
             welcomeMessage: data.ai_settings.welcomeMessage || 'Merhaba! Ben Av. Eren Akarsu Yapay Zekâ Asistanıyım. Size hukuki konularda veya randevu işlemlerinde nasıl yardımcı olabilirim?',
-            systemPrompt: data.ai_settings.systemPrompt || 'Sen Av. Eren Akarsu platformunun yapay zekâ asistanısın. Ziyaretçilere hukuki konularda genel ön bilgi ver, kesinlikle resmi hukuki danışmanlık yapmadığını ve bu bilgilerin danışmanlık niteliği taşımadığını belirt. Ziyaretçileri iletişim formu veya randevu alma modüllerine yönlendir.',
+            systemPrompt: data.ai_settings.disclaimerText || 'Sen Av. Eren Akarsu platformunun yapay zekâ asistanısın. Bu bilgiler danışmanlık niteliği taşımaz.',
             isActive: data.ai_settings.isActive !== undefined ? data.ai_settings.isActive : true,
-            modelName: data.ai_settings.modelProvider || 'Gemini'
+            modelName: 'Gemini'
           });
         }
+
       } catch (err) {
         console.error('[AppContext] Failed to load site settings:', err);
       }
     }
     loadSettings();
   }, []);
+
+  // Synchronize browser tab title and SEO meta description tag dynamically
+  useEffect(() => {
+    if (siteSettings && siteSettings.general_settings) {
+      document.title = siteSettings.general_settings.browserTitle || 'Av. Eren Akarsu - Premium LegalTech ve Hukuk Danışmanlığı';
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', siteSettings.general_settings.metaDescription || '');
+      } else {
+        const meta = document.createElement('meta');
+        meta.name = 'description';
+        meta.content = siteSettings.general_settings.metaDescription || '';
+        document.head.appendChild(meta);
+      }
+    }
+  }, [siteSettings]);
 
   // ============================================================
   // THEME & LANGUAGE EFFECTS
@@ -1156,7 +1173,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (success) {
       setSiteSettings(prev => {
         const updated = { ...prev };
-        updated[group] = { ...updated[group], ...data };
+        updated[group] = { ...(updated[group] as any), ...data };
         return updated;
       });
       // Sync legacy chatbotSettings if updating AI group
@@ -1164,9 +1181,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setChatbotSettings(prev => ({
           ...prev,
           welcomeMessage: data.welcomeMessage !== undefined ? data.welcomeMessage : prev.welcomeMessage,
-          systemPrompt: data.systemPrompt !== undefined ? data.systemPrompt : prev.systemPrompt,
+          systemPrompt: data.disclaimerText !== undefined ? data.disclaimerText : prev.systemPrompt,
           isActive: data.isActive !== undefined ? data.isActive : prev.isActive,
-          modelName: data.modelProvider !== undefined ? data.modelProvider : prev.modelName
+          modelName: 'Gemini'
         }));
       }
     }
@@ -1179,16 +1196,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (success) {
       setSiteSettings(prev => {
         const updated = { ...prev };
-        updated[group] = defaults[group];
+        updated[group] = defaults[group] as any;
         return updated;
       });
       if (group === 'ai_settings') {
         const aiDefaults = defaults.ai_settings;
         setChatbotSettings({
           welcomeMessage: aiDefaults.welcomeMessage,
-          systemPrompt: aiDefaults.systemPrompt,
+          systemPrompt: aiDefaults.disclaimerText,
           isActive: aiDefaults.isActive,
-          modelName: aiDefaults.modelProvider
+          modelName: 'Gemini'
         });
       }
     }

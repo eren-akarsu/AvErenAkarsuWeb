@@ -4,7 +4,7 @@ import { ArrowRight, Calendar, BookOpen, Sparkles } from 'lucide-react';
 import { HeroPhotoCarousel } from './HeroPhotoCarousel';
 
 export const Hero: React.FC = () => {
-  const { t, navigateTo } = useApp();
+  const { t, navigateTo, siteSettings } = useApp();
 
   return (
     <section
@@ -67,7 +67,7 @@ export const Hero: React.FC = () => {
                 fontWeight: 800
               }}
             >
-              {t('hero.title')}
+              {siteSettings?.homepage_settings?.heroTitle || t('hero.title')}
             </h1>
 
             <p
@@ -78,7 +78,7 @@ export const Hero: React.FC = () => {
                 maxWidth: '520px'
               }}
             >
-              {t('hero.description')}
+              {siteSettings?.homepage_settings?.heroDescription || t('hero.description')}
             </p>
 
             {/* CTA Action Buttons */}
