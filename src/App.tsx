@@ -11,14 +11,19 @@ import { ExplicitConsent } from './pages/ExplicitConsent';
 import { TermsOfUse } from './pages/TermsOfUse';
 import { Disclaimer } from './pages/Disclaimer';
 import { ContentDetailPage } from './pages/ContentDetailPage';
+import { ResetPassword } from './pages/ResetPassword';
 import { ToastContainer } from './components/layout/ToastContainer';
 
 const AppContent: React.FC = () => {
   const { currentRoute } = useApp();
 
-  // If we are on the admin page, render it standalone without the client header/footer
+  // If we are on the admin page or reset password page, render it standalone without the client header/footer
   if (currentRoute === 'admin') {
     return <AdminPanel />;
+  }
+
+  if (currentRoute === 'reset-password') {
+    return <ResetPassword />;
   }
 
   return (

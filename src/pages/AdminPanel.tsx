@@ -8,7 +8,7 @@ import {
   Lock, User, Mail, Calendar, Clock, BookOpen, Users, Folder, Scale, 
   CreditCard, Sparkles, Settings, BarChart2, CheckSquare, LogOut, Plus, 
   Trash2, Check, X, ShieldAlert, Award, FileText, ChevronRight, Info,
-  File, HelpCircle, Eye, ArrowLeft, Menu, Home, Globe, Phone, Bell, Image, Activity, Cpu, Code
+  File, HelpCircle, Eye, EyeOff, ArrowLeft, Menu, Home, Globe, Phone, Bell, Image, Activity, Cpu, Code
 } from 'lucide-react';
 import { ContentTypeCard } from '../components/admin/ContentTypeCard';
 import { ContentEditorLayout } from '../components/admin/ContentEditorLayout';
@@ -19,6 +19,7 @@ import { ContentListTable } from '../components/admin/ContentListTable';
 import { ContentPreviewModal } from '../components/admin/ContentPreviewModal';
 import { CustomCheckbox } from '../components/ui/CustomCheckbox';
 import { CustomSelect } from '../components/ui/CustomSelect';
+import { isAdminEmail } from '../utils/adminConfig';
 
 export const AdminPanel: React.FC = () => {
   const { 
@@ -44,8 +45,11 @@ export const AdminPanel: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
+  const [isForgotMode, setIsForgotMode] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'contact' | 'homepage' | 'appointment' | 'footer' | 'ai'>('general');
   const [editedSettings, setEditedSettings] = useState<any>(null);
@@ -69,7 +73,13 @@ export const AdminPanel: React.FC = () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          setIsLoggedIn(true);
+          if (isAdminEmail(session.user?.email)) {
+            setIsLoggedIn(true);
+          } else {
+            await supabase.auth.signOut();
+            setIsLoggedIn(false);
+            showToast(isEn ? 'Unauthorized email address.' : 'Yetkisiz e-posta adresi ile giriş yapılamaz.', 'error');
+          }
         }
       } catch (err) {
         console.error('Session check error:', err);
@@ -80,9 +90,15 @@ export const AdminPanel: React.FC = () => {
     checkSession();
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
-        setIsLoggedIn(true);
+        if (isAdminEmail(session.user?.email)) {
+          setIsLoggedIn(true);
+        } else {
+          await supabase.auth.signOut();
+          setIsLoggedIn(false);
+          showToast(isEn ? 'Unauthorized email address.' : 'Yetkisiz e-posta adresi ile giriş yapılamaz.', 'error');
+        }
       } else {
         setIsLoggedIn(false);
       }
@@ -91,7 +107,7 @@ export const AdminPanel: React.FC = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [isEn]);
 
   useEffect(() => {
     if (isAdminSidebarOpen && window.innerWidth <= 1024) {
@@ -222,6 +238,15 @@ export const AdminPanel: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoggingIn) return;
+
+    if (!isAdminEmail(email)) {
+      showToast(
+        isEn ? 'Unauthorized email address.' : 'Yetkisiz e-posta adresi ile giriş yapılamaz.',
+        'error'
+      );
+      return;
+    }
+
     setIsLoggingIn(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -251,6 +276,47 @@ export const AdminPanel: React.FC = () => {
       );
     } finally {
       setIsLoggingIn(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      showToast(isEn ? 'Please enter your email address.' : 'Lütfen e-posta adresinizi girin.', 'warning');
+      return;
+    }
+    if (!isAdminEmail(email)) {
+      showToast(
+        isEn ? 'Unauthorized email address.' : 'Yetkisiz e-posta adresi ile şifre sıfırlanamaz.',
+        'error'
+      );
+      return;
+    }
+    if (isSendingReset) return;
+    setIsSendingReset(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://av-eren-akarsu-web.vercel.app/reset-password',
+      });
+      if (error) {
+        showToast(error.message, 'error');
+      } else {
+        showToast(
+          isEn 
+            ? 'Password reset link has been sent to your email.' 
+            : 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.',
+          'success'
+        );
+        setIsForgotMode(false);
+      }
+    } catch (err: any) {
+      console.error(err);
+      showToast(
+        isEn ? 'An error occurred.' : 'Bir hata oluştu.',
+        'error'
+      );
+    } finally {
+      setIsSendingReset(false);
     }
   };
 
@@ -435,78 +501,155 @@ export const AdminPanel: React.FC = () => {
               }}
             />
             <h2 style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'Outfit', color: '#F0DAC5' }}>
-              {isEn ? 'Administrator Login' : 'Yönetici Giriş Ekranı'}
+              {isForgotMode 
+                ? (isEn ? 'Reset Password' : 'Şifre Sıfırlama Talebi')
+                : (isEn ? 'Administrator Login' : 'Yönetici Giriş Ekranı')}
             </h2>
           </div>
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '11px', textTransform: 'uppercase', color: '#A0AEC0', fontWeight: 600 }}>
-                {isEn ? 'Email Address' : 'E-posta Adresi'}
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="glass-input"
-                  style={{ width: '100%', paddingLeft: '40px', color: '#FFFFFF', background: 'rgba(28, 35, 64, 0.6)' }}
-                  required
-                />
-                <Mail size={14} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#A0AEC0' }} />
+          {isForgotMode ? (
+            <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '11px', textTransform: 'uppercase', color: '#A0AEC0', fontWeight: 600 }}>
+                  {isEn ? 'Email Address' : 'E-posta Adresi'}
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="glass-input"
+                    style={{ width: '100%', paddingLeft: '40px', color: '#FFFFFF', background: 'rgba(28, 35, 64, 0.6)' }}
+                    required
+                  />
+                  <Mail size={14} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#A0AEC0' }} />
+                </div>
               </div>
-            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '11px', textTransform: 'uppercase', color: '#A0AEC0', fontWeight: 600 }}>
-                {isEn ? 'Password' : 'Şifre'}
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="glass-input"
-                  style={{ width: '100%', paddingLeft: '40px', color: '#FFFFFF', background: 'rgba(28, 35, 64, 0.6)' }}
-                  required
-                />
-                <Lock size={14} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#A0AEC0' }} />
+              <button 
+                type="submit" 
+                className="btn-primary" 
+                disabled={isSendingReset}
+                style={{ 
+                  width: '100%', 
+                  justifyContent: 'center', 
+                  background: '#F0DAC5', 
+                  color: '#1C2340', 
+                  border: 'none', 
+                  boxShadow: 'none', 
+                  fontWeight: 600,
+                  opacity: isSendingReset ? 0.7 : 1,
+                  cursor: isSendingReset ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isSendingReset 
+                  ? (isEn ? 'Sending link...' : 'Bağlantı gönderiliyor...') 
+                  : (isEn ? 'Send Reset Link' : 'Sıfırlama Bağlantısı Gönder')}
+              </button>
+
+              <div style={{ textAlign: 'center', fontSize: '11px', marginTop: '10px' }}>
+                <span 
+                  style={{ color: '#F0DAC5', cursor: 'pointer', textDecoration: 'underline' }} 
+                  onClick={() => setIsForgotMode(false)}
+                >
+                  {isEn ? 'Back to Secure Login' : 'Güvenli Girişe Geri Dön'}
+                </span>
               </div>
-            </div>
+            </form>
+          ) : (
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '11px', textTransform: 'uppercase', color: '#A0AEC0', fontWeight: 600 }}>
+                  {isEn ? 'Email Address' : 'E-posta Adresi'}
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="glass-input"
+                    style={{ width: '100%', paddingLeft: '40px', color: '#FFFFFF', background: 'rgba(28, 35, 64, 0.6)' }}
+                    required
+                  />
+                  <Mail size={14} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#A0AEC0' }} />
+                </div>
+              </div>
 
-            {/* Remember Me */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
-              <CustomCheckbox 
-                checked={rememberMe} 
-                onChange={setRememberMe} 
-                label={isEn ? 'Remember Me' : 'Beni Hatırla'} 
-              />
-              <span style={{ color: '#F0DAC5', cursor: 'pointer' }} onClick={() => showToast(isEn ? 'Please contact system administrator to reset password.' : 'Şifrenizi sıfırlamak için lütfen sistem yöneticisiyle iletişime geçin.', 'info')}>
-                {isEn ? 'Forgot Password' : 'Şifremi Unuttum'}
-              </span>
-            </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '11px', textTransform: 'uppercase', color: '#A0AEC0', fontWeight: 600 }}>
+                  {isEn ? 'Password' : 'Şifre'}
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="glass-input"
+                    style={{ width: '100%', paddingLeft: '40px', paddingRight: '40px', color: '#FFFFFF', background: 'rgba(28, 35, 64, 0.6)' }}
+                    required
+                  />
+                  <Lock size={14} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#A0AEC0' }} />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '14px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      color: '#A0AEC0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#F0DAC5'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#A0AEC0'}
+                    title={showPassword ? (isEn ? 'Hide password' : 'Şifreyi gizle') : (isEn ? 'Show password' : 'Şifreyi göster')}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
 
-            <button 
-              type="submit" 
-              className="btn-primary" 
-              disabled={isLoggingIn}
-              style={{ 
-                width: '100%', 
-                justifyContent: 'center', 
-                background: '#F0DAC5', 
-                color: '#1C2340', 
-                border: 'none', 
-                boxShadow: 'none', 
-                fontWeight: 600,
-                opacity: isLoggingIn ? 0.7 : 1,
-                cursor: isLoggingIn ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {isLoggingIn 
-                ? (isEn ? 'Signing in...' : 'Giriş yapılıyor...') 
-                : (isEn ? 'Secure Login' : 'Güvenli Giriş Yap')}
-            </button>
-          </form>
+              {/* Remember Me */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
+                <CustomCheckbox 
+                  checked={rememberMe} 
+                  onChange={setRememberMe} 
+                  label={isEn ? 'Remember Me' : 'Beni Hatırla'} 
+                />
+                <span style={{ color: '#F0DAC5', cursor: 'pointer' }} onClick={() => setIsForgotMode(true)}>
+                  {isEn ? 'Forgot Password' : 'Şifremi Unuttum'}
+                </span>
+              </div>
+
+              <button 
+                type="submit" 
+                className="btn-primary" 
+                disabled={isLoggingIn}
+                style={{ 
+                  width: '100%', 
+                  justifyContent: 'center', 
+                  background: '#F0DAC5', 
+                  color: '#1C2340', 
+                  border: 'none', 
+                  boxShadow: 'none', 
+                  fontWeight: 600,
+                  opacity: isLoggingIn ? 0.7 : 1,
+                  cursor: isLoggingIn ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isLoggingIn 
+                  ? (isEn ? 'Signing in...' : 'Giriş yapılıyor...') 
+                  : (isEn ? 'Secure Login' : 'Güvenli Giriş Yap')}
+              </button>
+            </form>
+          )}
 
           {/* Hint info */}
           <div style={{ marginTop: '24px', background: 'rgba(240, 218, 197, 0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(240, 218, 197, 0.1)', fontSize: '11px', color: '#A0AEC0', display: 'flex', gap: '8px' }}>

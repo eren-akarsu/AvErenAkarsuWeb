@@ -66,6 +66,17 @@ Vercel Dashboard → Project Settings → **Environment Variables**:
 - `VITE_SUPABASE_URL` = Supabase URL
 - `VITE_SUPABASE_ANON_KEY` = Supabase anon key
 
+### Supabase URL Configuration (Authentication)
+Supabase Dashboard → **Authentication** → **URL Configuration** bölümünde şu ayarlar yapılmalıdır:
+* **Site URL**:
+  `https://av-eren-akarsu-web.vercel.app`
+* **Redirect URLs**:
+  * `https://av-eren-akarsu-web.vercel.app`
+  * `https://av-eren-akarsu-web.vercel.app/*`
+  * `http://localhost:5173`
+  * `http://localhost:5173/*`
+
+
 ### SPA Routing
 `vercel.json` dosyası zaten projeye eklenmiştir. Bu sayede doğrudan URL erişiminde (ör: `/icerik/kidem-tazminati`) 404 hatası alınmaz.
 

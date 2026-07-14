@@ -119,8 +119,8 @@ interface AppContextType {
   toggleTheme: () => void;
   language: 'tr' | 'en';
   toggleLanguage: () => void;
-  currentRoute: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail';
-  navigateTo: (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail') => void;
+  currentRoute: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail' | 'reset-password';
+  navigateTo: (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail' | 'reset-password') => void;
   
   // Toast notifications
   toasts: Toast[];
@@ -625,11 +625,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return (localStorage.getItem('language') as 'tr' | 'en') || 'tr';
   });
   
-  const [currentRoute, setCurrentRoute] = useState<'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail'>(() => {
+  const [currentRoute, setCurrentRoute] = useState<'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail' | 'reset-password'>(() => {
     const path = window.location.pathname;
     const hash = window.location.hash;
     if (path.startsWith('/icerik/')) {
       return 'content-detail';
+    }
+    if (path === '/reset-password' || hash === '#reset-password' || hash.includes('type=recovery') || hash.includes('access_token=')) {
+      return 'reset-password';
     }
     if (path === '/cerez-politikasi' || hash === '#cerez-politikasi') {
       return 'cerez-politikasi';
@@ -841,6 +844,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (path.startsWith('/icerik/')) {
         setCurrentRoute('content-detail');
         setContentSlug(path.replace('/icerik/', ''));
+      } else if (path === '/reset-password' || hash === '#reset-password' || hash.includes('type=recovery') || hash.includes('access_token=')) {
+        setCurrentRoute('reset-password');
       } else if (path === '/cerez-politikasi' || hash === '#cerez-politikasi') {
         setCurrentRoute('cerez-politikasi');
       } else if (path === '/hukuki-hesaplama-araclari' || hash === '#hukuki-hesaplama-araclari') {
@@ -877,7 +882,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLanguage(prev => prev === 'tr' ? 'en' : 'tr');
   };
 
-  const navigateTo = (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail') => {
+  const navigateTo = (route: 'home' | 'knowledge-hub' | 'admin' | 'cerez-politikasi' | 'hukuki-hesaplama-araclari' | 'kvkk-aydinlatma-metni' | 'acik-riza-metni' | 'kullanim-kosullari' | 'sorumluluk-reddi-beyani' | 'content-detail' | 'reset-password') => {
     setCurrentRoute(route);
     
     // Sync browser address bar URL path or hash
@@ -885,7 +890,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       window.history.pushState(null, '', '/');
     } else if (route === 'content-detail' && contentSlug) {
       window.history.pushState(null, '', `/icerik/${contentSlug}`);
-    } else if (['cerez-politikasi', 'hukuki-hesaplama-araclari', 'kvkk-aydinlatma-metni', 'acik-riza-metni', 'kullanim-kosullari', 'sorumluluk-reddi-beyani'].includes(route)) {
+    } else if (['cerez-politikasi', 'hukuki-hesaplama-araclari', 'kvkk-aydinlatma-metni', 'acik-riza-metni', 'kullanim-kosullari', 'sorumluluk-reddi-beyani', 'reset-password'].includes(route)) {
       window.history.pushState(null, '', `/${route}`);
     } else {
       window.history.pushState(null, '', `#${route}`);
