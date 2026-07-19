@@ -1,6 +1,7 @@
 import React from 'react';
 import { LegalDocLayout } from '../components/layout/LegalDocLayout';
 import { useApp } from '../context/AppContext';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const KvkkDisclosure: React.FC = () => {
   const { language, navigateTo } = useApp();
@@ -196,12 +197,23 @@ export const KvkkDisclosure: React.FC = () => {
   ];
 
   return (
-    <LegalDocLayout
-      title={title}
-      lastUpdated={lastUpdated}
-      readingTime={readingTime}
-      sections={sections}
-    />
+    <>
+      <SEOHead
+        title={isEn ? 'KVKK Clarification Text | Av. Eren Akarsu' : 'KVKK Aydınlatma Metni | Av. Eren Akarsu'}
+        description={isEn
+          ? 'Clarification text prepared under the Law on the Protection of Personal Data (KVKK) regarding data processed on the Att. Eren Akarsu platform.'
+          : '6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında web sitesi üzerinden işlenen verilere dair aydınlatma metni.'
+        }
+        canonical="/kvkk-aydinlatma-metni"
+        ogType="website"
+      />
+      <LegalDocLayout
+        title={title}
+        lastUpdated={lastUpdated}
+        readingTime={readingTime}
+        sections={sections}
+      />
+    </>
   );
 };
 export default KvkkDisclosure;

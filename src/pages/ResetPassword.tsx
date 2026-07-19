@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useApp } from '../context/AppContext';
 import { Lock, Eye, EyeOff, Info, ShieldAlert } from 'lucide-react';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const ResetPassword: React.FC = () => {
   const { language, showToast, navigateTo } = useApp();
@@ -124,7 +125,9 @@ export const ResetPassword: React.FC = () => {
 
   if (isVerifying) {
     return (
-      <div 
+      <>
+        <SEOHead title="Şifre Sıfırlama" noIndex={true} />
+        <div
         style={{ 
           minHeight: '100vh', 
           display: 'flex', 
@@ -150,21 +153,24 @@ export const ResetPassword: React.FC = () => {
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
+      </>
     );
   }
 
   return (
-    <div 
-      style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        background: 'radial-gradient(circle at 50% 50%, #1C2340 0%, #0A0D18 100%)',
-        padding: '24px',
-        fontFamily: 'Outfit, sans-serif'
-      }}
-    >
+    <>
+      <SEOHead title="Şifre Sıfırlama | Av. Eren Akarsu" noIndex={true} />
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'radial-gradient(circle at 50% 50%, #1C2340 0%, #0A0D18 100%)',
+          padding: '24px',
+          fontFamily: 'Outfit, sans-serif'
+        }}
+      >
       <div
         className="glass-panel"
         style={{
@@ -342,5 +348,6 @@ export const ResetPassword: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };

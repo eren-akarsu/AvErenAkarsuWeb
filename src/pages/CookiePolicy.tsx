@@ -1,6 +1,7 @@
 import React from 'react';
 import { LegalDocLayout } from '../components/layout/LegalDocLayout';
 import { useApp } from '../context/AppContext';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const CookiePolicy: React.FC = () => {
   const { language, navigateTo } = useApp();
@@ -168,12 +169,23 @@ export const CookiePolicy: React.FC = () => {
   ];
 
   return (
-    <LegalDocLayout
-      title={title}
-      lastUpdated={lastUpdated}
-      readingTime={readingTime}
-      sections={sections}
-    />
+    <>
+      <SEOHead
+        title={isEn ? 'Cookie Policy | Av. Eren Akarsu' : 'Çerez Politikası | Av. Eren Akarsu'}
+        description={isEn
+          ? 'Information about the cookie collection mechanisms, types, and purposes of processing on the Av. Eren Akarsu website.'
+          : 'Av. Eren Akarsu web sitesinde kullanılan çerez türleri, kullanım amaçları ve çerez yönetimi hakkında bilgilendirme.'
+        }
+        canonical="/cerez-politikasi"
+        ogType="website"
+      />
+      <LegalDocLayout
+        title={title}
+        lastUpdated={lastUpdated}
+        readingTime={readingTime}
+        sections={sections}
+      />
+    </>
   );
 };
 export default CookiePolicy;

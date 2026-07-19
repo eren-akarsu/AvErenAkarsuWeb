@@ -4,6 +4,7 @@ import type { BlogPost } from '../context/AppContext';
 import { Search, Scale, FileText, ArrowRight, Eye, ThumbsUp, Printer, MessageSquare, Download, Share2, ZoomIn, ZoomOut, ChevronDown } from 'lucide-react';
 import { ContentSkeleton } from '../components/ui/ContentSkeleton';
 import { EmptyState } from '../components/ui/EmptyState';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const KnowledgeHub: React.FC = () => {
   const { blogPosts, precedentDecisions, t, language, theme, navigateTo, showToast, selectedCategory, setSelectedCategory, isLoadingContents, isLoadingDecisions, setContentSlug } = useApp();
@@ -11,6 +12,7 @@ export const KnowledgeHub: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('Hepsi');
   const [sortBy, setSortBy] = useState<'newest' | 'views' | 'likes'>('newest');
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const isEn = language === 'en';
 
   // Sync selectedCategory from context if set by other components
   React.useEffect(() => {
@@ -20,7 +22,6 @@ export const KnowledgeHub: React.FC = () => {
     }
   }, [selectedCategory, setSelectedCategory]);
   
-  const isEn = language === 'en';
 
   // Map precedent decisions to BlogPost structure dynamically
   const mappedDecisionsAsPosts: BlogPost[] = precedentDecisions
@@ -101,8 +102,19 @@ export const KnowledgeHub: React.FC = () => {
   };
 
   return (
+    <>
+      <SEOHead
+        title={isEn ? 'Legal Content Hub | Av. Eren Akarsu' : 'Hukuki İçerikler Merkezi | Av. Eren Akarsu'}
+        description={isEn
+          ? 'Legal articles, case analyses, document templates, and professional notes in the fields of IT law, criminal law, labor law, and family law.'
+          : 'Bilişim hukuku, ceza hukuku, iş hukuku ve aile hukuku alanlarında makaleler, yargı kararı analizleri, dilekçe örnekleri ve mesleki notlar.'
+        }
+        canonical="/hukuki-icerikler"
+        ogType="website"
+      />
     <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', padding: '100px 0 60px' }}>
       <div className="container">
+
         
         {/* Page Hero */}
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
@@ -681,7 +693,6 @@ export const KnowledgeHub: React.FC = () => {
         </div>
       )}
 
-      {/* Styled keyframe animation */}
       <style>{`
         @keyframes drawerSlideIn {
           from { transform: translateX(100%); }
@@ -689,6 +700,8 @@ export const KnowledgeHub: React.FC = () => {
         }
       `}</style>
     </div>
+    </>
   );
 };
 export default KnowledgeHub;
+

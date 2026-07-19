@@ -815,18 +815,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Synchronize browser tab title and SEO meta description tag dynamically
   useEffect(() => {
-    if (siteSettings && siteSettings.general_settings) {
-      document.title = siteSettings.general_settings.browserTitle || 'Av. Eren Akarsu - Premium LegalTech ve Hukuk Danışmanlığı';
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', siteSettings.general_settings.metaDescription || '');
-      } else {
-        const meta = document.createElement('meta');
-        meta.name = 'description';
-        meta.content = siteSettings.general_settings.metaDescription || '';
-        document.head.appendChild(meta);
-      }
-    }
+    // Handled dynamically by SEOHead and react-helmet-async globally.
   }, [siteSettings]);
 
   // ============================================================

@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Scale, Percent, Landmark, ShieldCheck, X, FileText, Landmark as BankIcon, Heart, BookOpen, AlertCircle } from 'lucide-react';
 import { CustomCheckbox } from '../components/ui/CustomCheckbox';
 import { CustomSelect } from '../components/ui/CustomSelect';
+import { SEOHead } from '../components/seo/SEOHead';
 
 interface CalculatorInfo {
   id: string;
@@ -299,16 +300,26 @@ export const LegalCalculatorPage: React.FC = () => {
   };
 
   return (
-    <div 
-      style={{ 
-        background: 'var(--bg-primary)', 
-        minHeight: '100vh', 
-        padding: '120px 0 80px',
-        color: 'var(--text-primary)',
-        fontFamily: 'Inter, sans-serif'
-      }}
-    >
-      <div className="container">
+    <>
+      <SEOHead
+        title={isEn ? 'Legal Calculation Tools | Av. Eren Akarsu' : 'Hukuki Hesaplama Araçları | Av. Eren Akarsu'}
+        description={isEn
+          ? 'Access automatic calculation tools for labor law severance pay, notice indemnity, rent increase, statutory interest, and court fees.'
+          : 'Kıdem tazminatı, ihbar tazminatı, kira artış oranları, yasal faiz ve dava harç masrafları için güncel baro tarifelerine uygun hesaplama araçları.'
+        }
+        canonical="/hukuki-hesaplama-araclari"
+        ogType="website"
+      />
+      <div 
+        style={{ 
+          background: 'var(--bg-primary)', 
+          minHeight: '100vh', 
+          padding: '120px 0 80px',
+          color: 'var(--text-primary)',
+          fontFamily: 'Inter, sans-serif'
+        }}
+      >
+        <div className="container">
         
         {/* Page Top Header */}
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
@@ -775,5 +786,6 @@ export const LegalCalculatorPage: React.FC = () => {
         }
       `}</style>
     </div>
+    </>
   );
 };

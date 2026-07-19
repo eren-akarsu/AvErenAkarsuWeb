@@ -25,6 +25,3 @@ export const supabase = createClient(
 export const isSupabaseConfigured = (): boolean => {
   return !!(supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('placeholder'));
 };
-
-console.log(import.meta.env.VITE_SUPABASE_URL);
-console.log(import.meta.env.VITE_SUPABASE_ANON_KEY);

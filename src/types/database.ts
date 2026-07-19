@@ -28,6 +28,8 @@ export interface Content {
   sub_category: string;
   tags: string[];
   cover_image_url: string;
+  cover_image_alt?: string;
+  cover_image_caption?: string;
   author: string;
   status: ContentStatus;
   is_featured: boolean;
@@ -42,10 +44,25 @@ export interface Content {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  // SEO temel alanlar (schema.sql'de zaten var)
   seo_title: string;
   seo_description: string;
   seo_keywords: string;
   canonical_url: string;
+  // SEO genişletilmiş alanlar (migration ile eklendi)
+  og_title?: string;
+  og_description?: string;
+  og_image_url?: string;
+  robots_index?: boolean;
+  robots_follow?: boolean;
+  focus_keyword?: string;
+  legal_sources?: unknown[];
+  legal_basis?: unknown[];
+  related_laws?: unknown[];
+  related_cases?: unknown[];
+  reviewed_at?: string | null;
+  content_version?: number;
+  language?: string;
   // Document-specific
   doc_type: string;
   doc_law_area: string;
@@ -63,6 +80,7 @@ export interface Content {
   calc_warning: string;
   calc_order: number;
 }
+
 
 // --- Precedent Decision ---
 export interface PrecedentDecisionDB {

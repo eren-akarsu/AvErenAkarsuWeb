@@ -1,6 +1,7 @@
 import React from 'react';
 import { LegalDocLayout } from '../components/layout/LegalDocLayout';
 import { useApp } from '../context/AppContext';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const TermsOfUse: React.FC = () => {
   const { language, navigateTo } = useApp();
@@ -126,12 +127,23 @@ export const TermsOfUse: React.FC = () => {
   ];
 
   return (
-    <LegalDocLayout
-      title={title}
-      lastUpdated={lastUpdated}
-      readingTime={readingTime}
-      sections={sections}
-    />
+    <>
+      <SEOHead
+        title={isEn ? 'Terms of Use | Av. Eren Akarsu' : 'Kullanım Koşulları | Av. Eren Akarsu'}
+        description={isEn
+          ? 'Terms and rules governing the usage of Att. Eren Akarsu web tools, legal calculator services, and informational contents.'
+          : 'Av. Eren Akarsu web sitesinde sunulan araçların, bilgi kaynaklarının ve hesaplama servislerinin kullanım şartları.'
+        }
+        canonical="/kullanim-kosullari"
+        ogType="website"
+      />
+      <LegalDocLayout
+        title={title}
+        lastUpdated={lastUpdated}
+        readingTime={readingTime}
+        sections={sections}
+      />
+    </>
   );
 };
 export default TermsOfUse;

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Admin ve özel sayfalar indekslenmez
+Disallow: /admin
+Disallow: /admin/
+Disallow: /login
+Disallow: /reset-password
+Disallow: /dashboard
+Disallow: /preview
+Disallow: /preview/
+Disallow: /payment-success
+Disallow: /payment-failed
+Disallow: /account
+
+# Sitemap
+Sitemap: https://av-eren-akarsu-web.vercel.app/sitemap.xml

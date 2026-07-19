@@ -1,6 +1,7 @@
 import React from 'react';
 import { LegalDocLayout } from '../components/layout/LegalDocLayout';
 import { useApp } from '../context/AppContext';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const Disclaimer: React.FC = () => {
   const { language, navigateTo } = useApp();
@@ -97,12 +98,23 @@ export const Disclaimer: React.FC = () => {
   ];
 
   return (
-    <LegalDocLayout
-      title={title}
-      lastUpdated={lastUpdated}
-      readingTime={readingTime}
-      sections={sections}
-    />
+    <>
+      <SEOHead
+        title={isEn ? 'Disclaimer | Av. Eren Akarsu' : 'Sorumluluk Reddi Beyanı | Av. Eren Akarsu'}
+        description={isEn
+          ? 'Notice and limitations of liability regarding the informational contents, database references, and calculation utilities of Att. Eren Akarsu.'
+          : 'Sitede yer alan genel bilgilendirici yazıların ve otomatik hesaplama sonuçlarının yasal sorumluluk sınırları beyanı.'
+        }
+        canonical="/sorumluluk-reddi-beyani"
+        ogType="website"
+      />
+      <LegalDocLayout
+        title={title}
+        lastUpdated={lastUpdated}
+        readingTime={readingTime}
+        sections={sections}
+      />
+    </>
   );
 };
 export default Disclaimer;

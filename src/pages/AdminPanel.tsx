@@ -20,6 +20,8 @@ import { ContentPreviewModal } from '../components/admin/ContentPreviewModal';
 import { CustomCheckbox } from '../components/ui/CustomCheckbox';
 import { CustomSelect } from '../components/ui/CustomSelect';
 import { isAdminEmail } from '../utils/adminConfig';
+import { SEOHead } from '../components/seo/SEOHead';
+import { getSiteUrl } from '../utils/seo';
 
 export const AdminPanel: React.FC = () => {
   const { 
@@ -296,7 +298,7 @@ export const AdminPanel: React.FC = () => {
     setIsSendingReset(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://av-eren-akarsu-web.vercel.app/reset-password',
+        redirectTo: `${getSiteUrl()}/reset-password`,
       });
       if (error) {
         showToast(error.message, 'error');
@@ -438,34 +440,39 @@ export const AdminPanel: React.FC = () => {
   // Return Loading Screen while checking session
   if (isAuthLoading) {
     return (
-      <div 
-        style={{ 
-          minHeight: '100vh', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          background: 'radial-gradient(circle at 50% 50%, #1C2340 0%, #0A0D18 100%)',
-          color: '#F0DAC5',
-          fontFamily: 'Outfit, sans-serif'
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '50%',
-            border: '3px solid rgba(240,218,197,0.1)', borderTopColor: '#F0DAC5',
-            animation: 'spin 0.8s linear infinite'
-          }} />
-          <p style={{ color: '#A0AEC0', fontSize: '14px' }}>{isEn ? 'Verifying Session...' : 'Oturum Kontrol Ediliyor...'}</p>
+      <>
+        <SEOHead title="Oturum Kontrol Ediliyor | Av. Eren Akarsu" noIndex={true} />
+        <div 
+          style={{ 
+            minHeight: '100vh', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            background: 'radial-gradient(circle at 50% 50%, #1C2340 0%, #0A0D18 100%)',
+            color: '#F0DAC5',
+            fontFamily: 'Outfit, sans-serif'
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '40px', height: '40px', borderRadius: '50%',
+              border: '3px solid rgba(240,218,197,0.1)', borderTopColor: '#F0DAC5',
+              animation: 'spin 0.8s linear infinite'
+            }} />
+            <p style={{ color: '#A0AEC0', fontSize: '14px' }}>{isEn ? 'Verifying Session...' : 'Oturum Kontrol Ediliyor...'}</p>
+          </div>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
+      </>
     );
   }
 
   // Return Login Panel if not logged in
   if (!isLoggedIn) {
     return (
-      <div 
+      <>
+        <SEOHead title="Yönetici Girişi | Av. Eren Akarsu" noIndex={true} />
+        <div 
         style={{ 
           minHeight: '100vh', 
           display: 'flex', 
@@ -663,6 +670,7 @@ export const AdminPanel: React.FC = () => {
 
         </div>
       </div>
+      </>
     );
   }
 
@@ -954,7 +962,9 @@ export const AdminPanel: React.FC = () => {
 
   // Dashboard structure
   return (
-    <div className={`admin-layout ${isAdminSidebarOpen ? 'sidebar-open' : ''}`}>
+    <>
+      <SEOHead title="Yönetici Kontrol Paneli | Av. Eren Akarsu" noIndex={true} />
+      <div className={`admin-layout ${isAdminSidebarOpen ? 'sidebar-open' : ''}`}>
       
       {/* Responsive styles */}
       <style>{`
@@ -3195,6 +3205,7 @@ export const AdminPanel: React.FC = () => {
       </main>
 
     </div>
+    </>
   );
 };
 export default AdminPanel;

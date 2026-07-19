@@ -3,6 +3,7 @@ import { LegalDocLayout } from '../components/layout/LegalDocLayout';
 import { useApp } from '../context/AppContext';
 import { Check } from 'lucide-react';
 import { CustomCheckbox } from '../components/ui/CustomCheckbox';
+import { SEOHead } from '../components/seo/SEOHead';
 
 export const ExplicitConsent: React.FC = () => {
   const { language, showToast } = useApp();
@@ -162,12 +163,23 @@ export const ExplicitConsent: React.FC = () => {
   ];
 
   return (
-    <LegalDocLayout
-      title={title}
-      lastUpdated={lastUpdated}
-      readingTime={readingTime}
-      sections={sections}
-    />
+    <>
+      <SEOHead
+        title={isEn ? 'Explicit Consent Form | Av. Eren Akarsu' : 'Açık Rıza Metni | Av. Eren Akarsu'}
+        description={isEn
+          ? 'Explicit consent preferences form for analytics, newsletter subscription, and AI assistant interaction on the Att. Eren Akarsu website.'
+          : 'Analiz çerezleri, bülten üyeliği ve yapay zeka asistanı etkileşimleri için açık rıza izinlerinin yönetildiği tercih formu.'
+        }
+        canonical="/acik-riza-metni"
+        ogType="website"
+      />
+      <LegalDocLayout
+        title={title}
+        lastUpdated={lastUpdated}
+        readingTime={readingTime}
+        sections={sections}
+      />
+    </>
   );
 };
 export default ExplicitConsent;
