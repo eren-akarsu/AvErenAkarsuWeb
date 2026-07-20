@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Award, GraduationCap, CodeXml, BookMarked } from 'lucide-react';
+import { Award, GraduationCap, CodeXml, BookMarked, Briefcase } from 'lucide-react';
 
 export const Education: React.FC = () => {
   const { t, language, theme } = useApp();
@@ -34,7 +34,7 @@ export const Education: React.FC = () => {
       title: t('education.item1.title'),
       desc: t('education.item1.desc'),
       icon: <GraduationCap size={20} />,
-      badge: isEn ? 'Scholarship Law' : 'Burslu Hukuk'
+      badge: isEn ? '100% Full Scholarship' : '%100 Tam Burslu'
     },
     {
       year: t('education.item2.year'),
@@ -48,7 +48,7 @@ export const Education: React.FC = () => {
       title: t('education.item3.title'),
       desc: t('education.item3.desc'),
       icon: <Award size={20} />,
-      badge: isEn ? 'Second in Class' : 'Fakülte Derecesi'
+      badge: isEn ? 'Faculty Honor' : 'Fakülte Derecesi'
     },
     {
       year: t('education.item4.year'),
@@ -56,6 +56,13 @@ export const Education: React.FC = () => {
       desc: t('education.item4.desc'),
       icon: <BookMarked size={20} />,
       badge: isEn ? 'LL.M Master' : 'Yüksek Lisans'
+    },
+    {
+      year: t('education.item5.year'),
+      title: t('education.item5.title'),
+      desc: t('education.item5.desc'),
+      icon: <Briefcase size={20} />,
+      badge: isEn ? 'Career Beginning' : 'Mesleğe Başlangıç'
     }
   ];
 
@@ -363,8 +370,8 @@ export const Education: React.FC = () => {
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '8px' }}>
             {isEn
-              ? 'Academic chronology of legal theory and software engineering competencies'
-              : 'Hukuki teori ve yazılım geliştirme yetkinliklerinin akademik kronolojisi'}
+              ? 'Chronology of the educational journey in law and software fields'
+              : 'Hukuk ve yazılım alanındaki eğitim yolculuğunun kronolojisi'}
           </p>
         </div>
 
