@@ -73,8 +73,8 @@ export function getDefaultSettings(): SiteSettings {
       instagram: 'https://instagram.com/av.erenakarsu'
     },
     homepage_settings: {
-      heroTitle: 'Hukuk ve Teknoloji Arasında Bir Köprü',
-      heroDescription: 'İstanbul Okan Üniversitesi Hukuk Fakültesi ve Yazılım Mühendisliği çift anadal programı mezunu olarak, hukuki süreçleri dijital çağın dinamikleriyle yönetiyor, yenilikçi LegalTech çözümleri sunuyorum.',
+      heroTitle: 'Hukuki Süreçlere Disiplinlerarası Bakış',
+      heroDescription: 'Hukuk ve yazılım mühendisliği alanındaki akademik eğitimim doğrultusunda bilişim hukuku, dijital dönüşüm ve LegalTech alanlarında içerikler üretmekte ve hukuki süreçlere ilişkin bilgilendirme faaliyetleri yürütmekteyim.',
       heroImages: ['/hero-carousel-1.jpg', '/hero-carousel-2.jpg', '/hero-carousel-3.jpg'],
       blogCount: 3,
       decisionsCount: 3,
@@ -195,6 +195,7 @@ function getLocalSettingsFallback(defaults: SiteSettings): SiteSettings {
       const parsed = JSON.parse(local);
       const general = { ...defaults.general_settings, ...parsed.general_settings };
       const footer = { ...defaults.footer_settings, ...parsed.footer_settings };
+      const homepage = { ...defaults.homepage_settings, ...parsed.homepage_settings };
 
       if (general.siteName === 'Avukat Eren Akarsu') {
         general.siteName = 'Av. Eren Akarsu';
@@ -202,11 +203,17 @@ function getLocalSettingsFallback(defaults: SiteSettings): SiteSettings {
       if (footer.brandName === 'Avukat Eren Akarsu') {
         footer.brandName = 'Av. Eren Akarsu';
       }
+      if (homepage.heroTitle === 'Hukuk ve Teknoloji Arasında Bir Köprü') {
+        homepage.heroTitle = 'Hukuki Süreçlere Disiplinlerarası Bakış';
+      }
+      if (homepage.heroDescription?.includes('İstanbul Okan Üniversitesi')) {
+        homepage.heroDescription = 'Hukuk ve yazılım mühendisliği alanındaki akademik eğitimim doğrultusunda bilişim hukuku, dijital dönüşüm ve LegalTech alanlarında içerikler üretmekte ve hukuki süreçlere ilişkin bilgilendirme faaliyetleri yürütmekteyim.';
+      }
 
       return {
         general_settings: general,
         contact_settings: { ...defaults.contact_settings, ...parsed.contact_settings },
-        homepage_settings: { ...defaults.homepage_settings, ...parsed.homepage_settings },
+        homepage_settings: homepage,
         appointment_settings: { ...defaults.appointment_settings, ...parsed.appointment_settings },
         footer_settings: footer,
         ai_settings: { ...defaults.ai_settings, ...parsed.ai_settings }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ArrowRight, Calendar, BookOpen, Sparkles } from 'lucide-react';
+import { ArrowRight, Calendar, BookOpen, Scale } from 'lucide-react';
 import { HeroPhotoCarousel } from './HeroPhotoCarousel';
 
 export const Hero: React.FC = () => {
@@ -55,7 +55,7 @@ export const Hero: React.FC = () => {
                 color: 'var(--color-burgundy)'
               }}
             >
-              <Sparkles size={14} /> {t('hero.badge')}
+              <Scale size={14} /> {t('hero.badge')}
             </div>
 
             <h1

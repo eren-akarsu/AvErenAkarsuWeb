@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldCheck, Cpu, Code, BookOpen } from 'lucide-react';
+import { ShieldCheck, GraduationCap, Search, BookOpen } from 'lucide-react';
 
 export const About: React.FC = () => {
   const { t, language } = useApp();
@@ -41,7 +41,7 @@ export const About: React.FC = () => {
               }}
             />
 
-            {/* Block 1: Hukukçu Persona */}
+            {/* Block 1: Hukuki Birikim */}
             <div
               className="glass-card"
               style={{
@@ -70,12 +70,12 @@ export const About: React.FC = () => {
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                 {isEn 
-                  ? 'Deep follow-up on latest legislation and precedent dynamics in first-instance and supreme judicial authorities.'
-                  : 'İlk derece ve yüksek yargı mercilerindeki güncel mevzuatı ve içtihat dinamiklerini derinlemesine takip.'}
+                  ? 'Professional knowledge continuously updated through regular tracking of current legislation, Constitutional Court, Court of Cassation, and Council of State decisions.'
+                  : 'Güncel mevzuat, Anayasa Mahkemesi, Yargıtay ve Danıştay kararlarının düzenli takibi ile sürekli güncellenen mesleki bilgi birikimi.'}
               </p>
             </div>
 
-            {/* Block 2: Yazılımcı Persona */}
+            {/* Block 2: Akademik Gelişim */}
             <div
               className="glass-card about-card-offset"
               style={{
@@ -97,19 +97,19 @@ export const About: React.FC = () => {
                   marginBottom: '16px'
                 }}
               >
-                <Code size={20} />
+                <GraduationCap size={20} />
               </div>
               <h4 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                {isEn ? 'Software Mastery' : 'Yazılım Uzmanlığı'}
+                {isEn ? 'Academic Growth' : 'Akademik Gelişim'}
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                 {isEn 
-                  ? 'Active development expertise in TypeScript, React, Next.js, and advanced artificial intelligence integrations.'
-                  : 'TypeScript, React, Next.js ve yapay zekâ entegrasyonu alanlarında aktif geliştirme yetkinliği.'}
+                  ? 'Supporting the academic background acquired during bachelor\'s and master\'s degrees with continuous education and scientific studies.'
+                  : 'Lisans ve yüksek lisans sürecinde edinilen akademik altyapının sürekli eğitim ve bilimsel çalışmalarla desteklenmesi.'}
               </p>
             </div>
 
-            {/* Block 3: LegalTech entegrasyonu */}
+            {/* Block 3: Hukuki Araştırma */}
             <div
               className="glass-card about-card-offset-negative"
               style={{
@@ -131,19 +131,19 @@ export const About: React.FC = () => {
                   marginBottom: '16px'
                 }}
               >
-                <Cpu size={20} />
+                <Search size={20} />
               </div>
               <h4 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                {isEn ? 'LegalTech Oriented' : 'LegalTech Odaklı'}
+                {isEn ? 'Legal Research' : 'Hukuki Araştırma'}
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                 {isEn
-                  ? 'Developing smart contract analysis tools, custom legal CRM applications, and AI-powered advice systems.'
-                  : 'Hukuki otomasyon sistemleri, sözleşme analiz araçları ve yapay zekâ destekli asistanların geliştirilmesi.'}
+                  ? 'A comprehensive legal research approach in line with laws, regulations, doctrinal views, and current precedents.'
+                  : 'Kanunlar, yönetmelikler, doktrin görüşleri ve güncel içtihatlar doğrultusunda kapsamlı hukuki araştırma anlayışı.'}
               </p>
             </div>
 
-            {/* Block 4: Bilgi paylaşımı */}
+            {/* Block 4: Bilgi Merkezi */}
             <div
               className="glass-card"
               style={{
@@ -168,12 +168,12 @@ export const About: React.FC = () => {
                 <BookOpen size={20} />
               </div>
               <h4 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                {isEn ? 'Resource & Blog' : 'Kütüphane & Blog'}
+                {isEn ? 'Information Center' : 'Bilgi Merkezi'}
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                 {isEn
-                  ? 'A digital information center sharing petition templates, legislative analysis, and current precedent rulings.'
-                  : 'Dilekçe örnekleri, kanun analizleri ve güncel içtihat kararlarının paylaşıldığı dijital bilgi merkezi.'}
+                  ? 'Sharing the current legal agenda through articles, legal evaluations, landmark decision analyses, and informative content.'
+                  : 'Makaleler, hukuki değerlendirmeler, emsal karar analizleri ve bilgilendirici içeriklerle güncel hukuk gündeminin paylaşılması.'}
               </p>
             </div>
 
@@ -182,25 +182,24 @@ export const About: React.FC = () => {
           {/* Right Column: Detailed Story */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <h4 style={{ fontSize: '14px', color: 'var(--color-burgundy)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {isEn ? 'Visionary Approach' : 'Vizyoner Yaklaşım'}
+              {isEn ? 'Legal Vision' : 'Hukuki Vizyon'}
             </h4>
             <h2 style={{ fontSize: 'clamp(28px, 3.5vw, 40px)', lineHeight: '1.2', color: 'var(--text-primary)' }}>
               {t('about.title')}
             </h2>
             <p style={{ fontSize: '15px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
-              {t('about.description')}
+              {t('about.desc1')}
             </p>
             <p style={{ fontSize: '15px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
-              {isEn 
-                ? "In today's world where digital transformation is reshaping every sector, I combine the legal and IT worlds. I am not just a lawyer resolving disputes, but also a builder designing tech infrastructures to boost the operational efficiency of those processes."
-                : "Dijital dönüşümün her sektörü yeniden şekillendirdiği günümüzde, hukuk ve bilişim dünyasını tek potada eritiyorum. Sadece hukuki sorunları çözen bir avukat değil, aynı zamanda o süreçlerin operasyonel verimliliğini artıran teknolojik altyapılar tasarlıyorum."}
+              {t('about.desc2')}
             </p>
 
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px', padding: 0, marginTop: '10px' }}>
               {[
                 t('about.point1'),
                 t('about.point2'),
-                t('about.point3')
+                t('about.point3'),
+                t('about.point4')
               ].map((point, index) => (
                 <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
                   <span
