@@ -53,7 +53,7 @@ export interface SiteSettings {
 export function getDefaultSettings(): SiteSettings {
   return {
     general_settings: {
-      siteName: 'Avukat Eren Akarsu',
+      siteName: 'Av. Eren Akarsu',
       browserTitle: 'Av. Eren Akarsu - Premium LegalTech ve Hukuk Danışmanlığı',
       metaDescription: 'Yapay zekâ destekli hukuki danışmanlık, emsal karar arama motoru ve online randevu merkezi.',
       logoUrl: '/ea-monogram.png',
@@ -91,7 +91,7 @@ export function getDefaultSettings(): SiteSettings {
       pastHoursDisabled: true
     },
     footer_settings: {
-      brandName: 'Avukat Eren Akarsu',
+      brandName: 'Av. Eren Akarsu',
       copyrightText: 'Web sitemizin tüm hakları saklıdır. Alıntı yaptığınıza ilişkin link vermek suretiyle makalelerimizi paylaşabilirsiniz.'
     },
     ai_settings: {
@@ -193,12 +193,22 @@ function getLocalSettingsFallback(defaults: SiteSettings): SiteSettings {
     const local = localStorage.getItem('site_settings');
     if (local) {
       const parsed = JSON.parse(local);
+      const general = { ...defaults.general_settings, ...parsed.general_settings };
+      const footer = { ...defaults.footer_settings, ...parsed.footer_settings };
+
+      if (general.siteName === 'Avukat Eren Akarsu') {
+        general.siteName = 'Av. Eren Akarsu';
+      }
+      if (footer.brandName === 'Avukat Eren Akarsu') {
+        footer.brandName = 'Av. Eren Akarsu';
+      }
+
       return {
-        general_settings: { ...defaults.general_settings, ...parsed.general_settings },
+        general_settings: general,
         contact_settings: { ...defaults.contact_settings, ...parsed.contact_settings },
         homepage_settings: { ...defaults.homepage_settings, ...parsed.homepage_settings },
         appointment_settings: { ...defaults.appointment_settings, ...parsed.appointment_settings },
-        footer_settings: { ...defaults.footer_settings, ...parsed.footer_settings },
+        footer_settings: footer,
         ai_settings: { ...defaults.ai_settings, ...parsed.ai_settings }
       };
     }

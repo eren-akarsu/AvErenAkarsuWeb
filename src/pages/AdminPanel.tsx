@@ -147,7 +147,7 @@ export const AdminPanel: React.FC = () => {
   const [contentTags, setContentTags] = useState('');
   const [contentStatus, setContentStatus] = useState('Taslak');
   const [contentReadTime, setContentReadTime] = useState('5 Dakika');
-  const [contentAuthor, setContentAuthor] = useState('Avukat Eren Akarsu');
+  const [contentAuthor, setContentAuthor] = useState('Av. Eren Akarsu');
   const [contentShowOnHome, setContentShowOnHome] = useState(true);
   const [contentShowOnHub, setContentShowOnHub] = useState(true);
   const [contentAllowComments, setContentAllowComments] = useState(true);
@@ -746,7 +746,7 @@ export const AdminPanel: React.FC = () => {
     setContentTags('');
     setContentStatus('Taslak');
     setContentReadTime('5 Dakika');
-    setContentAuthor('Avukat Eren Akarsu');
+    setContentAuthor('Av. Eren Akarsu');
     setContentShowOnHome(true);
     setContentShowOnHub(true);
     setContentAllowComments(true);
@@ -1028,7 +1028,7 @@ export const AdminPanel: React.FC = () => {
             }}
           />
           <div style={{ fontSize: '14px', fontWeight: 700, fontFamily: 'Outfit', color: '#F0DAC5' }}>
-            Avukat Eren Akarsu
+            Av. Eren Akarsu
           </div>
         </div>
 

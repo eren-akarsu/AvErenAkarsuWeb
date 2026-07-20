@@ -83,7 +83,7 @@ export const Footer: React.FC = () => {
                 letterSpacing: '0.02em'
               }}
             >
-              {siteSettings?.footer_settings?.brandName || siteSettings?.general_settings?.siteName || "Avukat Eren Akarsu"}
+              {siteSettings?.footer_settings?.brandName || siteSettings?.general_settings?.siteName || "Av. Eren Akarsu"}
             </span>
           </div>
 

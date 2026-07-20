@@ -48,7 +48,7 @@ export async function getSitemapContents(): Promise<Content[]> {
           console.warn('[sitemapService] Graceful fallback fetch failed:', retryResult.error);
           return [];
         }
-        data = retryResult.data;
+        data = (retryResult.data || []).map(item => ({ ...item, robots_index: true }));
         error = null;
       } else {
         console.warn('[sitemapService] getSitemapContents error:', error);
