@@ -22,13 +22,13 @@ export const Stats: React.FC = () => {
     {
       num: isEn ? 'Active' : 'Aktif',
       label: t('stats.cmk'),
-      sub: isEn ? 'Istanbul Bar Representation' : 'İstanbul Barosu Temsili',
+      sub: isEn ? 'CMK Appointed Cases' : 'CMK Kapsamındaki Görevlendirmeler',
       icon: <Briefcase size={24} />
     },
     {
       num: '5+',
       label: t('stats.projects'),
-      sub: isEn ? 'Automations & AI Integrations' : 'Otomasyon ve AI Entegrasyonları',
+      sub: isEn ? 'Legal automation & digital solutions' : 'Hukuki otomasyon ve dijital çözümler',
       icon: <CodeXml size={24} />
     },
     {

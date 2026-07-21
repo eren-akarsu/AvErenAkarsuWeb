@@ -1,12 +1,53 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Calendar as CalendarIcon, Clock, Video, Users, PhoneCall, Check } from 'lucide-react';
 import { CustomCheckbox } from '../ui/CustomCheckbox';
+
+// Helper for local date string (YYYY-MM-DD)
+const getLocalDateStr = (d: Date = new Date()) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+// Helper for Turkey Official Public Holidays (Resmi Tatiller)
+const isPublicHoliday = (dateStr: string) => {
+  const [y, m, d] = dateStr.split('-');
+  const monthDay = `${m}-${d}`;
+  // Fixed official holidays in Turkey
+  const fixedHolidays = ['01-01', '04-23', '05-01', '05-19', '07-15', '08-30', '10-29'];
+  if (fixedHolidays.includes(monthDay)) return true;
+
+  // Religious / Dynamic official holidays in Turkey (2025-2027)
+  const variableHolidays = [
+    // 2025
+    '2025-03-29', '2025-03-30', '2025-03-31', '2025-04-01',
+    '2025-06-05', '2025-06-06', '2025-06-07', '2025-06-08', '2025-06-09',
+    // 2026
+    '2026-03-19', '2026-03-20', '2026-03-21', '2026-03-22',
+    '2026-05-26', '2026-05-27', '2026-05-28', '2026-05-29', '2026-05-30',
+    // 2027
+    '2027-03-08', '2027-03-09', '2027-03-10', '2027-03-11',
+    '2027-05-16', '2027-05-17', '2027-05-18', '2027-05-19', '2027-05-20',
+  ];
+  return variableHolidays.includes(dateStr);
+};
 
 export const AppointmentSystem: React.FC = () => {
   const { t, addAppointment, language, showToast, navigateTo, siteSettings } = useApp();
   
   const isEn = language === 'en';
+
+  // Real-time synchronized clock state
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 10000); // 10s sync
+    return () => clearInterval(timer);
+  }, []);
   
   const generateTimeslots = () => {
     const settings = siteSettings?.appointment_settings;
@@ -44,8 +85,7 @@ export const AppointmentSystem: React.FC = () => {
 
   // Helper to check if a timeslot is past today
   const isTimeslotPast = (timeStr: string, dateStr: string) => {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = getLocalDateStr(currentTime);
     if (dateStr < todayStr) return true;
     if (dateStr > todayStr) return false;
 
@@ -54,17 +94,20 @@ export const AppointmentSystem: React.FC = () => {
     }
 
     const [h, m] = timeStr.split(':').map(Number);
-    const currentHour = today.getHours();
-    const currentMinute = today.getMinutes();
+    const currentHour = currentTime.getHours();
+    const currentMinute = currentTime.getMinutes();
 
     return (h < currentHour) || (h === currentHour && m <= currentMinute);
   };
 
   // Helper to check if all slots today are past
-  const allSlotsPassedToday = () => {
-    const today = new Date();
-    const currentHour = today.getHours();
-    const currentMinute = today.getMinutes();
+  const allSlotsPassedToday = (dateStr: string) => {
+    const todayStr = getLocalDateStr(currentTime);
+    if (dateStr < todayStr) return true;
+    if (dateStr > todayStr) return false;
+
+    const currentHour = currentTime.getHours();
+    const currentMinute = currentTime.getMinutes();
     return timeslots.every(slot => {
       const [h, m] = slot.split(':').map(Number);
       return (h < currentHour) || (h === currentHour && m <= currentMinute);
@@ -72,10 +115,10 @@ export const AppointmentSystem: React.FC = () => {
   };
 
   // Helper to find Monday of the week
-  const getMondayOfCurrentWeek = (today: Date) => {
-    const day = today.getDay();
-    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(today);
+  const getMondayOfCurrentWeek = (referenceDate: Date) => {
+    const day = referenceDate.getDay();
+    const diff = referenceDate.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(referenceDate);
     monday.setDate(diff);
     monday.setHours(0, 0, 0, 0);
     return monday;
@@ -83,78 +126,67 @@ export const AppointmentSystem: React.FC = () => {
 
   const [weekOffset, setWeekOffset] = useState(0);
 
+  // Helper to get first active slot for a given date
+  const getFirstActiveSlot = (dateStr: string) => {
+    const todayStr = getLocalDateStr(currentTime);
+    if (dateStr > todayStr) return timeslots[0] || '10:30';
+
+    if (dateStr === todayStr) {
+      const nowH = currentTime.getHours();
+      const nowM = currentTime.getMinutes();
+      const firstActiveSlot = timeslots.find(slot => {
+        const [h, m] = slot.split(':').map(Number);
+        return (h > nowH) || (h === nowH && m > nowM);
+      });
+      return firstActiveSlot || timeslots[0] || '10:30';
+    }
+
+    return timeslots[0] || '10:30';
+  };
+
   // Date selector (defaults to current system date or first available non-past date)
   const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    const monday = getMondayOfCurrentWeek(today);
-    const allPassedToday = allSlotsPassedToday();
+    const monday = getMondayOfCurrentWeek(currentTime);
+    const todayStr = getLocalDateStr(currentTime);
 
     for (let i = 0; i < 7; i++) {
       const nextDate = new Date(monday);
       nextDate.setDate(monday.getDate() + i);
-      const isString = nextDate.toISOString().split('T')[0];
-      
-      const dateOnly = new Date(nextDate);
-      dateOnly.setHours(0, 0, 0, 0);
-      const todayOnly = new Date(today);
-      todayOnly.setHours(0, 0, 0, 0);
+      const isString = getLocalDateStr(nextDate);
 
-      const isPast = dateOnly.getTime() < todayOnly.getTime();
-      const isToday = dateOnly.getTime() === todayOnly.getTime();
+      const dayIndex = nextDate.getDay();
+      const trDays = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+      const currentDayTR = trDays[dayIndex];
 
-      if (!isPast && !(isToday && allPassedToday)) {
+      const isWorkingDay = siteSettings?.appointment_settings?.workingDays
+        ? siteSettings.appointment_settings.workingDays.includes(currentDayTR)
+        : [1, 2, 3, 4, 5].includes(dayIndex);
+
+      const isHoliday = isPublicHoliday(isString);
+      const allPassed = allSlotsPassedToday(isString);
+      const isBeforeToday = isString < todayStr;
+
+      if (!isBeforeToday && isWorkingDay && !isHoliday && !allPassed) {
         return isString;
       }
     }
 
     const nextMonday = new Date(monday);
     nextMonday.setDate(monday.getDate() + 7);
-    return nextMonday.toISOString().split('T')[0];
+    return getLocalDateStr(nextMonday);
   });
 
-  // Time selector (defaults to first active non-past slot of selectedDate)
-  const [selectedTime, setSelectedTime] = useState(() => {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    
-    // We want to calculate the initial date first to match the default selectedDate hook
-    const initialDate = (() => {
-      const monday = getMondayOfCurrentWeek(today);
-      const allPassedToday = allSlotsPassedToday();
+  // Time selector
+  const [selectedTime, setSelectedTime] = useState(() => getFirstActiveSlot(selectedDate));
 
-      for (let i = 0; i < 7; i++) {
-        const nextDate = new Date(monday);
-        nextDate.setDate(monday.getDate() + i);
-        const isString = nextDate.toISOString().split('T')[0];
-        
-        const dateOnly = new Date(nextDate);
-        dateOnly.setHours(0, 0, 0, 0);
-        const todayOnly = new Date(today);
-        todayOnly.setHours(0, 0, 0, 0);
-
-        const isPast = dateOnly.getTime() < todayOnly.getTime();
-        const isToday = dateOnly.getTime() === todayOnly.getTime();
-
-        if (!isPast && !(isToday && allPassedToday)) {
-          return isString;
-        }
-      }
-      const nextMonday = new Date(monday);
-      nextMonday.setDate(monday.getDate() + 7);
-      return nextMonday.toISOString().split('T')[0];
-    })();
-
-    if (initialDate === todayStr) {
-      const currentHour = today.getHours();
-      const currentMinute = today.getMinutes();
-      const firstActiveSlot = timeslots.find(slot => {
-        const [h, m] = slot.split(':').map(Number);
-        return (h > currentHour) || (h === currentHour && m > currentMinute);
-      });
-      return firstActiveSlot || '10:30';
+  // Sync selectedTime if selectedDate changes or time passes
+  useEffect(() => {
+    const isPast = isTimeslotPast(selectedTime, selectedDate);
+    if (isPast) {
+      const nextActive = getFirstActiveSlot(selectedDate);
+      setSelectedTime(nextActive);
     }
-    return '10:30';
-  });
+  }, [selectedDate, currentTime]);
 
   const [clientName, setClientName] = useState('');
   const [email, setEmail] = useState('');
@@ -174,10 +206,9 @@ export const AppointmentSystem: React.FC = () => {
 
   // Generates 7 calendar days of the week based on weekOffset
   const getUpcomingDays = () => {
-    const today = new Date();
-    const monday = getMondayOfCurrentWeek(today);
+    const monday = getMondayOfCurrentWeek(currentTime);
     monday.setDate(monday.getDate() + weekOffset * 7);
-    const allPassedToday = allSlotsPassedToday();
+    const todayStr = getLocalDateStr(currentTime);
 
     const days = [];
     const dateNamesTR = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
@@ -186,12 +217,7 @@ export const AppointmentSystem: React.FC = () => {
     for (let i = 0; i < 7; i++) {
       const nextDate = new Date(monday);
       nextDate.setDate(monday.getDate() + i);
-      const isString = nextDate.toISOString().split('T')[0];
-      
-      const dateOnly = new Date(nextDate);
-      dateOnly.setHours(0, 0, 0, 0);
-      const todayOnly = new Date(today);
-      todayOnly.setHours(0, 0, 0, 0);
+      const isString = getLocalDateStr(nextDate);
 
       const dayIndex = nextDate.getDay(); // 0 is Sunday, 1 is Monday ...
       const trDays = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
@@ -201,15 +227,20 @@ export const AppointmentSystem: React.FC = () => {
         ? siteSettings.appointment_settings.workingDays.includes(currentDayTR)
         : [1, 2, 3, 4, 5].includes(dayIndex); // fallback Mon-Fri
 
-      let isPast = dateOnly.getTime() < todayOnly.getTime();
-      const isToday = dateOnly.getTime() === todayOnly.getTime();
+      const isHoliday = isPublicHoliday(isString);
+      const allPassed = allSlotsPassedToday(isString);
+      const isBeforeToday = isString < todayStr;
+      const isToday = isString === todayStr;
 
-      if (isToday && allPassedToday) {
-        isPast = true;
-      }
+      let isPast = isBeforeToday || (isToday && allPassed) || !isWorkingDay || isHoliday;
 
-      if (!isWorkingDay) {
-        isPast = true;
+      let statusLabel = '';
+      if (isHoliday) {
+        statusLabel = isEn ? 'Holiday' : 'Tatil';
+      } else if (!isWorkingDay) {
+        statusLabel = isEn ? 'Closed' : 'Kapalı';
+      } else if (isToday && allPassed) {
+        statusLabel = isEn ? 'Passed' : 'Doldu';
       }
 
       days.push({
@@ -217,7 +248,10 @@ export const AppointmentSystem: React.FC = () => {
         dayNum: nextDate.getDate(),
         dayName: isEn ? dateNamesEN[i] : dateNamesTR[i],
         isPast,
-        isToday
+        isToday,
+        isHoliday,
+        isNonWorking: !isWorkingDay,
+        statusLabel
       });
     }
     return days;
@@ -324,10 +358,11 @@ export const AppointmentSystem: React.FC = () => {
                         disabled={weekOffset === 0}
                         style={{
                           background: 'transparent',
-                          border: '1px solid ' + (weekOffset === 0 ? 'rgba(240, 218, 197, 0.1)' : 'rgba(240, 218, 197, 0.25)'),
+                          border: '1px solid ' + (weekOffset === 0 ? 'var(--border-color)' : 'var(--border-color)'),
                           borderRadius: '6px',
                           padding: '3px 8px',
-                          color: weekOffset === 0 ? 'rgba(240, 218, 197, 0.2)' : 'var(--text-primary)',
+                          color: weekOffset === 0 ? 'var(--text-secondary)' : 'var(--text-primary)',
+                          opacity: weekOffset === 0 ? 0.4 : 1,
                           cursor: weekOffset === 0 ? 'not-allowed' : 'pointer',
                           fontSize: '11px',
                           fontWeight: 600,
@@ -341,7 +376,7 @@ export const AppointmentSystem: React.FC = () => {
                         onClick={() => setWeekOffset(prev => prev + 1)}
                         style={{
                           background: 'transparent',
-                          border: '1px solid rgba(240, 218, 197, 0.25)',
+                          border: '1px solid var(--border-color)',
                           borderRadius: '6px',
                           padding: '3px 8px',
                           color: 'var(--text-primary)',
@@ -362,7 +397,7 @@ export const AppointmentSystem: React.FC = () => {
                       display: none;
                       align-items: center;
                       justify-content: center;
-                      background: rgba(12, 16, 30, 0.85);
+                      background: var(--bg-card);
                       border: 1px solid var(--border-color);
                       color: var(--text-primary);
                       border-radius: 50%;
@@ -424,126 +459,113 @@ export const AppointmentSystem: React.FC = () => {
                         const isPast = day.isPast;
                         return (
                           <div
-                                                       onClick={() => {
-                               if (!isPast) {
-                                 setSelectedDate(day.fullDate);
-                                 
-                                 // Auto-reset selectedTime if it is today and the currently selected slot is past
-                                 const today = new Date();
-                                 const todayStr = today.toISOString().split('T')[0];
-                                 if (day.fullDate === todayStr) {
-                                   const [currH, currM] = selectedTime.split(':').map(Number);
-                                   const nowH = today.getHours();
-                                   const nowM = today.getMinutes();
-                                   const isCurrentSlotPast = (currH < nowH) || (currH === nowH && currM <= nowM);
-                                   
-                                   if (isCurrentSlotPast) {
-                                     const firstActiveSlot = timeslots.find(slot => {
-                                       const [h, m] = slot.split(':').map(Number);
-                                       return (h > nowH) || (h === nowH && m > nowM);
-                                     });
-                                     if (firstActiveSlot) {
-                                       setSelectedTime(firstActiveSlot);
-                                     }
-                                   }
-                                 }
-                               }
-                             }}
-                             style={{
-                               padding: '12px 6px',
-                               borderRadius: '10px',
-                               border: isSelected 
-                                 ? '1px solid var(--color-burgundy)' 
-                                 : isPast 
-                                   ? '1px dashed rgba(240, 218, 197, 0.12)' 
-                                   : '1px solid var(--border-color)',
-                               background: isSelected 
-                                 ? 'var(--color-burgundy)' 
-                                 : isPast 
-                                   ? 'rgba(240, 218, 197, 0.01)' 
-                                   : 'var(--input-bg)',
-                               color: isSelected 
-                                 ? '#FFFFFF' 
-                                 : isPast 
-                                   ? 'rgba(240, 218, 197, 0.25)' 
-                                   : 'var(--text-primary)',
-                               cursor: isPast ? 'not-allowed' : 'pointer',
-                               textAlign: 'center',
-                               transition: 'var(--transition-fast)',
-                               opacity: isPast ? 0.45 : 1,
-                               pointerEvents: isPast ? 'none' : 'auto'
-                             }}
-                           >
-                             <div style={{ fontSize: '10px', opacity: isSelected ? '0.8' : isPast ? '0.5' : '0.6', textTransform: 'uppercase' }}>
-                               {day.dayName}
-                             </div>
-                             <div style={{ fontSize: '16px', fontWeight: 700, marginTop: '4px' }}>
-                               {day.dayNum}
-                             </div>
-                           </div>
-                         );
-                       })}
-                     </div>
- 
-                     <button
-                       type="button"
-                       className="days-scroll-btn"
-                       onClick={() => scrollDays('right')}
-                       style={{ flexShrink: 0 }}
-                     >
-                       ›
-                     </button>
-                   </div>
- 
-                   {/* Hours Title */}
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-burgundy)', fontWeight: 600, fontSize: '14px', marginTop: '10px' }}>
-                     <Clock size={18} /> {t('appointment.time')}
-                   </div>
- 
-                   {/* Hour slots grid */}
-                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                     {timeslots.map((time) => {
-                       const isSelected = selectedTime === time;
-                       const isPastSlot = isTimeslotPast(time, selectedDate);
-                       return (
-                         <div
-                           key={time}
-                           onClick={() => {
-                             if (!isPastSlot) {
-                               setSelectedTime(time);
-                             }
-                           }}
-                           style={{
-                             padding: '10px',
-                             borderRadius: '8px',
-                             border: isSelected 
-                               ? '1px solid var(--color-burgundy)' 
-                               : isPastSlot
-                                 ? '1px dashed rgba(240, 218, 197, 0.12)'
-                                 : '1px solid var(--border-color)',
-                             background: isSelected 
-                               ? 'var(--color-burgundy)' 
-                               : isPastSlot
-                                 ? 'rgba(240, 218, 197, 0.01)'
-                                 : 'var(--input-bg)',
-                             color: isSelected 
-                               ? '#FFFFFF' 
-                               : isPastSlot
-                                 ? 'rgba(240, 218, 197, 0.25)'
-                                 : 'var(--text-primary)',
-                             cursor: isPastSlot ? 'not-allowed' : 'pointer',
-                             textAlign: 'center',
-                             fontSize: '13px',
-                             fontWeight: 600,
-                             transition: 'var(--transition-fast)',
-                             opacity: isPastSlot ? 0.45 : 1,
-                             pointerEvents: isPastSlot ? 'none' : 'auto'
-                           }}
-                         >
-                           {time}
-                         </div>
-                       );
-                     })}
+                            key={day.fullDate}
+                            onClick={() => {
+                              if (!isPast) {
+                                setSelectedDate(day.fullDate);
+                              }
+                            }}
+                            style={{
+                              padding: '10px 4px',
+                              borderRadius: '10px',
+                              border: isSelected 
+                                ? '1px solid var(--color-burgundy)' 
+                                : isPast 
+                                  ? '1px dashed var(--border-color)' 
+                                  : '1px solid var(--border-color)',
+                              background: isSelected 
+                                ? 'var(--color-burgundy)' 
+                                : isPast 
+                                  ? 'var(--bg-primary)' 
+                                  : 'var(--input-bg)',
+                              color: isSelected 
+                                ? '#FFFFFF' 
+                                : isPast 
+                                  ? 'var(--text-secondary)' 
+                                  : 'var(--text-primary)',
+                              cursor: isPast ? 'not-allowed' : 'pointer',
+                              textAlign: 'center',
+                              transition: 'var(--transition-fast)',
+                              opacity: isPast ? 0.45 : 1,
+                              pointerEvents: isPast ? 'none' : 'auto'
+                            }}
+                          >
+                            <div style={{ fontSize: '10px', opacity: isSelected ? '0.85' : '0.7', textTransform: 'uppercase', fontWeight: 600 }}>
+                              {day.dayName}
+                            </div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, marginTop: '3px' }}>
+                              {day.dayNum}
+                            </div>
+                            {day.statusLabel && !isSelected && (
+                              <div style={{ fontSize: '9px', fontWeight: 600, color: day.isHoliday ? '#EF4444' : 'var(--text-secondary)', marginTop: '2px' }}>
+                                {day.statusLabel}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="days-scroll-btn"
+                      onClick={() => scrollDays('right')}
+                      style={{ flexShrink: 0 }}
+                    >
+                      ›
+                    </button>
+                  </div>
+
+                  {/* Hours Title */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-burgundy)', fontWeight: 600, fontSize: '14px', marginTop: '10px' }}>
+                    <Clock size={18} /> {t('appointment.time')}
+                  </div>
+
+                  {/* Hour slots grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                    {timeslots.map((time) => {
+                      const isSelected = selectedTime === time;
+                      const isPastSlot = isTimeslotPast(time, selectedDate);
+                      return (
+                        <div
+                          key={time}
+                          onClick={() => {
+                            if (!isPastSlot) {
+                              setSelectedTime(time);
+                            }
+                          }}
+                          style={{
+                            padding: '10px',
+                            borderRadius: '8px',
+                            border: isSelected 
+                              ? '1px solid var(--color-burgundy)' 
+                              : isPastSlot
+                                ? '1px dashed var(--border-color)'
+                                : '1px solid var(--border-color)',
+                            background: isSelected 
+                              ? 'var(--color-burgundy)' 
+                              : isPastSlot
+                                ? 'var(--bg-primary)'
+                                : 'var(--input-bg)',
+                            color: isSelected 
+                              ? '#FFFFFF' 
+                              : isPastSlot
+                                ? 'var(--text-secondary)'
+                                : 'var(--text-primary)',
+                            cursor: isPastSlot ? 'not-allowed' : 'pointer',
+                            textAlign: 'center',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            transition: 'var(--transition-fast)',
+                            opacity: isPastSlot ? 0.45 : 1,
+                            pointerEvents: isPastSlot ? 'none' : 'auto',
+                            textDecoration: isPastSlot ? 'line-through' : 'none'
+                          }}
+                        >
+                          {time}
+                        </div>
+                      );
+                    })}
                   </div>
 
                 </div>
