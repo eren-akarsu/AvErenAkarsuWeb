@@ -155,13 +155,20 @@ ${urlElements}
 
   // dist/ klasörüne yaz (Vercel deploy root)
   const distPath = path.join(ROOT, 'dist');
+  const publicPath = path.join(ROOT, 'public');
+
   if (fs.existsSync(distPath)) {
     fs.writeFileSync(path.join(distPath, 'sitemap.xml'), xml, 'utf-8');
     console.log(`[sitemap] dist/sitemap.xml oluşturuldu. ${allEntries.length} URL.`);
+
+    const publicRobots = path.join(publicPath, 'robots.txt');
+    if (fs.existsSync(publicRobots)) {
+      fs.copyFileSync(publicRobots, path.join(distPath, 'robots.txt'));
+      console.log('[sitemap] robots.txt dist/ klasörüne kopyalandı.');
+    }
   }
 
   // public/ klasörüne de yaz (geliştirme ortamı için)
-  const publicPath = path.join(ROOT, 'public');
   fs.writeFileSync(path.join(publicPath, 'sitemap.xml'), xml, 'utf-8');
   console.log(`[sitemap] public/sitemap.xml oluşturuldu. ${allEntries.length} URL.`);
 }
