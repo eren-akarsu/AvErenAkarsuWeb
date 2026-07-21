@@ -128,7 +128,7 @@ function escapeXml(str: string): string {
  * Build scriptleri ve fallback durumları için.
  */
 export function generateStaticSitemapXml(siteUrl?: string): string {
-  const baseUrl = siteUrl || 'https://av-eren-akarsu-web.vercel.app';
+  const baseUrl = siteUrl || 'https://erenakarsu.av.tr';
   const now = new Date().toISOString().split('T')[0];
 
   const entries = STATIC_PAGES.map(p => ({

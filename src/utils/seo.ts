@@ -15,7 +15,7 @@ export function getSiteUrl(): string {
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  return 'https://av-eren-akarsu-web.vercel.app';
+  return 'https://erenakarsu.av.tr';
 }
 
 /**

@@ -69,10 +69,10 @@ Vercel Dashboard → Project Settings → **Environment Variables**:
 ### Supabase URL Configuration (Authentication)
 Supabase Dashboard → **Authentication** → **URL Configuration** bölümünde şu ayarlar yapılmalıdır:
 * **Site URL**:
-  `https://av-eren-akarsu-web.vercel.app`
+  `https://erenakarsu.av.tr`
 * **Redirect URLs**:
-  * `https://av-eren-akarsu-web.vercel.app`
-  * `https://av-eren-akarsu-web.vercel.app/*`
+  * `https://erenakarsu.av.tr`
+  * `https://erenakarsu.av.tr/*`
   * `http://localhost:5173`
   * `http://localhost:5173/*`
 

@@ -14,4 +14,4 @@ Disallow: /payment-failed
 Disallow: /account
 
 # Sitemap
-Sitemap: https://av-eren-akarsu-web.vercel.app/sitemap.xml
+Sitemap: https://erenakarsu.av.tr/sitemap.xml
