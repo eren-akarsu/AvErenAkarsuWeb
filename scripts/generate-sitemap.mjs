@@ -46,7 +46,11 @@ async function main() {
     ...process.env,
     ...loadEnv()
   };
-  const siteUrl = (env['VITE_SITE_URL'] || 'https://www.erenakarsu.av.tr').replace(/\/$/, '');
+  let siteUrl = env['VITE_SITE_URL'] || 'https://www.erenakarsu.av.tr';
+  if (siteUrl.includes('vercel.app')) {
+    siteUrl = 'https://www.erenakarsu.av.tr';
+  }
+  siteUrl = siteUrl.replace(/\/$/, '');
   const now = new Date().toISOString().split('T')[0];
 
   const staticPages = [

@@ -9,11 +9,14 @@
  */
 export function getSiteUrl(): string {
   const envUrl = import.meta.env.VITE_SITE_URL as string | undefined;
-  if (envUrl && envUrl.trim()) {
+  if (envUrl && envUrl.trim() && !envUrl.includes('vercel.app')) {
     return envUrl.trim().replace(/\/$/, '');
   }
   if (typeof window !== 'undefined') {
-    return window.location.origin;
+    const origin = window.location.origin;
+    if (origin && !origin.includes('vercel.app') && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+      return origin;
+    }
   }
   return 'https://www.erenakarsu.av.tr';
 }
