@@ -357,7 +357,7 @@ export const SEOSettingsPanel: React.FC<SEOSettingsPanelProps> = ({
                     value={canonicalUrl || ''}
                     onChange={(e) => setCanonicalUrl?.(e.target.value)}
                     className="glass-input"
-                    placeholder="https://erenakarsu.av.tr/icerik/..."
+                    placeholder="https://www.erenakarsu.av.tr/icerik/..."
                     style={{ width: '100%' }}
                   />
                 </div>

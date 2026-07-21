@@ -15,13 +15,13 @@ export function getSiteUrl(): string {
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  return 'https://erenakarsu.av.tr';
+  return 'https://www.erenakarsu.av.tr';
 }
 
 /**
  * Verilen path için tam canonical URL üretir.
  * Örnek: getCanonicalUrl('/hukuki-icerikler/makaleler/konu') 
- *        → 'https://erenakarsu.av.tr/hukuki-icerikler/makaleler/konu'
+ *        → 'https://www.erenakarsu.av.tr/hukuki-icerikler/makaleler/konu'
  */
 export function getCanonicalUrl(path: string): string {
   const base = getSiteUrl();
@@ -47,7 +47,7 @@ export function buildOgImageUrl(imagePath?: string): string {
 /**
  * İçerik slug'ından public URL üretir.
  * Örnek: buildContentUrl('article', 'kidem-tazminati') 
- *        → 'https://erenakarsu.av.tr/icerik/kidem-tazminati'
+ *        → 'https://www.erenakarsu.av.tr/icerik/kidem-tazminati'
  */
 export function buildContentUrl(slug: string): string {
   return getCanonicalUrl(`/icerik/${slug}`);

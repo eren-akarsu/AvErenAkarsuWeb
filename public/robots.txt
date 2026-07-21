@@ -14,4 +14,4 @@ Disallow: /payment-failed
 Disallow: /account
 
 # Sitemap
-Sitemap: https://erenakarsu.av.tr/sitemap.xml
+Sitemap: https://www.erenakarsu.av.tr/sitemap.xml
